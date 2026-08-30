@@ -18,3 +18,7 @@ Disposition: kill both sessions; worker slots freed for final adversarial + opti
 
 M10: perceptron-trained 3×3 glyph classifier (top bar vs left bar), trained at build time by scripts/train.py on 9 exemplars, weights compiled to gates. 34 tests green in 32 s.
 Optimization swarm: with DeepSeek-only budget and all measurable targets already at parity (152 KB single file, ~30 ms automation-floor recalc), a parallel swarm adds review latency without clear wins. Decision: lead does a single integrated optimization pass; final DeepSeek review is the gate.
+
+## D-005 (lead) — worker branch integration policy
+
+Worker branches stay on experiment/* unmerged; their validated findings are integrated into main by the lead (css-logic: var-graph over style queries; arithmetic: two's-complement feasibility, var*var illegality; network-demo: XOR proof + alternate ±1 formulation; ui: honest-labeling vocabulary, a11y patterns; prior-art: docs merged). Rationale: main ships one validated architecture; worker artifacts remain inspectable as experiments.

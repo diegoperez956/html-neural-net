@@ -96,6 +96,17 @@ class StaticChecks(Base):
         self.assertNotIn("<link", lower)
         self.assertNotIn("<img", lower)
 
+    def test_no_operand_pair_lookup_selectors(self):
+        """Composition, not enumeration: :has() rules may only map single
+        primary input checkboxes; no selector may encode a truth-table row."""
+        import re
+        html = open(DIST).read()
+        has_rules = re.findall(r"body\.rt:has\(([^)]+)\)", html)
+        self.assertTrue(has_rules, "expected input mapping rules")
+        for rule in has_rules:
+            ids = re.findall(r"#[A-Za-z0-9_:-]+", rule)
+            self.assertEqual(len(ids), 1, f"multi-input :has rule: {rule}")
+
     def test_deterministic_rebuild(self):
         import hashlib
         out = subprocess.run([sys.executable, "scripts/generate.py", "/tmp/htmlnet-rebuild.html"],
