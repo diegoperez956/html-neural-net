@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>lead vertical slice: gate adder + multiplier (proof)</title>
+<style>
+  body { background:#0b0e14; color:#cfe3ff; font:16px/1.5 ui-monospace,monospace; }
+  h1 { font-size:18px; }
+  .inputs { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+  .inputs label { display:flex; gap:6px; align-items:center; }
+
+@property --na1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --s0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --c0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --s1a { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --c1a { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --s2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p1x { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p1y { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --c1p { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p2x { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p2xy { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --c2p { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --p3 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --a1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --a0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --b1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --b0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+
+  /* primary bits: browser form state -> integer custom property */
+  .rt { --a1:0; --a0:0; --b1:0; --b0:0; }
+  body.rt:has(#a1:checked) { --a1:1; }
+  body.rt:has(#a0:checked) { --a0:1; }
+  body.rt:has(#b1:checked) { --b1:1; }
+  body.rt:has(#b0:checked) { --b0:1; }
+
+  /* gate basis on bits: NOT=1-a AND=min OR=max XOR=max-min */
+  .rt { --na1: calc(1 - var(--a1)); }
+
+  /* 2-bit ripple-carry adder: sum = a+b, carry chain of named wires */
+  .rt { --s0: calc(max(var(--a0),var(--b0)) - min(var(--a0),var(--b0))); }
+  .rt { --c0: min(var(--a0),var(--b0)); }
+  .rt { --s1a: calc(max(var(--a1),var(--b1)) - min(var(--a1),var(--b1))); }
+  .rt { --c1a: min(var(--a1),var(--b1)); }
+  .rt { --s1: calc(max(var(--s1a),var(--c0)) - min(var(--s1a),var(--c0))); }
+  .rt { --c1: max(var(--c1a), min(var(--s1a),var(--c0))); }
+  .rt { --s2: var(--c1); }
+
+  /* 2x2 unsigned multiplier from gates: partial products + half/full adders */
+  .rt { --p0: min(var(--a0),var(--b0)); }
+  .rt { --p1x: min(var(--a1),var(--b0)); }
+  .rt { --p1y: min(var(--a0),var(--b1)); }
+  .rt { --p1: calc(max(var(--p1x),var(--p1y)) - min(var(--p1x),var(--p1y))); }
+  .rt { --c1p: min(var(--p1x),var(--p1y)); }
+  .rt { --p2x: min(var(--a1),var(--b1)); }
+  .rt { --p2xy: calc(max(var(--p2x),var(--c1p)) - min(var(--p2x),var(--c1p))); }
+  .rt { --p2: var(--p2xy); }
+  .rt { --c2p: min(var(--p2x),var(--c1p)); }
+  .rt { --p3: var(--c2p); }
+
+  .out { display:grid; grid-template-columns:auto auto; gap:6px 14px; }
+  .out > div:nth-child(odd) { color:#8fa8c8; }
+  .out > div:nth-child(even) { color:#7CFC9B; }
+
+  /* counter display: computed integer -> digit without JS */
+  .num::after { counter-reset: v var(--v); content: counter(v); }
+  .w1::after { counter-reset: v var(--s0); content: counter(v); }
+  .w2::after { counter-reset: v var(--s1); content: counter(v); }
+  .w3::after { counter-reset: v var(--s2); content: counter(v); }
+  .m1::after { counter-reset: v var(--p0); content: counter(v); }
+  .m2::after { counter-reset: v var(--p1); content: counter(v); }
+  .m3::after { counter-reset: v var(--p2); content: counter(v); }
+  .m4::after { counter-reset: v var(--p3); content: counter(v); }
+  .c0v::after { counter-reset: v var(--c0); content: counter(v); }
+  .c1v::after { counter-reset: v var(--c1); content: counter(v); }
+</style>
+</head>
+<body class="rt">
+  <h1>lead vertical slice — gate-built 2-bit adder + 2x2 multiplier</h1>
+  <div class="inputs">
+    <label><input type="checkbox" id="a1"> a1</label>
+    <label><input type="checkbox" id="a0"> a0</label>
+    <label><input type="checkbox" id="b1"> b1</label>
+    <label><input type="checkbox" id="b0"> b0</label>
+  </div>
+  <div class="out">
+    <div>adder sum s2 s1 s0</div><div><span class="w3"></span><span class="w2"></span><span class="w1"></span></div>
+    <div>adder carry c0</div><div class="c0v"></div>
+    <div>adder carry c1</div><div class="c1v"></div>
+    <div>product p3 p2 p1 p0</div><div><span class="m4"></span><span class="m3"></span><span class="m2"></span><span class="m1"></span></div>
+  </div>
+</body>
+</html>
