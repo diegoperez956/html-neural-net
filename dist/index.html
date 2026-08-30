@@ -25,6 +25,13 @@
   .v { color: #7CFC9B; }
   .tag { color: #5f7190; font-size: 12px; }
   .kbd { color: #8fa8c8; }
+  .ladder { color: #38ff8c; font-size: 13px; letter-spacing: 1px; margin-bottom: 18px; }
+  .ladder .dim { color: #5f7190; }
+  input[type="checkbox"]:focus-visible { outline: 2px solid #38ff8c; outline-offset: 2px; }
+  section:focus-within h2 { color: #7CFC9B; }
+  .caption { color: #4c5f7a; font-size: 11px; }
+  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #1e2a3d; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
 body.rt:has(#x1:checked) { --x1: 1; }
 body.rt:has(#x0:checked) { --x0: 1; }
@@ -1021,6 +1028,8 @@ body.rt:has(#v0:checked) { --v0: 1; }
 <h1>htmlnet — a neural network from HTML + CSS, zero JavaScript</h1>
 <div class="sub">checked form state → bits → gates → adders → multiplication → dot product → matrix×vector → neurons → XOR MLP. Composed at build time; evaluated by the browser's style engine at runtime. <span class="kbd">File → open → toggle.</span></div>
 
+<div class="ladder">checkbox state <span class="dim">→</span> bits <span class="dim">→</span> gates <span class="dim">→</span> adders <span class="dim">→</span> multiplication <span class="dim">→</span> dot product <span class="dim">→</span> matrix×vector <span class="dim">→</span> neurons <span class="dim">→</span> XOR MLP</div>
+
 <section>
   <h2>1 · input bits</h2>
   <div class="row"><label><input type="checkbox" id="x1"> x1</label>
@@ -1063,9 +1072,9 @@ body.rt:has(#v0:checked) { --v0: 1; }
     <label><input type="checkbox" id="b0"> b0</label>
   </div>
   <div class="row"><span class="kbd">a + b =</span> <span class="bits"><span class="led l_add2_0"></span><span class="led l_add2_1"></span><span class="led l_add2_2"></span></span>
-  <span class="v d_add2"></span></div>
+  <span class="v d_add2"></span> <span class="caption">4·2·1</span></div>
   <div class="row"><span class="kbd">a × b =</span> <span class="bits"><span class="led l_mul2_0"></span><span class="led l_mul2_1"></span><span class="led l_mul2_2"></span><span class="led l_mul2_3"></span></span>
-  <span class="v d_mul2"></span>
+  <span class="v d_mul2"></span> <span class="caption">8·4·2·1</span>
   <span class="tag">partial products (AND gates) + ripple addition</span></div>
 </section>
 
@@ -1082,7 +1091,7 @@ body.rt:has(#v0:checked) { --v0: 1; }
     <label><input type="checkbox" id="d0"> d0</label>
   </div>
   <div class="row"><span class="kbd">c + d =</span> <span class="bits"><span class="led l_add4_0"></span><span class="led l_add4_1"></span><span class="led l_add4_2"></span><span class="led l_add4_3"></span><span class="led l_add4_4"></span></span>
-  <span class="v d_add4"></span>
+  <span class="v d_add4"></span> <span class="caption">16·8·4·2·1</span>
   <span class="tag">4 full adders, carries chained as named wires</span></div>
 </section>
 
@@ -1095,7 +1104,7 @@ body.rt:has(#v0:checked) { --v0: 1; }
     <label><input type="checkbox" id="v0"> v0</label>
   </div>
   <div class="row"><span class="kbd">u₀v₀ + u₁v₁ =</span> <span class="bits"><span class="led l_dot_0"></span><span class="led l_dot_1"></span><span class="led l_dot_2"></span><span class="led l_dot_3"></span><span class="led l_dot_4"></span></span>
-  <span class="v d_dot"></span>
+  <span class="v d_dot"></span> <span class="caption">16·8·4·2·1</span>
   <span class="tag">two multipliers + shared ripple adder</span></div>
 </section>
 
@@ -1111,7 +1120,7 @@ body.rt:has(#v0:checked) { --v0: 1; }
 <section>
   <h2>9 · neuron — y = step(+2x₁ − 2x₀ − 1)</h2>
   <div class="row"><span class="kbd">preactivation (4-bit two's complement)</span>
-  <span class="bits"><span class="led l_npre_0"></span><span class="led l_npre_1"></span><span class="led l_npre_2"></span><span class="led l_npre_3"></span></span> <span class="v d_npre"></span></div>
+  <span class="bits"><span class="led l_npre_0"></span><span class="led l_npre_1"></span><span class="led l_npre_2"></span><span class="led l_npre_3"></span></span> <span class="v d_npre"></span> <span class="caption">−8·4·2·1</span></div>
   <div class="row"><span class="kbd">activation</span> <span class="led l_n_out"></span>
   <span class="tag">= 1 if preactivation ≥ 0 (sign bit)</span></div>
 </section>
@@ -1122,7 +1131,8 @@ body.rt:has(#v0:checked) { --v0: 1; }
   <div class="row"><span class="kbd">h2 = step(−2x₁+2x₀−1)</span> <span class="led l_h2"></span></div>
   <div class="row"><span class="kbd">out = step(+2h1+2h2−1)</span> <span class="led l_xor_out"></span>
   <span class="v d_xor"></span></div>
-  <div class="tag">a single linear neuron cannot learn XOR; two hidden neurons can. All four inputs verified against an independent reference model.</div>
+  <div class="tag">a single linear neuron cannot learn XOR; two hidden neurons can. All four inputs verified against an independent reference model.<br>
+  inspect the live math: DevTools → Computed → <span class="kbd">--xor_h1_out</span>, <span class="kbd">--xor_out_out</span>…</div>
 </section>
 
 <section>
@@ -1146,6 +1156,8 @@ body.rt:has(#v0:checked) { --v0: 1; }
   Generated by scripts/generate.py at build time; rebuilds are deterministic.
   </div>
 </section>
+
+<footer class="tag">htmlnet · zero runtime JavaScript · <span class="kbd">make build</span> / <span class="kbd">make test</span></footer>
 
 </body>
 </html>
