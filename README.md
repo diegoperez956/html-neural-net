@@ -87,7 +87,7 @@ flat and deterministic.
 ## Correctness
 
 ```bash
-make test    # builds, then 34 Playwright tests × Chromium + Firefox
+make test    # builds, then 58 Playwright tests × Chromium + Firefox
 ```
 
 * static: no `<script>`, handlers, `javascript:`, WASM, external resource;
