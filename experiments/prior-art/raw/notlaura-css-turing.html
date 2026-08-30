@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+	<!-- This site is optimized with the Yoast SEO plugin v25.6 - https://yoast.com/wordpress/plugins/seo/ -->
+	<link rel="canonical" href="https://notlaura.com/is-css-turing-complete/" />
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="Is CSS Turing Complete? - Lara (Schenck) Karki" />
+	<meta property="og:description" content="I took a deep dive into this question, and the answer is: kinda, mostly, yeah! CSS + HTML + user input is Turing complete. Is it possible to remove the user input part? Then I can re-title this post to be more, ahem, declarative." />
+	<meta property="og:url" content="https://notlaura.com/is-css-turing-complete/" />
+	<meta property="og:site_name" content="Lara (Schenck) Karki" />
+	<meta property="article:published_time" content="2019-05-25T04:05:12+00:00" />
+	<meta property="article:modified_time" content="2022-07-21T22:05:35+00:00" />
+	<meta property="og:image" content="https://notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png" />
+	<meta property="og:image:width" content="1026" />
+	<meta property="og:image:height" content="1024" />
+	<meta property="og:image:type" content="image/png" />
+	<meta name="author" content="Lara" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:label1" content="Written by" />
+	<meta name="twitter:data1" content="Lara" />
+	<meta name="twitter:label2" content="Est. reading time" />
+	<meta name="twitter:data2" content="7 minutes" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https://schema.org","@graph":[{"@type":"Article","@id":"https://notlaura.com/is-css-turing-complete/#article","isPartOf":{"@id":"https://notlaura.com/is-css-turing-complete/"},"author":{"name":"Lara","@id":"https://notlaura.com/#/schema/person/cfbd669f7b288f70a97538060a58bcd6"},"headline":"Is CSS Turing Complete?","datePublished":"2019-05-25T04:05:12+00:00","dateModified":"2022-07-21T22:05:35+00:00","mainEntityOfPage":{"@id":"https://notlaura.com/is-css-turing-complete/"},"wordCount":1428,"commentCount":1,"publisher":{"@id":"https://notlaura.com/#organization"},"image":{"@id":"https://notlaura.com/is-css-turing-complete/#primaryimage"},"thumbnailUrl":"https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?fit=1026%2C1024&ssl=1","keywords":["cellular automata","computer science","rule 110","turing complete","turing machine"],"articleSection":["Greatest Hits","Research","Web Development","🧊 Frozen"],"inLanguage":"en-US","potentialAction":[{"@type":"CommentAction","name":"Comment","target":["https://notlaura.com/is-css-turing-complete/#respond"]}]},{"@type":"WebPage","@id":"https://notlaura.com/is-css-turing-complete/","url":"https://notlaura.com/is-css-turing-complete/","name":"Is CSS Turing Complete? - Lara (Schenck) Karki","isPartOf":{"@id":"https://notlaura.com/#website"},"primaryImageOfPage":{"@id":"https://notlaura.com/is-css-turing-complete/#primaryimage"},"image":{"@id":"https://notlaura.com/is-css-turing-complete/#primaryimage"},"thumbnailUrl":"https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?fit=1026%2C1024&ssl=1","datePublished":"2019-05-25T04:05:12+00:00","dateModified":"2022-07-21T22:05:35+00:00","breadcrumb":{"@id":"https://notlaura.com/is-css-turing-complete/#breadcrumb"},"inLanguage":"en-US","potentialAction":[{"@type":"ReadAction","target":["https://notlaura.com/is-css-turing-complete/"]}]},{"@type":"ImageObject","inLanguage":"en-US","@id":"https://notlaura.com/is-css-turing-complete/#primaryimage","url":"https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?fit=1026%2C1024&ssl=1","contentUrl":"https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?fit=1026%2C1024&ssl=1","width":1026,"height":1024,"caption":"Rule 110 cellular automata"},{"@type":"BreadcrumbList","@id":"https://notlaura.com/is-css-turing-complete/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://notlaura.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://notlaura.com/blog/"},{"@type":"ListItem","position":3,"name":"Is CSS Turing Complete?"}]},{"@type":"WebSite","@id":"https://notlaura.com/#website","url":"https://notlaura.com/","name":"Lara (Schenck) Karki","description":"Lover of programming, maker of monsters","publisher":{"@id":"https://notlaura.com/#organization"},"potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://notlaura.com/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"en-US"},{"@type":"Organization","@id":"https://notlaura.com/#organization","name":"Lara (Schenck) Karki","url":"https://notlaura.com/","logo":{"@type":"ImageObject","inLanguage":"en-US","@id":"https://notlaura.com/#/schema/logo/image/","url":"https://i0.wp.com/notlaura.com/wp-content/uploads/2022/07/445861.jpg?fit=400%2C400&ssl=1","contentUrl":"https://i0.wp.com/notlaura.com/wp-content/uploads/2022/07/445861.jpg?fit=400%2C400&ssl=1","width":400,"height":400,"caption":"Lara (Schenck) Karki"},"image":{"@id":"https://notlaura.com/#/schema/logo/image/"}},{"@type":"Person","@id":"https://notlaura.com/#/schema/person/cfbd669f7b288f70a97538060a58bcd6","name":"Lara","image":{"@type":"ImageObject","inLanguage":"en-US","@id":"https://notlaura.com/#/schema/person/image/","url":"https://secure.gravatar.com/avatar/10c98143f6275f023f6f67cbcb789974?s=96&d=retro&r=g","contentUrl":"https://secure.gravatar.com/avatar/10c98143f6275f023f6f67cbcb789974?s=96&d=retro&r=g","caption":"Lara"},"url":"https://notlaura.com/author/nodoinet/"}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<title>Is CSS Turing Complete? - Lara (Schenck) Karki</title>
+<link rel='dns-prefetch' href='//stats.wp.com' />
+<link rel='preconnect' href='//i0.wp.com' />
+<link rel='preconnect' href='//c0.wp.com' />
+<link rel="alternate" type="application/rss+xml" title="Lara (Schenck) Karki &raquo; Feed" href="https://notlaura.com/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Lara (Schenck) Karki &raquo; Comments Feed" href="https://notlaura.com/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Lara (Schenck) Karki &raquo; Is CSS Turing Complete? Comments Feed" href="https://notlaura.com/is-css-turing-complete/feed/" />
+<script>
+window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/notlaura.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=6.6.7"}};
+/*! This file is auto-generated */
+!function(i,n){var o,s,e;function c(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(o,JSON.stringify(t))}catch(e){}}function p(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data),r=(e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0),new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data));return t.every(function(e,t){return e===r[t]})}function u(e,t,n){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\uddfa\ud83c\uddf3","\ud83c\uddfa\u200b\ud83c\uddf3")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!n(e,"\ud83d\udc26\u200d\u2b1b","\ud83d\udc26\u200b\u2b1b")}return!1}function f(e,t,n){var r="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):i.createElement("canvas"),a=r.getContext("2d",{willReadFrequently:!0}),o=(a.textBaseline="top",a.font="600 32px Arial",{});return e.forEach(function(e){o[e]=t(a,e,n)}),o}function t(e){var t=i.createElement("script");t.src=e,t.defer=!0,i.head.appendChild(t)}"undefined"!=typeof Promise&&(o="wpEmojiSettingsSupports",s=["flag","emoji"],n.supports={everything:!0,everythingExceptFlag:!0},e=new Promise(function(e){i.addEventListener("DOMContentLoaded",e,{once:!0})}),new Promise(function(t){var n=function(){try{var e=JSON.parse(sessionStorage.getItem(o));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(s),u.toString(),p.toString()].join(",")+"));",r=new Blob([e],{type:"text/javascript"}),a=new Worker(URL.createObjectURL(r),{name:"wpTestEmojiSupports"});return void(a.onmessage=function(e){c(n=e.data),a.terminate(),t(n)})}catch(e){}c(n=f(s,u,p))}t(n)}).then(function(e){for(var t in e)n.supports[t]=e[t],n.supports.everything=n.supports.everything&&n.supports[t],"flag"!==t&&(n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&n.supports[t]);n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&!n.supports.flag,n.DOMReady=!1,n.readyCallback=function(){n.DOMReady=!0}}).then(function(){return e}).then(function(){var e;n.supports.everything||(n.readyCallback(),(e=n.source||{}).concatemoji?t(e.concatemoji):e.wpemoji&&e.twemoji&&(t(e.twemoji),t(e.wpemoji)))}))}((window,document),window._wpemojiSettings);
+</script>
+<link rel='stylesheet' id='jetpack_related-posts-css' href='https://c0.wp.com/p/jetpack/14.5/modules/related-posts/related-posts.css' media='all' />
+<style id='wp-block-site-title-inline-css'>
+.wp-block-site-title{box-sizing:border-box}.wp-block-site-title :where(a){color:inherit;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;letter-spacing:inherit;line-height:inherit;text-decoration:inherit}
+</style>
+<style id='wp-block-group-inline-css'>
+.wp-block-group{box-sizing:border-box}:where(.wp-block-group.wp-block-group-is-layout-constrained){position:relative}
+</style>
+<style id='wp-block-group-theme-inline-css'>
+:where(.wp-block-group.has-background){padding:1.25em 2.375em}
+</style>
+<style id='wp-block-site-tagline-inline-css'>
+.wp-block-site-tagline{box-sizing:border-box}
+</style>
+<style id='wp-block-navigation-link-inline-css'>
+.wp-block-navigation .wp-block-navigation-item__label{overflow-wrap:break-word}.wp-block-navigation .wp-block-navigation-item__description{display:none}.link-ui-tools{border-top:1px solid #f0f0f0;padding:8px}.link-ui-block-inserter{padding-top:8px}.link-ui-block-inserter__back{margin-left:8px;text-transform:uppercase}
+</style>
+<link rel='stylesheet' id='wp-block-navigation-css' href='https://notlaura.com/wp-content/plugins/gutenberg/build/block-library/blocks/navigation/style.css?ver=20.7.0' media='all' />
+<style id='wp-block-template-part-theme-inline-css'>
+:root :where(.wp-block-template-part.has-background){margin-bottom:0;margin-top:0;padding:1.25em 2.375em}
+</style>
+<style id='wp-block-post-title-inline-css'>
+.wp-block-post-title{box-sizing:border-box;word-break:break-word}.wp-block-post-title :where(a){display:inline-block;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;letter-spacing:inherit;line-height:inherit;text-decoration:inherit}
+</style>
+<style id='wp-block-post-excerpt-inline-css'>
+:where(.wp-block-post-excerpt){box-sizing:border-box;margin-bottom:var(--wp--style--block-gap);margin-top:var(--wp--style--block-gap)}.wp-block-post-excerpt__excerpt{margin-bottom:0;margin-top:0}.wp-block-post-excerpt__more-text{margin-bottom:0;margin-top:var(--wp--style--block-gap)}.wp-block-post-excerpt__more-link{display:inline-block}
+</style>
+<style id='wp-block-post-terms-inline-css'>
+.wp-block-post-terms{box-sizing:border-box}.wp-block-post-terms .wp-block-post-terms__separator{white-space:pre-wrap}
+</style>
+<style id='wp-block-post-date-inline-css'>
+.wp-block-post-date{box-sizing:border-box}
+</style>
+<style id='wp-block-post-featured-image-inline-css'>
+.wp-block-post-featured-image{margin-left:0;margin-right:0}.wp-block-post-featured-image a{display:block;height:100%}.wp-block-post-featured-image :where(img){box-sizing:border-box;height:auto;max-width:100%;vertical-align:bottom;width:100%}.wp-block-post-featured-image.alignfull img,.wp-block-post-featured-image.alignwide img{width:100%}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim{background-color:#000;inset:0;position:absolute}.wp-block-post-featured-image{position:relative}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-gradient{background-color:initial}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-0{opacity:0}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-10{opacity:.1}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-20{opacity:.2}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-30{opacity:.3}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-40{opacity:.4}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-50{opacity:.5}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-60{opacity:.6}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-70{opacity:.7}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-80{opacity:.8}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-90{opacity:.9}.wp-block-post-featured-image .wp-block-post-featured-image__overlay.has-background-dim-100{opacity:1}.wp-block-post-featured-image:where(.alignleft,.alignright){width:100%}
+</style>
+<style id='wp-block-columns-inline-css'>
+.wp-block-columns{align-items:normal!important;box-sizing:border-box;display:flex;flex-wrap:wrap!important}@media (min-width:782px){.wp-block-columns{flex-wrap:nowrap!important}}.wp-block-columns.are-vertically-aligned-top{align-items:flex-start}.wp-block-columns.are-vertically-aligned-center{align-items:center}.wp-block-columns.are-vertically-aligned-bottom{align-items:flex-end}@media (max-width:781px){.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column{flex-basis:100%!important}}@media (min-width:782px){.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column{flex-basis:0;flex-grow:1}.wp-block-columns:not(.is-not-stacked-on-mobile)>.wp-block-column[style*=flex-basis]{flex-grow:0}}.wp-block-columns.is-not-stacked-on-mobile{flex-wrap:nowrap!important}.wp-block-columns.is-not-stacked-on-mobile>.wp-block-column{flex-basis:0;flex-grow:1}.wp-block-columns.is-not-stacked-on-mobile>.wp-block-column[style*=flex-basis]{flex-grow:0}:where(.wp-block-columns){margin-bottom:1.75em}:where(.wp-block-columns.has-background){padding:1.25em 2.375em}.wp-block-column{flex-grow:1;min-width:0;overflow-wrap:break-word;word-break:break-word}.wp-block-column.is-vertically-aligned-top{align-self:flex-start}.wp-block-column.is-vertically-aligned-center{align-self:center}.wp-block-column.is-vertically-aligned-bottom{align-self:flex-end}.wp-block-column.is-vertically-aligned-stretch{align-self:stretch}.wp-block-column.is-vertically-aligned-bottom,.wp-block-column.is-vertically-aligned-center,.wp-block-column.is-vertically-aligned-top{width:100%}
+</style>
+<style id='wp-block-separator-inline-css'>
+@charset "UTF-8";.wp-block-separator{border:none;border-top:2px solid}:root :where(.wp-block-separator.is-style-dots){height:auto;line-height:1;text-align:center}:root :where(.wp-block-separator.is-style-dots):before{color:currentColor;content:"···";font-family:serif;font-size:1.5em;letter-spacing:2em;padding-left:2em}.wp-block-separator.is-style-dots{background:none!important;border:none!important}
+</style>
+<style id='wp-block-separator-theme-inline-css'>
+.wp-block-separator.has-css-opacity{opacity:.4}.wp-block-separator{border:none;border-bottom:2px solid;margin-left:auto;margin-right:auto}.wp-block-separator.has-alpha-channel-opacity{opacity:1}.wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}.wp-block-separator.has-background:not(.is-style-dots){border-bottom:none;height:1px}.wp-block-separator.has-background:not(.is-style-wide):not(.is-style-dots){height:2px}
+</style>
+<style id='wp-block-spacer-inline-css'>
+.wp-block-spacer{clear:both}
+</style>
+<style id='wp-block-paragraph-inline-css'>
+.is-small-text{font-size:.875em}.is-regular-text{font-size:1em}.is-large-text{font-size:2.25em}.is-larger-text{font-size:3em}.has-drop-cap:not(:focus):first-letter{float:left;font-size:8.4em;font-style:normal;font-weight:100;line-height:.68;margin:.05em .1em 0 0;text-transform:uppercase}body.rtl .has-drop-cap:not(:focus):first-letter{float:none;margin-left:.1em}p.has-drop-cap.has-background{overflow:hidden}:root :where(p.has-background){padding:1.25em 2.375em}:where(p.has-text-color:not(.has-link-color)) a{color:inherit}p.has-text-align-left[style*="writing-mode:vertical-lr"],p.has-text-align-right[style*="writing-mode:vertical-rl"]{rotate:180deg}
+</style>
+<style id='wp-block-heading-inline-css'>
+h1.has-background,h2.has-background,h3.has-background,h4.has-background,h5.has-background,h6.has-background{padding:1.25em 2.375em}h1.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h1.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h2.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h2.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h3.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h3.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h4.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h4.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h5.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h5.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]),h6.has-text-align-left[style*=writing-mode]:where([style*=vertical-lr]),h6.has-text-align-right[style*=writing-mode]:where([style*=vertical-rl]){rotate:180deg}
+</style>
+<style id='wp-block-list-inline-css'>
+ol,ul{box-sizing:border-box}:root :where(.wp-block-list.has-background){padding:1.25em 2.375em}
+</style>
+<link rel='stylesheet' id='wp-block-image-css' href='https://notlaura.com/wp-content/plugins/gutenberg/build/block-library/blocks/image/style.css?ver=20.7.0' media='all' />
+<style id='wp-block-image-theme-inline-css'>
+:root :where(.wp-block-image figcaption){color:#555;font-size:13px;text-align:center}.is-dark-theme :root :where(.wp-block-image figcaption){color:#ffffffa6}.wp-block-image{margin:0 0 1em}
+</style>
+<style id='wp-block-code-inline-css'>
+.wp-block-code{box-sizing:border-box}.wp-block-code code{direction:ltr;display:block;font-family:inherit;overflow-wrap:break-word;text-align:initial;white-space:pre-wrap}
+</style>
+<style id='wp-block-code-theme-inline-css'>
+.wp-block-code{border:1px solid #ccc;border-radius:4px;font-family:Menlo,Consolas,monaco,monospace;padding:.8em 1em}
+</style>
+<style id='wp-block-post-content-inline-css'>
+.wp-block-post-content{display:flow-root}
+</style>
+<style id='wp-block-post-author-inline-css'>
+.wp-block-post-author{box-sizing:border-box;display:flex;flex-wrap:wrap}.wp-block-post-author__byline{font-size:.5em;margin-bottom:0;margin-top:0;width:100%}.wp-block-post-author__avatar{margin-right:1em}.wp-block-post-author__bio{font-size:.7em;margin-bottom:.7em}.wp-block-post-author__content{flex-basis:0;flex-grow:1}.wp-block-post-author__name{margin:0}
+</style>
+<style id='wp-block-comments-inline-css'>
+.wp-block-post-comments{box-sizing:border-box}.wp-block-post-comments .alignleft{float:left}.wp-block-post-comments .alignright{float:right}.wp-block-post-comments .navigation:after{clear:both;content:"";display:table}.wp-block-post-comments .commentlist{clear:both;list-style:none;margin:0;padding:0}.wp-block-post-comments .commentlist .comment{min-height:2.25em;padding-left:3.25em}.wp-block-post-comments .commentlist .comment p{font-size:1em;line-height:1.8;margin:1em 0}.wp-block-post-comments .commentlist .children{list-style:none;margin:0;padding:0}.wp-block-post-comments .comment-author{line-height:1.5}.wp-block-post-comments .comment-author .avatar{border-radius:1.5em;display:block;float:left;height:2.5em;margin-right:.75em;margin-top:.5em;width:2.5em}.wp-block-post-comments .comment-author cite{font-style:normal}.wp-block-post-comments .comment-meta{font-size:.875em;line-height:1.5}.wp-block-post-comments .comment-meta b{font-weight:400}.wp-block-post-comments .comment-meta .comment-awaiting-moderation{display:block;margin-bottom:1em;margin-top:1em}.wp-block-post-comments .comment-body .commentmetadata{font-size:.875em}.wp-block-post-comments .comment-form-author label,.wp-block-post-comments .comment-form-comment label,.wp-block-post-comments .comment-form-email label,.wp-block-post-comments .comment-form-url label{display:block;margin-bottom:.25em}.wp-block-post-comments .comment-form input:not([type=submit]):not([type=checkbox]),.wp-block-post-comments .comment-form textarea{box-sizing:border-box;display:block;width:100%}.wp-block-post-comments .comment-form-cookies-consent{display:flex;gap:.25em}.wp-block-post-comments .comment-form-cookies-consent #wp-comment-cookies-consent{margin-top:.35em}.wp-block-post-comments .comment-reply-title{margin-bottom:0}.wp-block-post-comments .comment-reply-title :where(small){font-size:var(--wp--preset--font-size--medium,smaller);margin-left:.5em}.wp-block-post-comments .reply{font-size:.875em;margin-bottom:1.4em}.wp-block-post-comments input:not([type=submit]),.wp-block-post-comments textarea{border:1px solid #949494;font-family:inherit;font-size:1em}.wp-block-post-comments input:not([type=submit]):not([type=checkbox]),.wp-block-post-comments textarea{padding:calc(.667em + 2px)}:where(.wp-block-post-comments input[type=submit]){border:none}.wp-block-comments{box-sizing:border-box}
+</style>
+<style id='wp-block-buttons-inline-css'>
+.wp-block-buttons{box-sizing:border-box}.wp-block-buttons.is-vertical{flex-direction:column}.wp-block-buttons.is-vertical>.wp-block-button:last-child{margin-bottom:0}.wp-block-buttons>.wp-block-button{display:inline-block;margin:0}.wp-block-buttons.is-content-justification-left{justify-content:flex-start}.wp-block-buttons.is-content-justification-left.is-vertical{align-items:flex-start}.wp-block-buttons.is-content-justification-center{justify-content:center}.wp-block-buttons.is-content-justification-center.is-vertical{align-items:center}.wp-block-buttons.is-content-justification-right{justify-content:flex-end}.wp-block-buttons.is-content-justification-right.is-vertical{align-items:flex-end}.wp-block-buttons.is-content-justification-space-between{justify-content:space-between}.wp-block-buttons.aligncenter{text-align:center}.wp-block-buttons:not(.is-content-justification-space-between,.is-content-justification-right,.is-content-justification-left,.is-content-justification-center) .wp-block-button.aligncenter{margin-left:auto;margin-right:auto;width:100%}.wp-block-buttons[style*=text-decoration] .wp-block-button,.wp-block-buttons[style*=text-decoration] .wp-block-button__link{text-decoration:inherit}.wp-block-buttons.has-custom-font-size .wp-block-button__link{font-size:inherit}.wp-block-button.aligncenter{text-align:center}
+</style>
+<style id='wp-block-button-inline-css'>
+.wp-block-button__link{align-content:center;box-sizing:border-box;cursor:pointer;display:inline-block;height:100%;text-align:center;width:100%;word-break:break-word}.wp-block-button__link.aligncenter{text-align:center}.wp-block-button__link.alignright{text-align:right}:where(.wp-block-button__link){border-radius:9999px;box-shadow:none;padding:calc(.667em + 2px) calc(1.333em + 2px);text-decoration:none}.wp-block-button[style*=text-decoration] .wp-block-button__link{text-decoration:inherit}.wp-block-buttons>.wp-block-button.has-custom-width{max-width:none}.wp-block-buttons>.wp-block-button.has-custom-width .wp-block-button__link{width:100%}.wp-block-buttons>.wp-block-button.has-custom-font-size .wp-block-button__link{font-size:inherit}.wp-block-buttons>.wp-block-button.wp-block-button__width-25{width:calc(25% - var(--wp--style--block-gap, .5em)*.75)}.wp-block-buttons>.wp-block-button.wp-block-button__width-50{width:calc(50% - var(--wp--style--block-gap, .5em)*.5)}.wp-block-buttons>.wp-block-button.wp-block-button__width-75{width:calc(75% - var(--wp--style--block-gap, .5em)*.25)}.wp-block-buttons>.wp-block-button.wp-block-button__width-100{flex-basis:100%;width:100%}.wp-block-buttons.is-vertical>.wp-block-button.wp-block-button__width-25{width:25%}.wp-block-buttons.is-vertical>.wp-block-button.wp-block-button__width-50{width:50%}.wp-block-buttons.is-vertical>.wp-block-button.wp-block-button__width-75{width:75%}.wp-block-button.is-style-squared,.wp-block-button__link.wp-block-button.is-style-squared{border-radius:0}.wp-block-button.no-border-radius,.wp-block-button__link.no-border-radius{border-radius:0!important}:root :where(.wp-block-button .wp-block-button__link.is-style-outline),:root :where(.wp-block-button.is-style-outline>.wp-block-button__link){border:2px solid;padding:.667em 1.333em}:root :where(.wp-block-button .wp-block-button__link.is-style-outline:not(.has-text-color)),:root :where(.wp-block-button.is-style-outline>.wp-block-button__link:not(.has-text-color)){color:currentColor}:root :where(.wp-block-button .wp-block-button__link.is-style-outline:not(.has-background)),:root :where(.wp-block-button.is-style-outline>.wp-block-button__link:not(.has-background)){background-color:initial;background-image:none}
+</style>
+<link rel='stylesheet' id='jetpack-block-subscriptions-css' href='https://notlaura.com/wp-content/plugins/jetpack/_inc/blocks/subscriptions/view.css?minify=false&#038;ver=14.5' media='all' />
+<style id='wp-block-library-inline-css'>
+:root{--wp-admin-theme-color:#007cba;--wp-admin-theme-color--rgb:0,124,186;--wp-admin-theme-color-darker-10:#006ba1;--wp-admin-theme-color-darker-10--rgb:0,107,161;--wp-admin-theme-color-darker-20:#005a87;--wp-admin-theme-color-darker-20--rgb:0,90,135;--wp-admin-border-width-focus:2px;--wp-block-synced-color:#7a00df;--wp-block-synced-color--rgb:122,0,223;--wp-bound-block-color:var(--wp-block-synced-color)}@media (min-resolution:192dpi){:root{--wp-admin-border-width-focus:1.5px}}.wp-element-button{cursor:pointer}:root{--wp--preset--font-size--normal:16px;--wp--preset--font-size--huge:42px}:root .has-very-light-gray-background-color{background-color:#eee}:root .has-very-dark-gray-background-color{background-color:#313131}:root .has-very-light-gray-color{color:#eee}:root .has-very-dark-gray-color{color:#313131}:root .has-vivid-green-cyan-to-vivid-cyan-blue-gradient-background{background:linear-gradient(135deg,#00d084,#0693e3)}:root .has-purple-crush-gradient-background{background:linear-gradient(135deg,#34e2e4,#4721fb 50%,#ab1dfe)}:root .has-hazy-dawn-gradient-background{background:linear-gradient(135deg,#faaca8,#dad0ec)}:root .has-subdued-olive-gradient-background{background:linear-gradient(135deg,#fafae1,#67a671)}:root .has-atomic-cream-gradient-background{background:linear-gradient(135deg,#fdd79a,#004a59)}:root .has-nightshade-gradient-background{background:linear-gradient(135deg,#330968,#31cdcf)}:root .has-midnight-gradient-background{background:linear-gradient(135deg,#020381,#2874fc)}.has-regular-font-size{font-size:1em}.has-larger-font-size{font-size:2.625em}.has-normal-font-size{font-size:var(--wp--preset--font-size--normal)}.has-huge-font-size{font-size:var(--wp--preset--font-size--huge)}.has-text-align-center{text-align:center}.has-text-align-left{text-align:left}.has-text-align-right{text-align:right}#end-resizable-editor-section{display:none}.aligncenter{clear:both}.items-justified-left{justify-content:flex-start}.items-justified-center{justify-content:center}.items-justified-right{justify-content:flex-end}.items-justified-space-between{justify-content:space-between}.screen-reader-text{word-wrap:normal!important;border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px}.screen-reader-text:focus{background-color:#ddd;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}html :where(.has-border-color){border-style:solid}html :where([style*=border-top-color]){border-top-style:solid}html :where([style*=border-right-color]){border-right-style:solid}html :where([style*=border-bottom-color]){border-bottom-style:solid}html :where([style*=border-left-color]){border-left-style:solid}html :where([style*=border-width]){border-style:solid}html :where([style*=border-top-width]){border-top-style:solid}html :where([style*=border-right-width]){border-right-style:solid}html :where([style*=border-bottom-width]){border-bottom-style:solid}html :where([style*=border-left-width]){border-left-style:solid}html :where(img[class*=wp-image-]){height:auto;max-width:100%}:where(figure){margin:0 0 1em}html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:var(--wp-admin--admin-bar--height,0px)}@media screen and (max-width:600px){html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:0px}}
+</style>
+<style id='global-styles-inline-css'>
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--color--foreground: #e2e8f2;--wp--preset--color--background: #366caf;--wp--preset--color--primary: #FFFFFF;--wp--preset--color--secondary: #783557;--wp--preset--color--tertiary: #000000;--wp--preset--color--custom-color-1: #868699;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--gradient--vertical-secondary-to-tertiary: linear-gradient(to bottom,var(--wp--preset--color--secondary) 0%,var(--wp--preset--color--tertiary) 100%);--wp--preset--gradient--vertical-secondary-to-background: linear-gradient(to bottom,var(--wp--preset--color--secondary) 0%,var(--wp--preset--color--background) 100%);--wp--preset--gradient--vertical-tertiary-to-background: linear-gradient(to bottom,var(--wp--preset--color--tertiary) 0%,var(--wp--preset--color--background) 100%);--wp--preset--gradient--diagonal-primary-to-foreground: linear-gradient(to bottom right,var(--wp--preset--color--primary) 0%,var(--wp--preset--color--foreground) 100%);--wp--preset--gradient--diagonal-secondary-to-background: linear-gradient(to bottom right,var(--wp--preset--color--secondary) 50%,var(--wp--preset--color--background) 50%);--wp--preset--gradient--diagonal-background-to-secondary: linear-gradient(to bottom right,var(--wp--preset--color--background) 50%,var(--wp--preset--color--secondary) 50%);--wp--preset--gradient--diagonal-tertiary-to-background: linear-gradient(to bottom right,var(--wp--preset--color--tertiary) 50%,var(--wp--preset--color--background) 50%);--wp--preset--gradient--diagonal-background-to-tertiary: linear-gradient(to bottom right,var(--wp--preset--color--background) 50%,var(--wp--preset--color--tertiary) 50%);--wp--preset--font-size--small: 1rem;--wp--preset--font-size--medium: 1.125rem;--wp--preset--font-size--large: 1.75rem;--wp--preset--font-size--x-large: clamp(1.75rem, 3vw, 2.25rem);--wp--preset--font-family--dm-sans: "DM Sans", sans-serif;--wp--preset--font-family--abril-fatface: "Abril Fatface", system-ui;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);--wp--custom--spacing--small: max(1rem, 4vw);--wp--custom--spacing--medium: clamp(1rem, 8vw, calc(2 * var(--wp--style--block-gap)));--wp--custom--spacing--large: clamp(2rem, 10vw, 6rem);--wp--custom--spacing--outer: var(--wp--custom--spacing--small, 1rem);--wp--custom--typography--font-size--huge: clamp(2rem, 4vw, 2.25rem);--wp--custom--typography--font-size--gigantic: clamp(2.25rem, 6vw, 2.75rem);--wp--custom--typography--font-size--colossal: clamp(2.75rem, 10vw, 5rem);--wp--custom--typography--line-height--tiny: 1.15;--wp--custom--typography--line-height--small: 1.2;--wp--custom--typography--line-height--medium: 1.4;--wp--custom--typography--line-height--normal: 1.6;}:root { --wp--style--global--content-size: 660px;--wp--style--global--wide-size: 1220px; }:where(body) { margin: 0; }.wp-site-blocks > .alignleft { float: left; margin-right: 2em; }.wp-site-blocks > .alignright { float: right; margin-left: 2em; }.wp-site-blocks > .aligncenter { justify-content: center; margin-left: auto; margin-right: auto; }:where(.wp-site-blocks) > * { margin-block-start: 1.5rem; margin-block-end: 0; }:where(.wp-site-blocks) > :first-child { margin-block-start: 0; }:where(.wp-site-blocks) > :last-child { margin-block-end: 0; }:root { --wp--style--block-gap: 1.5rem; }:root :where(.is-layout-flow) > :first-child{margin-block-start: 0;}:root :where(.is-layout-flow) > :last-child{margin-block-end: 0;}:root :where(.is-layout-flow) > *{margin-block-start: 1.5rem;margin-block-end: 0;}:root :where(.is-layout-constrained) > :first-child{margin-block-start: 0;}:root :where(.is-layout-constrained) > :last-child{margin-block-end: 0;}:root :where(.is-layout-constrained) > *{margin-block-start: 1.5rem;margin-block-end: 0;}:root :where(.is-layout-flex){gap: 1.5rem;}:root :where(.is-layout-grid){gap: 1.5rem;}.is-layout-flow > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}.is-layout-flow > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}.is-layout-flow > .aligncenter{margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}.is-layout-constrained > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}.is-layout-constrained > .aligncenter{margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width: var(--wp--style--global--content-size);margin-left: auto !important;margin-right: auto !important;}.is-layout-constrained > .alignwide{max-width: var(--wp--style--global--wide-size);}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}body{background-color: var(--wp--preset--color--primary);color: var(--wp--preset--color--tertiary);font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--preset--font-size--medium);line-height: var(--wp--custom--typography--line-height--normal);padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;}a:where(:not(.wp-element-button)){color: var(--wp--preset--color--background);text-decoration: underline;}:root :where(a:where(:not(.wp-element-button)):hover){color: var(--wp--preset--color--tertiary);}h1, h2, h3, h4, h5, h6{color: var(--wp--preset--color--background);}h1{font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--custom--typography--font-size--colossal);font-style: normal;font-weight: 700;line-height: var(--wp--custom--typography--line-height--tiny);}h2{font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--custom--typography--font-size--gigantic);font-weight: 700;line-height: var(--wp--custom--typography--line-height--small);}h3{font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--custom--typography--font-size--huge);font-weight: 700;line-height: var(--wp--custom--typography--line-height--tiny);}h4{font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--preset--font-size--x-large);font-weight: 700;line-height: var(--wp--custom--typography--line-height--tiny);}h5{font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--preset--font-size--medium);font-weight: 700;line-height: var(--wp--custom--typography--line-height--normal);text-transform: uppercase;}h6{font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--preset--font-size--medium);font-weight: 700;line-height: var(--wp--custom--typography--line-height--normal);text-transform: uppercase;}:root :where(.wp-element-button, .wp-block-button__link){background-color: var(--wp--preset--color--background);border-width: 0;color: var(--wp--preset--color--primary);font-family: inherit;font-size: inherit;line-height: inherit;padding-top: calc(0.667em + 2px);padding-right: calc(1.333em + 2px);padding-bottom: calc(0.667em + 2px);padding-left: calc(1.333em + 2px);text-decoration: none;}:root :where(.wp-element-caption, .wp-block-audio figcaption, .wp-block-embed figcaption, .wp-block-gallery figcaption, .wp-block-image figcaption, .wp-block-table figcaption, .wp-block-video figcaption){color: var(--wp--preset--color--custom-color-1);}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-foreground-color{color: var(--wp--preset--color--foreground) !important;}.has-background-color{color: var(--wp--preset--color--background) !important;}.has-primary-color{color: var(--wp--preset--color--primary) !important;}.has-secondary-color{color: var(--wp--preset--color--secondary) !important;}.has-tertiary-color{color: var(--wp--preset--color--tertiary) !important;}.has-custom-color-1-color{color: var(--wp--preset--color--custom-color-1) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-foreground-background-color{background-color: var(--wp--preset--color--foreground) !important;}.has-background-background-color{background-color: var(--wp--preset--color--background) !important;}.has-primary-background-color{background-color: var(--wp--preset--color--primary) !important;}.has-secondary-background-color{background-color: var(--wp--preset--color--secondary) !important;}.has-tertiary-background-color{background-color: var(--wp--preset--color--tertiary) !important;}.has-custom-color-1-background-color{background-color: var(--wp--preset--color--custom-color-1) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-foreground-border-color{border-color: var(--wp--preset--color--foreground) !important;}.has-background-border-color{border-color: var(--wp--preset--color--background) !important;}.has-primary-border-color{border-color: var(--wp--preset--color--primary) !important;}.has-secondary-border-color{border-color: var(--wp--preset--color--secondary) !important;}.has-tertiary-border-color{border-color: var(--wp--preset--color--tertiary) !important;}.has-custom-color-1-border-color{border-color: var(--wp--preset--color--custom-color-1) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-vertical-secondary-to-tertiary-gradient-background{background: var(--wp--preset--gradient--vertical-secondary-to-tertiary) !important;}.has-vertical-secondary-to-background-gradient-background{background: var(--wp--preset--gradient--vertical-secondary-to-background) !important;}.has-vertical-tertiary-to-background-gradient-background{background: var(--wp--preset--gradient--vertical-tertiary-to-background) !important;}.has-diagonal-primary-to-foreground-gradient-background{background: var(--wp--preset--gradient--diagonal-primary-to-foreground) !important;}.has-diagonal-secondary-to-background-gradient-background{background: var(--wp--preset--gradient--diagonal-secondary-to-background) !important;}.has-diagonal-background-to-secondary-gradient-background{background: var(--wp--preset--gradient--diagonal-background-to-secondary) !important;}.has-diagonal-tertiary-to-background-gradient-background{background: var(--wp--preset--gradient--diagonal-tertiary-to-background) !important;}.has-diagonal-background-to-tertiary-gradient-background{background: var(--wp--preset--gradient--diagonal-background-to-tertiary) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}.has-dm-sans-font-family{font-family: var(--wp--preset--font-family--dm-sans) !important;}.has-abril-fatface-font-family{font-family: var(--wp--preset--font-family--abril-fatface) !important;}
+:root :where(.wp-block-button .wp-block-button__link){background-color: var(--wp--preset--color--primary);border-radius: 0;color: var(--wp--preset--color--background);font-size: var(--wp--preset--font-size--medium);}
+:root :where(.wp-block-post-title){font-family: var(--wp--preset--font-family--dm-sans);font-size: var(--wp--custom--typography--font-size--colossal);font-weight: 700;line-height: var(--wp--custom--typography--line-height--tiny);}
+:root :where(.wp-block-site-title){font-family: var(--wp--preset--font-family--system-font);font-size: var(--wp--preset--font-size--medium);font-style: normal;font-weight: normal;line-height: var(--wp--custom--typography--line-height--normal);}
+</style>
+<style id='block-style-variation-styles-inline-css'>
+:root :where(.wp-block-separator.is-style-wide--2){background-color: var(--wp--preset--color--cyan-bluish-gray);}
+:root :where(.wp-block-separator.is-style-wide--3){background-color: var(--wp--preset--color--cyan-bluish-gray);}
+</style>
+<style id='wp-emoji-styles-inline-css'>
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+</style>
+<style id='wp-block-template-skip-link-inline-css'>
+
+		.skip-link.screen-reader-text {
+			border: 0;
+			clip: rect(1px,1px,1px,1px);
+			clip-path: inset(50%);
+			height: 1px;
+			margin: -1px;
+			overflow: hidden;
+			padding: 0;
+			position: absolute !important;
+			width: 1px;
+			word-wrap: normal !important;
+		}
+
+		.skip-link.screen-reader-text:focus {
+			background-color: #eee;
+			clip: auto !important;
+			clip-path: none;
+			color: #444;
+			display: block;
+			font-size: 1em;
+			height: auto;
+			left: 5px;
+			line-height: normal;
+			padding: 15px 23px 14px;
+			text-decoration: none;
+			top: 5px;
+			width: auto;
+			z-index: 100000;
+		}
+</style>
+<link rel='stylesheet' id='mkaz-code-syntax-prism-css-css' href='https://notlaura.com/wp-content/plugins/code-syntax-block/assets/prism-a11y-dark.css?ver=1759868466' media='all' />
+<style id='core-block-supports-inline-css'>
+.wp-elements-004b0de749e9db5c7f9f314be658a65c a:where(:not(.wp-element-button)){color:var(--wp--preset--color--primary);}.wp-elements-4a04215cd25d0d1f8e6ab5dd42720ac1 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--white);}.wp-container-core-group-is-layout-47e5a185 > *{margin-block-start:0;margin-block-end:0;}.wp-container-core-group-is-layout-47e5a185 > * + *{margin-block-start:0px;margin-block-end:0;}.wp-container-core-group-is-layout-6c531013{flex-wrap:nowrap;}.wp-container-core-group-is-layout-0b24e649{flex-wrap:nowrap;justify-content:space-between;}.wp-container-core-group-is-layout-cb46ffcb{flex-wrap:nowrap;justify-content:space-between;}.wp-container-core-columns-is-layout-28f84493{flex-wrap:nowrap;}.wp-container-core-columns-is-layout-d7d455e7{flex-wrap:nowrap;}.wp-elements-730911554151942058018486b5d915f5 a:where(:not(.wp-element-button)){color:var(--wp--preset--color--primary);}.wp-elements-3fb0ca4deee13d400693731debd1b94f a:where(:not(.wp-element-button)){color:var(--wp--preset--color--primary);}.wp-container-core-group-is-layout-4ba112a4{justify-content:space-between;}.wp-container-core-group-is-layout-99d29c99 > *{margin-block-start:0;margin-block-end:0;}.wp-container-core-group-is-layout-99d29c99 > * + *{margin-block-start:0px;margin-block-end:0;}
+</style>
+<link rel='stylesheet' id='twentytwentytwo-style-css' href='https://notlaura.com/wp-content/themes/twentytwentytwo/style.css?ver=1.4' media='all' />
+<script id="jetpack-blocks-assets-base-url-js-before">
+var Jetpack_Block_Assets_Base_Url="https://notlaura.com/wp-content/plugins/jetpack/_inc/blocks/";
+</script>
+<script src="https://notlaura.com/wp-content/plugins/gutenberg/build/dom-ready/index.min.js?ver=222ad38e3e5e302c8bbf" id="wp-dom-ready-js"></script>
+<script src="https://c0.wp.com/c/6.6.7/wp-includes/js/dist/vendor/wp-polyfill.min.js" id="wp-polyfill-js"></script>
+<script src="https://notlaura.com/wp-content/plugins/jetpack/_inc/blocks/subscriptions/view.js?minify=false&amp;ver=14.5" id="jetpack-block-subscriptions-js"></script>
+<link rel="https://api.w.org/" href="https://notlaura.com/wp-json/" /><link rel="alternate" title="JSON" type="application/json" href="https://notlaura.com/wp-json/wp/v2/posts/6494" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://notlaura.com/xmlrpc.php?rsd" />
+<meta name="generator" content="WordPress 6.6.7" />
+<link rel='shortlink' href='https://wp.me/p2LsIr-1GK' />
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="https://notlaura.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fnotlaura.com%2Fis-css-turing-complete%2F" />
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="https://notlaura.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fnotlaura.com%2Fis-css-turing-complete%2F&#038;format=xml" />
+	<style>img#wpstats{display:none}</style>
+		<script id="wp-load-polyfill-importmap">
+( HTMLScriptElement.supports && HTMLScriptElement.supports("importmap") ) || document.write( '<script src="https://c0.wp.com/c/6.6.7/wp-includes/js/dist/vendor/wp-polyfill-importmap.min.js"></scr' + 'ipt>' );
+</script>
+<script type="importmap" id="wp-importmap">
+{"imports":{"@wordpress\/interactivity":"https:\/\/notlaura.com\/wp-content\/plugins\/gutenberg\/build-module\/interactivity\/index.min.js?ver=d9948f13df6155717023"}}
+</script>
+<script type="module" src="https://notlaura.com/wp-content/plugins/gutenberg/build-module/block-library/navigation/view.min.js?ver=e87598ae68934bb20ab4" id="@wordpress/block-library/navigation/view-js-module"></script>
+<link rel="modulepreload" href="https://notlaura.com/wp-content/plugins/gutenberg/build-module/interactivity/index.min.js?ver=d9948f13df6155717023" id="@wordpress/interactivity-js-modulepreload"><style id='wp-fonts-local'>
+@font-face{font-family:"DM Sans";font-style:normal;font-weight:400;font-display:fallback;src:url('https://notlaura.com/wp-content/themes/twentytwentytwo/assets/fonts/dm-sans/DMSans-Regular.ttf') format('truetype');}
+@font-face{font-family:"DM Sans";font-style:normal;font-weight:700;font-display:fallback;src:url('https://notlaura.com/wp-content/themes/twentytwentytwo/assets/fonts/dm-sans/DMSans-Bold.ttf') format('truetype');}
+@font-face{font-family:"DM Sans";font-style:italic;font-weight:400;font-display:fallback;src:url('https://notlaura.com/wp-content/themes/twentytwentytwo/assets/fonts/dm-sans/DMSans-Italic.ttf') format('truetype');}
+@font-face{font-family:"DM Sans";font-style:italic;font-weight:700;font-display:fallback;src:url('https://notlaura.com/wp-content/themes/twentytwentytwo/assets/fonts/dm-sans/DMSans-BoldItalic.ttf') format('truetype');}
+@font-face{font-family:"Abril Fatface";font-style:normal;font-weight:400;font-display:fallback;src:url('https://notlaura.com/wp-content/uploads/fonts/zOL64pLDlL1D99S8g8PtiKchm-VsjOLhZBY.woff2') format('woff2');}
+</style>
+<link rel="icon" href="https://i0.wp.com/notlaura.com/wp-content/uploads/2018/01/cropped-favicon.png?fit=32%2C32&#038;ssl=1" sizes="32x32" />
+<link rel="icon" href="https://i0.wp.com/notlaura.com/wp-content/uploads/2018/01/cropped-favicon.png?fit=192%2C192&#038;ssl=1" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://i0.wp.com/notlaura.com/wp-content/uploads/2018/01/cropped-favicon.png?fit=180%2C180&#038;ssl=1" />
+<meta name="msapplication-TileImage" content="https://i0.wp.com/notlaura.com/wp-content/uploads/2018/01/cropped-favicon.png?fit=270%2C270&#038;ssl=1" />
+</head>
+
+<body class="post-template-default single single-post postid-6494 single-format-standard wp-custom-logo wp-embed-responsive">
+
+<div class="wp-site-blocks"><header class="wp-block-template-part">
+<div class="wp-block-group has-primary-color has-background-background-color has-text-color has-background has-link-color wp-elements-004b0de749e9db5c7f9f314be658a65c is-content-justification-space-between is-nowrap is-layout-flex wp-container-core-group-is-layout-0b24e649 wp-block-group-is-layout-flex" style="padding-top:20px;padding-bottom:20px">
+<div class="wp-block-group is-nowrap is-layout-flex wp-container-core-group-is-layout-6c531013 wp-block-group-is-layout-flex">
+<div class="wp-block-group is-layout-flow wp-container-core-group-is-layout-47e5a185 wp-block-group-is-layout-flow">
+<div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained"><h1 style="font-style:normal;font-weight:700;" class="has-link-color wp-elements-4a04215cd25d0d1f8e6ab5dd42720ac1 wp-block-site-title has-text-color has-primary-color has-large-font-size">Lara (Schenck) Karki</h1></div>
+
+
+<p style="font-style:italic;font-weight:400;line-height:1.25;" class="wp-block-site-tagline has-small-font-size">Lover of programming, maker of monsters</p></div>
+</div>
+
+
+<nav class="has-text-color has-primary-color is-responsive wp-block-navigation is-layout-flex wp-block-navigation-is-layout-flex" aria-label="Main" 
+		 data-wp-interactive="core/navigation" data-wp-context='{"overlayOpenedBy":{"click":false,"hover":false,"focus":false},"type":"overlay","roleAttribute":"","ariaLabel":"Menu"}'><button aria-haspopup="dialog" aria-label="Open menu" class="wp-block-navigation__responsive-container-open" 
+				data-wp-on-async--click="actions.openMenuOnClick"
+				data-wp-on--keydown="actions.handleMenuKeydown"
+			><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5" /><rect x="4" y="15" width="16" height="1.5" /></svg></button>
+				<div class="wp-block-navigation__responsive-container  has-text-color has-primary-color has-background has-background-background-color"  id="modal-1" 
+				data-wp-class--has-modal-open="state.isMenuOpen"
+				data-wp-class--is-menu-open="state.isMenuOpen"
+				data-wp-watch="callbacks.initMenu"
+				data-wp-on--keydown="actions.handleMenuKeydown"
+				data-wp-on-async--focusout="actions.handleMenuFocusout"
+				tabindex="-1"
+			>
+					<div class="wp-block-navigation__responsive-close" tabindex="-1">
+						<div class="wp-block-navigation__responsive-dialog" 
+				data-wp-bind--aria-modal="state.ariaModal"
+				data-wp-bind--aria-label="state.ariaLabel"
+				data-wp-bind--role="state.roleAttribute"
+			>
+							<button aria-label="Close menu" class="wp-block-navigation__responsive-container-close" 
+				data-wp-on-async--click="actions.closeMenuOnClick"
+			><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="m13.06 12 6.47-6.47-1.06-1.06L12 10.94 5.53 4.47 4.47 5.53 10.94 12l-6.47 6.47 1.06 1.06L12 13.06l6.47 6.47 1.06-1.06L13.06 12Z"></path></svg></button>
+							<div class="wp-block-navigation__responsive-container-content" 
+				data-wp-watch="callbacks.focusFirstElement"
+			 id="modal-1-content">
+								<ul class="wp-block-navigation__container has-text-color has-primary-color is-responsive wp-block-navigation"><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/now/"><span class="wp-block-navigation-item__label">Now</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/blog/"><span class="wp-block-navigation-item__label">Blog</span></a></li><li data-wp-context="{ &quot;submenuOpenedBy&quot;: { &quot;click&quot;: false, &quot;hover&quot;: false, &quot;focus&quot;: false }, &quot;type&quot;: &quot;submenu&quot;, &quot;modal&quot;: null, &quot;previousFocus&quot;: null }" data-wp-interactive="core/navigation" data-wp-on--focusout="actions.handleMenuFocusout" data-wp-on--keydown="actions.handleMenuKeydown" data-wp-on-async--mouseenter="actions.openMenuOnHover" data-wp-on-async--mouseleave="actions.closeMenuOnHover" data-wp-watch="callbacks.initMenu" tabindex="-1" class="wp-block-navigation-item has-child open-on-hover-click wp-block-navigation-submenu"><a class="wp-block-navigation-item__content" href="https://notlaura.com/about/"><span class="wp-block-navigation-item__label">About</span></a><button data-wp-bind--aria-expanded="state.isMenuOpen" data-wp-on-async--click="actions.toggleMenuOnClick" aria-label="About submenu" class="wp-block-navigation__submenu-icon wp-block-navigation-submenu__toggle" ><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" focusable="false"><path d="M1.50002 4L6.00002 8L10.5 4" stroke-width="1.5"></path></svg></button><ul data-wp-on-async--focus="actions.openMenuOnFocus" class="wp-block-navigation__submenu-container has-text-color has-primary-color has-background has-background-background-color wp-block-navigation-submenu has-text-color has-primary-color"><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/now/"><span class="wp-block-navigation-item__label">Now</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/reading/"><span class="wp-block-navigation-item__label">Reading (Books)</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/mission/"><span class="wp-block-navigation-item__label"><strike>Mission</strike> Compass</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/speaking/"><span class="wp-block-navigation-item__label">Speaking</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/updates"><span class="wp-block-navigation-item__label">Updates</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/portfolio/"><span class="wp-block-navigation-item__label">Portfolio</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://laras126.github.io/cv/" target="_blank"  ><span class="wp-block-navigation-item__label">CV</span></a></li></ul></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/monsters/"><span class="wp-block-navigation-item__label">Monsters</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://notlaura.com/contact/"><span class="wp-block-navigation-item__label">Contact</span></a></li><li class=" wp-block-navigation-item wp-block-navigation-link"><a class="wp-block-navigation-item__content"  href="https://larakarki.com"><span class="wp-block-navigation-item__label">larakarki.com 🔗</span></a></li></ul>
+							</div>
+						</div>
+					</div>
+				</div></nav></div>
+</header>
+
+
+<main class="wp-block-group is-layout-flow wp-block-group-is-layout-flow">
+<div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained">
+<div class="wp-block-columns alignwide are-vertically-aligned-center has-foreground-color has-text-color is-layout-flex wp-container-core-columns-is-layout-28f84493 wp-block-columns-is-layout-flex">
+<div class="wp-block-column is-vertically-aligned-center is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:50%">
+<div class="wp-block-group is-layout-flow wp-block-group-is-layout-flow"><h2 style="font-size:64px;" class="alignwide wp-block-post-title">Is CSS Turing Complete?</h2>
+
+<div class="wp-block-post-excerpt has-text-color has-tertiary-color"><p class="wp-block-post-excerpt__excerpt">I took a deep dive into this question, and the answer is: kinda, mostly, yeah! CSS + HTML + user input is Turing complete. Is it possible to remove the user input part? Then I can re-title this post to be more, ahem, declarative. </p></div>
+
+
+<div class="wp-block-group has-custom-color-1-color has-text-color is-content-justification-space-between is-nowrap is-layout-flex wp-container-core-group-is-layout-cb46ffcb wp-block-group-is-layout-flex"><div class="taxonomy-category wp-block-post-terms"><a href="https://notlaura.com/category/greatest-hits/" rel="tag">Greatest Hits</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/category/research/" rel="tag">Research</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/category/tech/web-development/" rel="tag">Web Development</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/category/garden/frozen/" rel="tag">🧊 Frozen</a></div>
+
+<div class="wp-block-post-date has-small-font-size"><time datetime="2019-05-25T00:05:12-04:00">May 25, 2019</time></div></div>
+</div>
+</div>
+
+
+
+<div class="wp-block-column is-vertically-aligned-center is-layout-flow wp-block-column-is-layout-flow" style="flex-basis:50%"><figure class="wp-block-post-featured-image"><img width="1026" height="1024" src="https://notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="Rule 110 cellular automata" style="object-fit:cover;" decoding="async" fetchpriority="high" srcset="https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?w=1026&amp;ssl=1 1026w, https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?resize=400%2C400&amp;ssl=1 400w, https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?resize=600%2C599&amp;ssl=1 600w, https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/Screen-Shot-2019-05-24-at-7.41.38-PM.png?resize=768%2C767&amp;ssl=1 768w" sizes="(max-width: 1026px) 100vw, 1026px" /></figure></div>
+</div>
+</div>
+
+
+
+<hr class="wp-block-separator has-text-color has-tertiary-color has-alpha-channel-opacity has-tertiary-background-color has-background is-style-wide is-style-wide--2"/>
+
+
+
+<div style="height:32px" aria-hidden="true" class="wp-block-spacer"></div>
+
+
+<div class="entry-content wp-block-post-content is-layout-constrained wp-block-post-content-is-layout-constrained">
+<p>Last night I did a preview of my talk for a great group of folks at Code &amp; Supply, and it went well! There were lots of great comments and questions, and it&#8217;s answering the tough ones that bring the best insights down the line. Justin Reese, the organizer of the space (and of <a href="http://abstractions.io/">Abstractions II</a> the conference, check it out!), very kindly sent me a message with one of my answers to said tough questions. It&#8217;s a key takeaway from the talk and needs more slide real estate: &#8220;CSS can be your mental model, your spring board into other languages and concepts&#8221;.</p>
+
+
+
+<p>Because that&#8217;s the thing&#8230;<em><a href="https://notlaura.com/css-is-a-programming-language/">CSS is a programming language</a></em> so you can learn <em>other </em>languages by linking new concepts back to what you already know about CSS! </p>
+
+
+
+<p>It spurred me to dive into some experiments to <em>truly</em> understand some concepts I presented in my talk: namely, that CSS is Turing complete&#8230;or is it? </p>
+
+
+
+<p>I have a section where I show an example of someone else&#8217;s implementation of Rule 110 (we&#8217;ll get to what that is), but that was copy pasta and it didn&#8217;t actually run. There&#8217;s a lot of debate about this topic, and until my adventures today, I was making a claim about something I did not actually understand. Yikes! I mean, people do that all the time, but still&#8230;</p>
+
+
+
+<p>Okay, let&#8217;s get to it.</p>
+
+
+
+<h2 class="wp-block-heading">What does it mean to be <em>Turing complete</em>? </h2>
+
+
+
+<p>Actually, we need to back up even more&#8230;who was Alan Turing?</p>
+
+
+
+<p>Alan Turing was a computer scientist and mathematician during World War II who developed a machine that could compute any math problem, and, suitably, that machine was called a Turing machine. That machine is the foundation of <em>all</em> modern digital devices&#8230;and it was invented in 1936!! He called it <code>a-machine</code> for short.</p>
+
+
+
+<p>In the simplest terms, for a language or machine to be Turing complete, it means that it is capable of doing what a Turing machine could do: perform <em>any</em> calculation, a.k.a. <strong>universal computation</strong>. After all, programming was invented to do math although we do a lot more with it now, of course!</p>
+
+
+
+<p>The requirements for being Turing complete (and thus capable of universal computation) are as follows:</p>
+
+
+
+<ol class="wp-block-list"><li>Conditional branching, or the ability to determine if a <em>thing</em> is true or false according to the state of another <em>thing</em>. </li><li>Arbitrary memory, or that the machine can fall victim to a problem that is <em>undecidable</em>. <em>Undecidable</em> refers to a class of math and logic problems for which it is proven to be impossible to write an algorithm for a Turing machine that will return a correct answer. These problems will result in an infinite loop, causing the machine to run forever and consume an arbitrary amount of memory. </li></ol>
+
+
+
+<p>The thing is&#8230;there is no device on planet earth that has arbitrary memory, so how can we <em>really</em> know if a problem is undecidable or not? Every program will <em>halt</em> at some point because we are limited by the physical world! The second requirement for Turing completeness is, therefore, often disregarded.</p>
+
+
+
+<h3 class="wp-block-heading">Rule 110 is Turing Complete</h3>
+
+
+
+<p>Okay, now we are going to make a big jump, and I haven&#8217;t quite connected the dots enough to explain it in my own words, so here is a blanket statement and some sources:</p>
+
+
+
+<p>Rule 110 is a <em>cellular automaton</em> (we&#8217;ll get to that in a moment) that is capable of universal computation and is therefore Turing complete.</p>
+
+
+
+<p>I don&#8217;t entirely understand how cellular automata are capable of computation, but apparently there are systems modeled after certain automata and those systems are Turing complete. At least, according to <a href="https://cs.stackexchange.com/questions/4779/how-is-the-rule-110-turing-complete">this Stack Overflow thread</a> that references <a href="http://wpmedia.wolfram.com/uploads/sites/13/2018/02/15-1-1.pdf">this research paper</a> that I did not read. </p>
+
+
+
+<p>So, from what I can gather, Rule 110, is a kind of litmus test for Turing completeness: if the language can encode Rule 110, then it is Turing complete. </p>
+
+
+
+<h2 class="wp-block-heading">Cellular Automata 101</h2>
+
+
+
+<p>Cellular automata are rules for single cells of a grid to either be 1 or 0 (black or white) depending on their nearest neighbors. They are the source of much generative art (<a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway&#8217;s Game of Life</a> is a common one); the idea is you define some rules, set a value 1 or 0, and from that you can determine the rest of the values by following the nearest neighbor rules provided.</p>
+
+
+
+<p>The elementary cellular automata are the simplest of them all, and I highly recommend watching this Youtube video from <a href="https://www.youtube.com/watch?v=W1zKu3fDQR8">The Coding Train</a> to get a deeper understanding. </p>
+
+
+
+<p>You could have a rule like this:</p>
+
+
+
+<figure class="wp-block-image is-resized"><img data-recalc-dims="1" decoding="async" src="https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/automata.gif?resize=566%2C81&#038;ssl=1" alt="" class="wp-image-6510" width="566" height="81"/><figcaption>An Elementary Cellular Automata rule. Credit: <a href="http://mathworld.wolfram.com/ElementaryCellularAutomaton.html">WolframMathWorld</a>. </figcaption></figure>
+
+
+
+<p>Think of the bottom square as the focus point and its state (black or white / 1 or 0) is determined according to the three cells that touch it: the one to its top left, the one above it top, and the cell its top left. These rule sets can result in cool, generative formations like so:</p>
+
+
+
+<figure class="wp-block-image"><img data-recalc-dims="1" decoding="async" width="540" height="566" src="https://i0.wp.com/notlaura.com/wp-content/uploads/2019/05/ElementaryCA_850.gif?resize=540%2C566&#038;ssl=1" alt="" class="wp-image-6513"/><figcaption>Elementary Cellular Automata. Credit: <a href="http://mathworld.wolfram.com/ElementaryCellularAutomaton.html">WolframMathWorld</a>. </figcaption></figure>
+
+
+
+<p>Let&#8217;s look at this in CSS! We can use checkbox inputs to hold the state of each cell, and determine the state of the ones following it with <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Adjacent_sibling_combinator">adjacent sibling combinators</a> (the <code>+</code>).</p>
+
+
+
+<p>Let&#8217;s say we want to encode the fourth digit in the rule above: black/white/white  =&gt; black, or 101 =&gt; 1. In CSS, the selector (this is where the conditional branching happens) would be: </p>
+
+
+
+<pre class="wp-block-code language-css"><code class="">input:checked + input:not(:checked) + input:not(:checked) + * {
+   /* Declarations to indicate 1 */
+}</code></pre>
+
+
+
+<p>This is <em>the exact same logic</em> as an imperative statement, like this:</p>
+
+
+
+<pre class="wp-block-code language-javascript"><code class="">if ( cellOne == 1 &amp;&amp; cellTwo == 0 &amp;&amp; cellThree == 0 ) {
+   cellFour = 1;
+}</code></pre>
+
+
+
+<p>The difference (which will bite us later) is that we cannot actually <em>assign</em> the value of 1 (i.e. <code>:checked</code>) to <code>*</code> using this approach, so it requires a click from a human to actually update the state.</p>
+
+
+
+<p>Here is a CodePen with an example of the single cell. Try clicking to check/uncheck each one in the top row. The bottom cell will <em>only</em> be a <code>1</code> when the top three are set to <code>1 0 0</code>, which is the logic that we programmed.</p>
+
+
+
+<p class="codepen" data-height="300" data-theme-id="18756" data-default-tab="css,result" data-user="laras126" data-slug-hash="VOXJqO" style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="Elementary Cellular Automaton - Single Cell">
+  <span>See the Pen <a href="https://codepen.io/laras126/pen/VOXJqO/">
+  Elementary Cellular Automaton &#8211; Single Cell</a> by Lara Schenck (<a href="https://codepen.io/laras126">@laras126</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async="" src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+
+
+<p>Hey, look! We are learning computer science&#8230;with declarative CSS! So cool!</p>
+
+
+
+<h2 class="wp-block-heading">Rule 190 in CSS</h2>
+
+
+
+<p>I started off programming rule 190 – it&#8217;s a little easier to visualize as it created one big triangle from the top down. </p>
+
+
+
+<p>You will notice a bit of Sass in the below CodePen – all of the logic for the automaton itself comes from CSS, and I used Sass to help DRY things out a bit so the pen is easier to modify. The JavaScript is there for an &#8220;Unchecker&#8221; button so that I could reset the Pen to test out the logic. At this point, I was like, &#8220;How could write a <em>test</em> for this?!&#8221;. I&#8217;m not sure what that would look like, but it&#8217;s a cool thought and would have been useful in testing the logic.</p>
+
+
+
+<p>Here is Rule 190 – click the top center cell to start, and click the following <code>X</code> cells to populate the next row:</p>
+
+
+
+<p class="codepen" data-height="485" data-theme-id="18756" data-default-tab="result" data-user="laras126" data-slug-hash="WBrdGN" style="height: 485px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="Rule 190 in CSS">
+  <span>See the Pen <a href="https://codepen.io/laras126/pen/WBrdGN/">
+  Rule 190 in CSS</a> by Lara Schenck (<a href="https://codepen.io/laras126">@laras126</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async="" src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+
+
+<p>It was very straightforward to translate this to Rule 110 – all I had to do is update the encoding rules to correspond to the rules of 110 vs 190.</p>
+
+
+
+<h2 class="wp-block-heading">Rule 110</h2>
+
+
+
+<p>And here we have it&#8230;the automata that, apparently, shows that CSS is Turing complete! </p>
+
+
+
+<p>Not so fast. In this implementation, that is <em>incorrect.</em> Alone, CSS is <em>not </em>Turing complete. CSS plus HTML plus user input is Turing complete!</p>
+
+
+
+<p>Click anywhere to start the program (the top right-most corner is a good place to start), and like above, click the pink Xs to run the program. </p>
+
+
+
+<p class="codepen" data-height="300" data-theme-id="18756" data-default-tab="result" data-user="laras126" data-slug-hash="OYvGZj" style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="Rule 110 in CSS">
+  <span>See the Pen <a href="https://codepen.io/laras126/pen/OYvGZj/">
+  Rule 110 in CSS</a> by Lara Schenck (<a href="https://codepen.io/laras126">@laras126</a>)
+  on <a href="https://codepen.io">CodePen</a>.</span>
+</p>
+<script async="" src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+
+
+<p>Given that CSS is a domain-specific language for styling user interface, this makes a lot of sense! CSS + HTML + Human = Turing complete. </p>
+
+
+
+<p>At the end of that day, as CSS developers that is the language we <em>really</em> write. CSS is incomplete without HTML, and a styled interface is incomplete without a human to use it. All three together (CSS/HTML/Human) are extremely powerful! I wonder if we need a name for <em>that</em> language.</p>
+
+
+
+<h2 class="wp-block-heading">Help, CSS friends!</h2>
+
+
+
+<p>That being said, there very well may be a way to accomplish what the user input does with CSS animations or even CSS Grid. Actually, maybe the entire thing could be accomplished with CSS Grid. Any ideas, CSS friends?</p>
+
+
+
+<h2 class="wp-block-heading">Sources</h2>
+
+
+
+<p>Here are my sources – lots of good stuff!</p>
+
+
+
+<ol class="wp-block-list"><li><a href="https://en.wikipedia.org/wiki/Turing_machine">Turing Machine on Wikipedia</a></li><li><a href="https://www.youtube.com/watch?v=RPQD7-AOjMI">Turing Complete on Computerphile</a></li><li><a href="https://www.youtube.com/watch?v=nsZsd5qtbo4">Undecideability Tangent on Computerphile</a></li><li>Miriam Nadler&#8217;s <a href="https://codepen.io/mknadler/pen/pEWAmg">Sass Cellular Automata</a> pen</li><li>Eli Fox-Epsteins&#8217;s <a href="http://eli.fox-epste.in/rule110-full.html">Rule 110 in HTML/CSS</a></li><li><a href="https://www.youtube.com/watch?v=W1zKu3fDQR8">This excellent video from The Coding Train</a> about Elementary Cellular Automata</li><li><a href="https://stackoverflow.com/questions/2497146/is-css-turing-complete">This Stack Overflow thread</a> for &#8220;Is CSS Turing Complete?&#8221;</li><li><a href="http://mathworld.wolfram.com/ElementaryCellularAutomaton.html">Elementary Cellular Automaton</a> on Wolfram Alpha</li></ol>
+</div>
+
+
+<div style="height:32px" aria-hidden="true" class="wp-block-spacer"></div>
+
+
+
+<div class="wp-block-group is-layout-constrained wp-block-group-is-layout-constrained">
+<div class="wp-block-group is-layout-flex wp-block-group-is-layout-flex"><div style="font-style:italic;font-weight:400;" class="wp-block-post-date has-small-font-size"><time datetime="2019-05-25T00:05:12-04:00">May 25, 2019</time></div>
+
+<div class="wp-block-post-author has-small-font-size"><div class="wp-block-post-author__content"><p class="wp-block-post-author__name">Lara</p></div></div>
+
+<div class="taxonomy-category wp-block-post-terms has-small-font-size"><a href="https://notlaura.com/category/greatest-hits/" rel="tag">Greatest Hits</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/category/research/" rel="tag">Research</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/category/tech/web-development/" rel="tag">Web Development</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/category/garden/frozen/" rel="tag">🧊 Frozen</a></div>
+
+<div class="taxonomy-post_tag wp-block-post-terms has-small-font-size"><a href="https://notlaura.com/tag/cellular-automata/" rel="tag">cellular automata</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/tag/computer-science/" rel="tag">computer science</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/tag/rule-110/" rel="tag">rule 110</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/tag/turing-complete/" rel="tag">turing complete</a><span class="wp-block-post-terms__separator">, </span><a href="https://notlaura.com/tag/turing-machine/" rel="tag">turing machine</a></div></div>
+
+
+
+<div style="height:32px" aria-hidden="true" class="wp-block-spacer"></div>
+
+
+
+<hr class="wp-block-separator has-css-opacity is-style-wide is-style-wide--3"/>
+
+
+<div class="wp-block-post-comments wp-block-comments">
+<!-- You can start editing here. -->
+
+	<h3 id="comments">
+		One response to &#8220;Is CSS Turing Complete?&#8221;	</h3>
+
+	<div class="navigation">
+		<div class="alignleft"></div>
+		<div class="alignright"></div>
+	</div>
+
+	<ol class="commentlist">
+			<li id="comment-14509" class="pingback even thread-even depth-1">
+			<article id="div-comment-14509" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+												<b class="fn"><a href="https://coinerblog.com/level-up-your-css-game-today-making-a-game-with-no-javascript-x71q2b64/" class="url" rel="ugc external nofollow">How To Make a CSS Game Without Using JavaScript [Step-by-Step Guide] &#8211; Coiner Blog</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="https://notlaura.com/is-css-turing-complete/#comment-14509"><time datetime="2019-10-26T16:02:25-04:00">October 26, 2019 at 4:02 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>[&#8230;] might not be the first language you think of when making games for the web. Heck! It isn’t even a Turing completeprogramming language by itself. As it’s name states, it’s “just” astyling language, no [&#8230;]</p>
+				</div><!-- .comment-content -->
+
+							</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+	</ol>
+
+	<div class="navigation">
+		<div class="alignleft"></div>
+		<div class="alignright"></div>
+	</div>
+
+</div></div>
+</main>
+
+
+<footer class="wp-block-template-part">
+<div class="wp-block-group has-foreground-background-color has-background is-layout-constrained wp-container-core-group-is-layout-99d29c99 wp-block-group-is-layout-constrained" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:0">
+<div class="wp-block-columns alignwide has-background is-layout-flex wp-container-core-columns-is-layout-d7d455e7 wp-block-columns-is-layout-flex" style="background-color:#dfe6f28f;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">
+<h3 class="wp-block-heading">RSS</h3>
+
+
+
+<p>For those who are loyal to RSS feeds, here is a feed of my posts.</p>
+
+
+
+<ul id="block-2002f1a3-240c-4d5e-af7b-44f9c51614e4" class="wp-block-list">
+<li><a href="http://feeds.feedburner.com/notlaura">notlaura.com&#8217;s Feedburner feed</a></li>
+</ul>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">
+<h3 class="wp-block-heading">Email List</h3>
+
+
+
+<p>Sign up here to occasionally receive new posts via email.</p>
+
+
+<div class="wp-block-jetpack-subscriptions__supports-newline is-style-compact wp-block-jetpack-subscriptions">
+		<div>
+			<div>
+				<div>
+					<p >
+						<a href="https://notlaura.com/?post_type=post&#038;p=6494" style="font-size: 16px;padding: 15px 23px 15px 23px;margin: 0; margin-left: 10px;border-radius: 0px;border-width: 1px; background-color: #113AF5; color: #FFFFFF; text-decoration: none; white-space: nowrap; margin-left: 0">Subscribe</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</div></div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">
+<h3 class="wp-block-heading">Social Media</h3>
+
+
+
+<p>Following me on social media is another way you can follow new posts. I share content posted from my blog.</p>
+
+
+
+<ul class="wp-block-list">
+<li><a href="https://twitter.com/laras126">@laras126 on Twitter</a></li>
+
+
+
+<li><a href="https://www.linkedin.com/in/notlaura/">My LinkedIn profile</a></li>
+</ul>
+</div>
+</div>
+
+
+
+<div class="wp-block-group alignfull is-layout-constrained wp-block-group-is-layout-constrained">
+<div class="wp-block-group alignfull has-primary-color has-background-background-color has-text-color has-background is-content-justification-space-between is-layout-flex wp-container-core-group-is-layout-4ba112a4 wp-block-group-is-layout-flex" style="margin-top:var(--wp--preset--spacing--50);padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50)"><p class="has-link-color wp-elements-730911554151942058018486b5d915f5 wp-block-site-title"><a href="https://notlaura.com" target="_self" rel="home">Lara (Schenck) Karki</a></p>
+
+
+<p class="has-text-align-right has-link-color wp-elements-3fb0ca4deee13d400693731debd1b94f">Proudly powered by <a rel="nofollow" href="https://wordpress.org">WordPress</a>, always &#8216;n forever.</p>
+</div>
+</div>
+</div>
+</footer></div>
+
+		<!-- GA Google Analytics @ https://m0n.co/ga -->
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-12198561-4', 'auto');
+			ga('set', 'forceSSL', true);
+			ga('send', 'pageview');
+		</script>
+
+	<script src="https://c0.wp.com/c/6.6.7/wp-includes/js/comment-reply.min.js" id="comment-reply-js" async data-wp-strategy="async"></script>
+<script id="wp-block-template-skip-link-js-after">
+	( function() {
+		var skipLinkTarget = document.querySelector( 'main' ),
+			sibling,
+			skipLinkTargetID,
+			skipLink;
+
+		// Early exit if a skip-link target can't be located.
+		if ( ! skipLinkTarget ) {
+			return;
+		}
+
+		/*
+		 * Get the site wrapper.
+		 * The skip-link will be injected in the beginning of it.
+		 */
+		sibling = document.querySelector( '.wp-site-blocks' );
+
+		// Early exit if the root element was not found.
+		if ( ! sibling ) {
+			return;
+		}
+
+		// Get the skip-link target's ID, and generate one if it doesn't exist.
+		skipLinkTargetID = skipLinkTarget.id;
+		if ( ! skipLinkTargetID ) {
+			skipLinkTargetID = 'wp--skip-link--target';
+			skipLinkTarget.id = skipLinkTargetID;
+		}
+
+		// Create the skip link.
+		skipLink = document.createElement( 'a' );
+		skipLink.classList.add( 'skip-link', 'screen-reader-text' );
+		skipLink.href = '#' + skipLinkTargetID;
+		skipLink.innerHTML = 'Skip to content';
+
+		// Inject the skip link.
+		sibling.parentElement.insertBefore( skipLink, sibling );
+	}() );
+	
+</script>
+<script id="mkaz-code-syntax-prism-js-js-extra">
+var prism_settings = {"pluginUrl":"https:\/\/notlaura.com\/wp-content\/plugins\/code-syntax-block\/"};
+</script>
+<script src="https://notlaura.com/wp-content/plugins/code-syntax-block/assets/prism/prism.js?ver=1759868466" id="mkaz-code-syntax-prism-js-js"></script>
+<script id="jetpack-stats-js-before">
+_stq = window._stq || [];
+_stq.push([ "view", JSON.parse("{\"v\":\"ext\",\"blog\":\"40864475\",\"post\":\"6494\",\"tz\":\"-4\",\"srv\":\"notlaura.com\",\"j\":\"1:14.5\"}") ]);
+_stq.push([ "clickTrackerInit", "40864475", "6494" ]);
+</script>
+<script src="https://stats.wp.com/e-202635.js" id="jetpack-stats-js" defer data-wp-strategy="defer"></script>
+</body>
+</html>
+<!-- *´¨)
+     ¸.•´¸.•*´¨) ¸.•*¨)
+     (¸.•´ (¸.•` ¤ Comet Cache is Fully Functional ¤ ´¨) -->
+
+<!-- Cache File Version Salt:       n/a -->
+
+<!-- Cache File URL:                https://notlaura.com/is-css-turing-complete/ -->
+<!-- Cache File Path:               /cache/comet-cache/cache/https/notlaura-com/is-css-turing-complete.html -->
+
+<!-- Cache File Generated Via:      HTTP request -->
+<!-- Cache File Generated On:       Aug 28th, 2026 @ 2:17 am UTC -->
+<!-- Cache File Generated In:       0.71238 seconds -->
+
+<!-- Cache File Expires On:         Sep 4th, 2026 @ 2:17 am UTC -->
+<!-- Cache File Auto-Rebuild On:    Sep 4th, 2026 @ 2:17 am UTC -->
+
+<!-- Loaded via Cache On:    Aug 30th, 2026 @ 7:11 pm UTC -->
+<!-- Loaded via Cache In:    0.00388 seconds -->

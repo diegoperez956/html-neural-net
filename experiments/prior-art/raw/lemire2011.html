@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en-US" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#" class="no-js">
+<head><script type="text/javascript" src="https://web-static.archive.org/_static/js/bundle-playback.js?v=2N_sDSC0" charset="utf-8"></script>
+<script type="text/javascript" src="https://web-static.archive.org/_static/js/wombat.js?v=o9P2E1FK" charset="utf-8"></script>
+<script>window.RufflePlayer=window.RufflePlayer||{};window.RufflePlayer.config={"autoplay":"on","unmuteOverlay":"hidden","showSwfDownload":true};</script>
+<script type="text/javascript" src="https://web-static.archive.org/_static/js/ruffle/ruffle.js"></script>
+<script type="text/javascript">
+    __wm.init("http://web.archive.org/web");
+  __wm.wombat("https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/","20251228032614","http://web.archive.org/","web","https://web-static.archive.org/_static/",
+	      "1766892374");
+</script>
+<link rel="stylesheet" type="text/css" href="https://web-static.archive.org/_static/css/banner-styles.css?v=1utQkbB3" />
+<link rel="stylesheet" type="text/css" href="https://web-static.archive.org/_static/css/iconochive.css?v=3PDvdIFv" />
+<!-- End Wayback Rewrite JS Include -->
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="profile" href="https://gmpg.org/xfn/11">
+	<link rel="pingback" href="https://lemire.me/blog/xmlrpc.php">
+	<script>(function(html){html.className = html.className.replace(/\bno-js\b/,'js')})(document.documentElement);</script>
+<title>Breaking news: HTML+CSS is Turing complete &#8211; Daniel Lemire&#039;s blog</title>
+<meta name="robots" content="max-image-preview:large"/>
+	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
+	<link rel="alternate" type="application/rss+xml" title="Daniel Lemire's blog » Feed" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/feed/"/>
+<link rel="alternate" type="application/rss+xml" title="Daniel Lemire's blog » Comments Feed" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/comments/feed/"/>
+<link rel="alternate" type="application/rss+xml" title="Daniel Lemire's blog » Breaking news: HTML+CSS is Turing complete Comments Feed" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/feed/"/>
+<script>
+window._wpemojiSettings = {"baseUrl":"http:\/\/web.archive.org\/web\/20251228032614\/https:\/\/s.w.org\/images\/core\/emoji\/16.0.1\/72x72\/","ext":".png","svgUrl":"http:\/\/web.archive.org\/web\/20251228032614\/https:\/\/s.w.org\/images\/core\/emoji\/16.0.1\/svg\/","svgExt":".svg","source":{"concatemoji":"http:\/\/web.archive.org\/web\/20251228032614\/https:\/\/lemire.me\/blog\/wp-includes\/js\/wp-emoji-release.min.js?ver=6.8.3"}};
+/*! This file is auto-generated */
+!function(s,n){var o,i,e;function c(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(o,JSON.stringify(t))}catch(e){}}function p(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data),a=(e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0),new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data));return t.every(function(e,t){return e===a[t]})}function u(e,t){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);for(var n=e.getImageData(16,16,1,1),a=0;a<n.data.length;a++)if(0!==n.data[a])return!1;return!0}function f(e,t,n,a){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\udde8\ud83c\uddf6","\ud83c\udde8\u200b\ud83c\uddf6")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!a(e,"\ud83e\udedf")}return!1}function g(e,t,n,a){var r="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):s.createElement("canvas"),o=r.getContext("2d",{willReadFrequently:!0}),i=(o.textBaseline="top",o.font="600 32px Arial",{});return e.forEach(function(e){i[e]=t(o,e,n,a)}),i}function t(e){var t=s.createElement("script");t.src=e,t.defer=!0,s.head.appendChild(t)}"undefined"!=typeof Promise&&(o="wpEmojiSettingsSupports",i=["flag","emoji"],n.supports={everything:!0,everythingExceptFlag:!0},e=new Promise(function(e){s.addEventListener("DOMContentLoaded",e,{once:!0})}),new Promise(function(t){var n=function(){try{var e=JSON.parse(sessionStorage.getItem(o));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+g.toString()+"("+[JSON.stringify(i),f.toString(),p.toString(),u.toString()].join(",")+"));",a=new Blob([e],{type:"text/javascript"}),r=new Worker(URL.createObjectURL(a),{name:"wpTestEmojiSupports"});return void(r.onmessage=function(e){c(n=e.data),r.terminate(),t(n)})}catch(e){}c(n=g(i,f,p,u))}t(n)}).then(function(e){for(var t in e)n.supports[t]=e[t],n.supports.everything=n.supports.everything&&n.supports[t],"flag"!==t&&(n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&n.supports[t]);n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&!n.supports.flag,n.DOMReady=!1,n.readyCallback=function(){n.DOMReady=!0}}).then(function(){return e}).then(function(){var e;n.supports.everything||(n.readyCallback(),(e=n.source||{}).concatemoji?t(e.concatemoji):e.wpemoji&&e.twemoji&&(t(e.twemoji),t(e.wpemoji)))}))}((window,document),window._wpemojiSettings);
+</script>
+<style id="wp-emoji-styles-inline-css">
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+</style>
+<link rel="stylesheet" id="wp-block-library-css" href="http://web.archive.org/web/20251228032614cs_/https://lemire.me/blog/wp-includes/css/dist/block-library/style.min.css?ver=6.8.3" media="all"/>
+<style id="wp-block-library-theme-inline-css">
+.wp-block-audio :where(figcaption){color:#555;font-size:13px;text-align:center}.is-dark-theme .wp-block-audio :where(figcaption){color:#ffffffa6}.wp-block-audio{margin:0 0 1em}.wp-block-code{border:1px solid #ccc;border-radius:4px;font-family:Menlo,Consolas,monaco,monospace;padding:.8em 1em}.wp-block-embed :where(figcaption){color:#555;font-size:13px;text-align:center}.is-dark-theme .wp-block-embed :where(figcaption){color:#ffffffa6}.wp-block-embed{margin:0 0 1em}.blocks-gallery-caption{color:#555;font-size:13px;text-align:center}.is-dark-theme .blocks-gallery-caption{color:#ffffffa6}:root :where(.wp-block-image figcaption){color:#555;font-size:13px;text-align:center}.is-dark-theme :root :where(.wp-block-image figcaption){color:#ffffffa6}.wp-block-image{margin:0 0 1em}.wp-block-pullquote{border-bottom:4px solid;border-top:4px solid;color:currentColor;margin-bottom:1.75em}.wp-block-pullquote cite,.wp-block-pullquote footer,.wp-block-pullquote__citation{color:currentColor;font-size:.8125em;font-style:normal;text-transform:uppercase}.wp-block-quote{border-left:.25em solid;margin:0 0 1.75em;padding-left:1em}.wp-block-quote cite,.wp-block-quote footer{color:currentColor;font-size:.8125em;font-style:normal;position:relative}.wp-block-quote:where(.has-text-align-right){border-left:none;border-right:.25em solid;padding-left:0;padding-right:1em}.wp-block-quote:where(.has-text-align-center){border:none;padding-left:0}.wp-block-quote.is-large,.wp-block-quote.is-style-large,.wp-block-quote:where(.is-style-plain){border:none}.wp-block-search .wp-block-search__label{font-weight:700}.wp-block-search__button{border:1px solid #ccc;padding:.375em .625em}:where(.wp-block-group.has-background){padding:1.25em 2.375em}.wp-block-separator.has-css-opacity{opacity:.4}.wp-block-separator{border:none;border-bottom:2px solid;margin-left:auto;margin-right:auto}.wp-block-separator.has-alpha-channel-opacity{opacity:1}.wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}.wp-block-separator.has-background:not(.is-style-dots){border-bottom:none;height:1px}.wp-block-separator.has-background:not(.is-style-wide):not(.is-style-dots){height:2px}.wp-block-table{margin:0 0 1em}.wp-block-table td,.wp-block-table th{word-break:normal}.wp-block-table :where(figcaption){color:#555;font-size:13px;text-align:center}.is-dark-theme .wp-block-table :where(figcaption){color:#ffffffa6}.wp-block-video :where(figcaption){color:#555;font-size:13px;text-align:center}.is-dark-theme .wp-block-video :where(figcaption){color:#ffffffa6}.wp-block-video{margin:0 0 1em}:root :where(.wp-block-template-part.has-background){margin-bottom:0;margin-top:0;padding:1.25em 2.375em}
+</style>
+<style id="classic-theme-styles-inline-css">
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+</style>
+<style id="safe-svg-svg-icon-style-inline-css">
+.safe-svg-cover{text-align:center}.safe-svg-cover .safe-svg-inside{display:inline-block;max-width:100%}.safe-svg-cover svg{fill:currentColor;height:100%;max-height:100%;max-width:100%;width:100%}
+
+</style>
+<style id="global-styles-inline-css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #fff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--color--dark-gray: #111;--wp--preset--color--light-gray: #f1f1f1;--wp--preset--color--yellow: #f4ca16;--wp--preset--color--dark-brown: #352712;--wp--preset--color--medium-pink: #e53b51;--wp--preset--color--light-pink: #ffe5d1;--wp--preset--color--dark-purple: #2e2256;--wp--preset--color--purple: #674970;--wp--preset--color--blue-gray: #22313f;--wp--preset--color--bright-blue: #55c3dc;--wp--preset--color--light-blue: #e9f2f9;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--gradient--dark-gray-gradient-gradient: linear-gradient(90deg, rgba(17,17,17,1) 0%, rgba(42,42,42,1) 100%);--wp--preset--gradient--light-gray-gradient: linear-gradient(90deg, rgba(241,241,241,1) 0%, rgba(215,215,215,1) 100%);--wp--preset--gradient--white-gradient: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(230,230,230,1) 100%);--wp--preset--gradient--yellow-gradient: linear-gradient(90deg, rgba(244,202,22,1) 0%, rgba(205,168,10,1) 100%);--wp--preset--gradient--dark-brown-gradient: linear-gradient(90deg, rgba(53,39,18,1) 0%, rgba(91,67,31,1) 100%);--wp--preset--gradient--medium-pink-gradient: linear-gradient(90deg, rgba(229,59,81,1) 0%, rgba(209,28,51,1) 100%);--wp--preset--gradient--light-pink-gradient: linear-gradient(90deg, rgba(255,229,209,1) 0%, rgba(255,200,158,1) 100%);--wp--preset--gradient--dark-purple-gradient: linear-gradient(90deg, rgba(46,34,86,1) 0%, rgba(66,48,123,1) 100%);--wp--preset--gradient--purple-gradient: linear-gradient(90deg, rgba(103,73,112,1) 0%, rgba(131,93,143,1) 100%);--wp--preset--gradient--blue-gray-gradient: linear-gradient(90deg, rgba(34,49,63,1) 0%, rgba(52,75,96,1) 100%);--wp--preset--gradient--bright-blue-gradient: linear-gradient(90deg, rgba(85,195,220,1) 0%, rgba(43,180,211,1) 100%);--wp--preset--gradient--light-blue-gradient: linear-gradient(90deg, rgba(233,242,249,1) 0%, rgba(193,218,238,1) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}
+:root :where(.wp-block-pullquote){font-size: 1.5em;line-height: 1.6;}
+</style>
+<link rel="stylesheet" id="wcjp-frontend.css-css" href="http://web.archive.org/web/20251228032614cs_/https://lemire.me/blog/wp-content/plugins/custom-css-js-php/assets/css/wcjp-frontend.css?ver=6.8.3" media="all"/>
+<link rel="stylesheet" id="twentyfifteen-fonts-css" href="http://web.archive.org/web/20251228032614cs_/https://lemire.me/blog/wp-content/themes/twentyfifteen/assets/fonts/noto-sans-plus-noto-serif-plus-inconsolata.css?ver=20230328" media="all"/>
+<link rel="stylesheet" id="genericons-css" href="http://web.archive.org/web/20251228032614cs_/https://lemire.me/blog/wp-content/themes/twentyfifteen/genericons/genericons.css?ver=20201026" media="all"/>
+<link rel="stylesheet" id="twentyfifteen-style-css" href="http://web.archive.org/web/20251228032614cs_/https://lemire.me/blog/wp-content/themes/twentyfifteen/style.css?ver=20250415" media="all"/>
+<style id="twentyfifteen-style-inline-css">
+	/* Color Scheme */
+
+	/* Background Color */
+	body {
+		background-color: #e9f2f9;
+	}
+
+	/* Sidebar Background Color */
+	body:before,
+	.site-header {
+		background-color: #55c3dc;
+	}
+
+	/* Box Background Color */
+	.post-navigation,
+	.pagination,
+	.secondary,
+	.site-footer,
+	.hentry,
+	.page-header,
+	.page-content,
+	.comments-area,
+	.widecolumn {
+		background-color: #ffffff;
+	}
+
+	/* Box Background Color */
+	button,
+	input[type="button"],
+	input[type="reset"],
+	input[type="submit"],
+	.pagination .prev,
+	.pagination .next,
+	.widget_calendar tbody a,
+	.widget_calendar tbody a:hover,
+	.widget_calendar tbody a:focus,
+	.page-links a,
+	.page-links a:hover,
+	.page-links a:focus,
+	.sticky-post {
+		color: #ffffff;
+	}
+
+	/* Main Text Color */
+	button,
+	input[type="button"],
+	input[type="reset"],
+	input[type="submit"],
+	.pagination .prev,
+	.pagination .next,
+	.widget_calendar tbody a,
+	.page-links a,
+	.sticky-post {
+		background-color: #22313f;
+	}
+
+	/* Main Text Color */
+	body,
+	blockquote cite,
+	blockquote small,
+	a,
+	.dropdown-toggle:after,
+	.image-navigation a:hover,
+	.image-navigation a:focus,
+	.comment-navigation a:hover,
+	.comment-navigation a:focus,
+	.widget-title,
+	.entry-footer a:hover,
+	.entry-footer a:focus,
+	.comment-metadata a:hover,
+	.comment-metadata a:focus,
+	.pingback .edit-link a:hover,
+	.pingback .edit-link a:focus,
+	.comment-list .reply a:hover,
+	.comment-list .reply a:focus,
+	.site-info a:hover,
+	.site-info a:focus {
+		color: #22313f;
+	}
+
+	/* Main Text Color */
+	.entry-content a,
+	.entry-summary a,
+	.page-content a,
+	.comment-content a,
+	.pingback .comment-body > a,
+	.author-description a,
+	.taxonomy-description a,
+	.textwidget a,
+	.entry-footer a:hover,
+	.comment-metadata a:hover,
+	.pingback .edit-link a:hover,
+	.comment-list .reply a:hover,
+	.site-info a:hover {
+		border-color: #22313f;
+	}
+
+	/* Secondary Text Color */
+	button:hover,
+	button:focus,
+	input[type="button"]:hover,
+	input[type="button"]:focus,
+	input[type="reset"]:hover,
+	input[type="reset"]:focus,
+	input[type="submit"]:hover,
+	input[type="submit"]:focus,
+	.pagination .prev:hover,
+	.pagination .prev:focus,
+	.pagination .next:hover,
+	.pagination .next:focus,
+	.widget_calendar tbody a:hover,
+	.widget_calendar tbody a:focus,
+	.page-links a:hover,
+	.page-links a:focus {
+		background-color: rgba( 34, 49, 63, 0.7);
+	}
+
+	/* Secondary Text Color */
+	blockquote,
+	a:hover,
+	a:focus,
+	.main-navigation .menu-item-description,
+	.post-navigation .meta-nav,
+	.post-navigation a:hover .post-title,
+	.post-navigation a:focus .post-title,
+	.image-navigation,
+	.image-navigation a,
+	.comment-navigation,
+	.comment-navigation a,
+	.widget,
+	.author-heading,
+	.entry-footer,
+	.entry-footer a,
+	.taxonomy-description,
+	.page-links > .page-links-title,
+	.entry-caption,
+	.comment-author,
+	.comment-metadata,
+	.comment-metadata a,
+	.pingback .edit-link,
+	.pingback .edit-link a,
+	.post-password-form label,
+	.comment-form label,
+	.comment-notes,
+	.comment-awaiting-moderation,
+	.logged-in-as,
+	.form-allowed-tags,
+	.no-comments,
+	.site-info,
+	.site-info a,
+	.wp-caption-text,
+	.gallery-caption,
+	.comment-list .reply a,
+	.widecolumn label,
+	.widecolumn .mu_register label {
+		color: rgba( 34, 49, 63, 0.7);
+	}
+
+	/* Secondary Text Color */
+	blockquote,
+	.logged-in-as a:hover,
+	.comment-author a:hover {
+		border-color: rgba( 34, 49, 63, 0.7);
+	}
+
+	/* Border Color */
+	hr,
+	.dropdown-toggle:hover,
+	.dropdown-toggle:focus {
+		background-color: rgba( 34, 49, 63, 0.1);
+	}
+
+	/* Border Color */
+	pre,
+	abbr[title],
+	table,
+	th,
+	td,
+	input,
+	textarea,
+	.main-navigation ul,
+	.main-navigation li,
+	.post-navigation,
+	.post-navigation div + div,
+	.pagination,
+	.comment-navigation,
+	.widget li,
+	.widget_categories .children,
+	.widget_nav_menu .sub-menu,
+	.widget_pages .children,
+	.site-header,
+	.site-footer,
+	.hentry + .hentry,
+	.author-info,
+	.entry-content .page-links a,
+	.page-links > span,
+	.page-header,
+	.comments-area,
+	.comment-list + .comment-respond,
+	.comment-list article,
+	.comment-list .pingback,
+	.comment-list .trackback,
+	.comment-list .reply a,
+	.no-comments {
+		border-color: rgba( 34, 49, 63, 0.1);
+	}
+
+	/* Border Focus Color */
+	a:focus,
+	button:focus,
+	input:focus {
+		outline-color: rgba( 34, 49, 63, 0.3);
+	}
+
+	input:focus,
+	textarea:focus {
+		border-color: rgba( 34, 49, 63, 0.3);
+	}
+
+	/* Sidebar Link Color */
+	.secondary-toggle:before {
+		color: #ffffff;
+	}
+
+	.site-title a,
+	.site-description {
+		color: #ffffff;
+	}
+
+	/* Sidebar Text Color */
+	.site-title a:hover,
+	.site-title a:focus {
+		color: rgba( 255, 255, 255, 0.7);
+	}
+
+	/* Sidebar Border Color */
+	.secondary-toggle {
+		border-color: rgba( 255, 255, 255, 0.1);
+	}
+
+	/* Sidebar Border Focus Color */
+	.secondary-toggle:hover,
+	.secondary-toggle:focus {
+		border-color: rgba( 255, 255, 255, 0.3);
+	}
+
+	.site-title a {
+		outline-color: rgba( 255, 255, 255, 0.3);
+	}
+
+	/* Meta Background Color */
+	.entry-footer {
+		background-color: #f1f1f1;
+	}
+
+	@media screen and (min-width: 38.75em) {
+		/* Main Text Color */
+		.page-header {
+			border-color: #22313f;
+		}
+	}
+
+	@media screen and (min-width: 59.6875em) {
+		/* Make sure its transparent on desktop */
+		.site-header,
+		.secondary {
+			background-color: transparent;
+		}
+
+		/* Sidebar Background Color */
+		.widget button,
+		.widget input[type="button"],
+		.widget input[type="reset"],
+		.widget input[type="submit"],
+		.widget_calendar tbody a,
+		.widget_calendar tbody a:hover,
+		.widget_calendar tbody a:focus {
+			color: #55c3dc;
+		}
+
+		/* Sidebar Link Color */
+		.secondary a,
+		.dropdown-toggle:after,
+		.widget-title,
+		.widget blockquote cite,
+		.widget blockquote small {
+			color: #ffffff;
+		}
+
+		.widget button,
+		.widget input[type="button"],
+		.widget input[type="reset"],
+		.widget input[type="submit"],
+		.widget_calendar tbody a {
+			background-color: #ffffff;
+		}
+
+		.textwidget a {
+			border-color: #ffffff;
+		}
+
+		/* Sidebar Text Color */
+		.secondary a:hover,
+		.secondary a:focus,
+		.main-navigation .menu-item-description,
+		.widget,
+		.widget blockquote,
+		.widget .wp-caption-text,
+		.widget .gallery-caption {
+			color: rgba( 255, 255, 255, 0.7);
+		}
+
+		.widget button:hover,
+		.widget button:focus,
+		.widget input[type="button"]:hover,
+		.widget input[type="button"]:focus,
+		.widget input[type="reset"]:hover,
+		.widget input[type="reset"]:focus,
+		.widget input[type="submit"]:hover,
+		.widget input[type="submit"]:focus,
+		.widget_calendar tbody a:hover,
+		.widget_calendar tbody a:focus {
+			background-color: rgba( 255, 255, 255, 0.7);
+		}
+
+		.widget blockquote {
+			border-color: rgba( 255, 255, 255, 0.7);
+		}
+
+		/* Sidebar Border Color */
+		.main-navigation ul,
+		.main-navigation li,
+		.widget input,
+		.widget textarea,
+		.widget table,
+		.widget th,
+		.widget td,
+		.widget pre,
+		.widget li,
+		.widget_categories .children,
+		.widget_nav_menu .sub-menu,
+		.widget_pages .children,
+		.widget abbr[title] {
+			border-color: rgba( 255, 255, 255, 0.1);
+		}
+
+		.dropdown-toggle:hover,
+		.dropdown-toggle:focus,
+		.widget hr {
+			background-color: rgba( 255, 255, 255, 0.1);
+		}
+
+		.widget input:focus,
+		.widget textarea:focus {
+			border-color: rgba( 255, 255, 255, 0.3);
+		}
+
+		.sidebar a:focus,
+		.dropdown-toggle:focus {
+			outline-color: rgba( 255, 255, 255, 0.3);
+		}
+	}
+
+		/* Custom Header Background Color */
+		body:before,
+		.site-header {
+			background-color: #0a89cc;
+		}
+
+		@media screen and (min-width: 59.6875em) {
+			.site-header,
+			.secondary {
+				background-color: transparent;
+			}
+
+			.widget button,
+			.widget input[type="button"],
+			.widget input[type="reset"],
+			.widget input[type="submit"],
+			.widget_calendar tbody a,
+			.widget_calendar tbody a:hover,
+			.widget_calendar tbody a:focus {
+				color: #0a89cc;
+			}
+		}
+	
+</style>
+<link rel="stylesheet" id="twentyfifteen-block-style-css" href="http://web.archive.org/web/20251228032614cs_/https://lemire.me/blog/wp-content/themes/twentyfifteen/css/blocks.css?ver=20240715" media="all"/>
+<link rel="stylesheet" id="newsletter-css" href="http://web.archive.org/web/20251228032614cs_/https://lemire.me/blog/wp-content/plugins/newsletter/style.css?ver=9.0.7" media="all"/>
+<script src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js"></script>
+<script src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1" id="jquery-migrate-js"></script>
+<script id="twentyfifteen-script-js-extra">
+var screenReaderText = {"expand":"<span class=\"screen-reader-text\">expand child menu<\/span>","collapse":"<span class=\"screen-reader-text\">collapse child menu<\/span>"};
+</script>
+<script src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-content/themes/twentyfifteen/js/functions.js?ver=20250303" id="twentyfifteen-script-js" defer data-wp-strategy="defer"></script>
+<link rel="https://api.w.org/" href="https://lemire.me/blog/wp-json/"/><link rel="alternate" title="JSON" type="application/json" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/wp-json/wp/v2/posts/3048"/><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://lemire.me/blog/xmlrpc.php?rsd"/>
+<meta name="generator" content="WordPress 6.8.3"/>
+<link rel="canonical" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/"/>
+<link rel="shortlink" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/?p=3048"/>
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/wp-json/oembed/1.0/embed?url=https%3A%2F%2Flemire.me%2Fblog%2F2011%2F03%2F08%2Fbreaking-news-htmlcss-is-turing-complete%2F"/>
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/wp-json/oembed/1.0/embed?url=https%3A%2F%2Flemire.me%2Fblog%2F2011%2F03%2F08%2Fbreaking-news-htmlcss-is-turing-complete%2F&amp;format=xml"/>
+    <style type="text/css">
+        .wpcp {background: #f7f7f7; padding: 16px 20px; border-radius: 5px; line-height: 20px;}
+    </style>
+    <!-- start Simple Custom CSS and JS -->
+<style>
+table {  
+    color: #333; /* Lighten up font color */
+    font-family: Helvetica, Arial, sans-serif; /* Nicer font */
+    width: 95%; 
+    border-collapse: 
+    collapse; border-spacing: 0; 
+}
+
+td, th { border: 1px solid #CCC; height: 30px; } /* Make cells a bit taller */
+
+th {  
+    background: #F3F3F3; /* Light grey background */
+    font-weight: bold; /* Make sure they're bold */
+}
+
+td {  
+    background: #FAFAFA; /* Lighter grey background */
+    text-align: center; /* Center our text */
+}
+
+</style>
+<!-- end Simple Custom CSS and JS -->
+<meta property="og:title" name="og:title" content="Breaking news: HTML+CSS is Turing complete"/>
+<meta property="og:type" name="og:type" content="article"/>
+<meta property="og:image" name="og:image" content="http://web.archive.org/web/20251228032614im_/https://lemire.me/blog/wp-content/uploads/2015/10/profile2011_152.jpg"/>
+<meta property="og:url" name="og:url" content="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/"/>
+<meta property="og:description" name="og:description" content="A programming language is Turing complete if it equivalent to a Turing machine. In practice, it means that any algorithm can be implemented. Most programming languages are Turing complete, including SQL, ECMAScript, Java, C, and so on. HTML5 + CSS3 is also Turing complete because it can be used to program a Rule 110 automaton. … Continue reading Breaking news: HTML+CSS is Turing complete"/>
+<meta property="og:locale" name="og:locale" content="en_US"/>
+<meta property="og:site_name" name="og:site_name" content="Daniel Lemire's blog"/>
+<meta property="twitter:card" name="twitter:card" content="summary"/>
+<meta property="article:published_time" name="article:published_time" content="2011-03-08T18:50:47+00:00"/>
+<meta property="article:modified_time" name="article:modified_time" content="2023-03-02T18:58:10+00:00"/>
+<meta property="article:author" name="article:author" content="https://lemire.me/blog/author/lemire/"/>
+<!--Customizer CSS--> 
+<style type="text/css">
+.site-info>span {
+    display: none;
+}
+.site-info>a:last-child {
+    display: none;
+}
+</style> 
+<!--/Customizer CSS-->
+<style> .entry-footer .byline{ display:none !important; } </style><style> .entry-meta .byline{ display:none !important; } </style><style> .entry-footer .posted-on{ display:none !important; } </style><style> .entry-meta .entry-date{ display:none !important; } </style><style> .entry-meta .date{ display:none !important; } </style><style> .entry-footer .cat-links{ display:none !important; } </style><style> .entry-meta .cat-links{ display:none !important; } </style><style> .entry-meta .categories-links{ display:none !important; } </style><style> .entry-footer .comments-link{ display:none !important; } </style><style> .entry-meta .comments-link{ display:none !important; } </style><style> .entry-footer .edit-link{ display:none !important; } </style><style> .entry-meta .edit-link{ display:none !important; } </style><style>.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style><link rel="icon" href="http://web.archive.org/web/20251228032614im_/https://lemire.me/blog/wp-content/uploads/2015/10/profile2011_152-150x150.jpg" sizes="32x32"/>
+<link rel="icon" href="http://web.archive.org/web/20251228032614im_/https://lemire.me/blog/wp-content/uploads/2015/10/profile2011_152.jpg" sizes="192x192"/>
+<link rel="apple-touch-icon" href="http://web.archive.org/web/20251228032614im_/https://lemire.me/blog/wp-content/uploads/2015/10/profile2011_152.jpg"/>
+<meta name="msapplication-TileImage" content="https://lemire.me/blog/wp-content/uploads/2015/10/profile2011_152.jpg"/>
+</head>
+
+<body class="wp-singular post-template-default single single-post postid-3048 single-format-standard wp-embed-responsive wp-theme-twentyfifteen">
+<div id="page" class="hfeed site">
+	<a class="skip-link screen-reader-text" href="#content">
+		Skip to content	</a>
+
+	<div id="sidebar" class="sidebar">
+		<header id="masthead" class="site-header">
+			<div class="site-branding">
+										<p class="site-title"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/" rel="home">Daniel Lemire&#039;s blog</a></p>
+												<p class="site-description">Daniel Lemire is a software performance expert. He ranks among the top 2% of scientists globally (Stanford/Elsevier 2025) and is one of GitHub&#039;s top 1000 most followed developers. </p>
+										<button class="secondary-toggle">Menu and widgets</button>
+			</div><!-- .site-branding -->
+		</header><!-- .site-header -->
+
+			<div id="secondary" class="secondary">
+
+					<nav id="site-navigation" class="main-navigation">
+				<div class="menu-main-links-container"><ul id="menu-main-links" class="nav-menu"><li id="menu-item-13529" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-13529"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/en/">My home page</a></li>
+<li id="menu-item-13531" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-13531"><a href="http://web.archive.org/web/20251228032614/https://github.com/lemire">GitHub profile</a></li>
+</ul></div>			</nav><!-- .main-navigation -->
+		
+		
+					<div id="widget-area" class="widget-area" role="complementary">
+				<aside id="block-22" class="widget widget_block">Your business needs help? Get in touch, I offer <a href="http://web.archive.org/web/20251228032614/https://lemire.me/en/?v=1#consulting">private talks, training, consulting and I do sponsored open-source projects</a>.</aside><aside id="custom_html-5" class="widget_text widget widget_custom_html"><h2 class="widget-title">Support my work!</h2><div class="textwidget custom-html-widget">I do not accept any advertisement. However, you can <a href="http://web.archive.org/web/20251228032614/https://github.com/sponsors/lemire">you can sponsor my open-source work on GitHub</a>.
+
+<iframe src="http://web.archive.org/web/20251228032614if_/https://github.com/sponsors/lemire/button" title="Sponsor lemire" height="32" width="114" style="border: 0; border-radius: 6px; margin: 20px;"></iframe>
+
+
+</div></aside><aside id="block-20" class="widget widget_block">Daniel Lemire started this blog in 2004. It contains <span class="sbs-count-posts">2,337</span> posts and <span class="sbs-count-approved">16,104</span> approved comments. <br/><br/><a href="http://web.archive.org/web/20251228032614/https://refactoringenglish.com/tools/hn-popularity/">Daniel Lemire's blog ranks among the top 50 most popular blogs</a> on Hacker News, a leading tech news aggregation platform.
+</aside><aside id="block-5" class="widget widget_block">
+<div style="padding:20px" class="wp-block-tnp-minimal"><p>Join over 12,500 email subscribers:</p><div><div class="tnp tnp-subscription-minimal  "><form action="http://web.archive.org/web/20251228032614/https://lemire.me/blog/wp-admin/admin-ajax.php?action=tnp&amp;na=s" method="post" style="text-align: center"><input type="hidden" name="nr" value="minimal">
+<input type="hidden" name="nlang" value="">
+<input class="tnp-email" type="email" required name="ne" value="" placeholder="Email"><input class="tnp-submit" type="submit" value="Go!" style="">
+</form></div>
+</div></div>
+</aside><aside id="block-10" class="widget widget_block">You can follow this blog on <a href="http://web.archive.org/web/20251228032614/https://t.me/dlemire">telegram</a>. </aside><aside id="block-17" class="widget widget_block">Follow me on GitHub: <iframe src="http://web.archive.org/web/20251228032614if_/https://ghbtns.com/github-btn.html?user=lemire&amp;type=follow&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="225" height="30"></iframe></aside><aside id="block-18" class="widget widget_block">Follow me on X:
+<a href="http://web.archive.org/web/20251228032614/https://x.com/intent/follow?screen_name=lemire&amp;show_count=true" class="twitter-follow-button" data-show-count="true">Follow @lemire</a>
+<script async src="http://web.archive.org/web/20251228032614js_/https://platform.x.com/widgets.js" charset="utf-8"></script>
+</aside><aside id="search-3" class="widget widget_search"><form role="search" method="get" class="search-form" action="http://web.archive.org/web/20251228032614/https://lemire.me/blog/">
+				<label>
+					<span class="screen-reader-text">Search for:</span>
+					<input type="search" class="search-field" placeholder="Search …" value="" name="s"/>
+				</label>
+				<input type="submit" class="search-submit screen-reader-text" value="Search"/>
+			</form></aside>
+		<aside id="recent-posts-2" class="widget widget_recent_entries">
+		<h2 class="widget-title">Recent Posts</h2><nav aria-label="Recent Posts">
+		<ul>
+											<li>
+					<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/20/performance-trick-optimistic-vs-pessimistic-checks/">Performance trick : optimistic vs pessimistic checks</a>
+									</li>
+											<li>
+					<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/20/json-complete-data-format-and-programming-languages/">JSON-complete data formats and programming languages</a>
+									</li>
+											<li>
+					<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/15/multiplying-the-shuffle-speed-in-go-with-batched-shuffling/">Multiplying the Shuffle Speed in Go with Batched Shuffling</a>
+									</li>
+											<li>
+					<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/05/why-speed-matters/">Why speed matters</a>
+									</li>
+											<li>
+					<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/04/we-see-something-that-works-and-then-we-understand-it/">We see something that works, and then we understand it</a>
+									</li>
+					</ul>
+
+		</nav></aside><aside id="recent-comments-3" class="widget widget_recent_comments"><h2 class="widget-title">Recent Comments</h2><nav aria-label="Recent Comments"><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/en/" class="url" rel="ugc">Daniel Lemire</a></span> on <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/20/performance-trick-optimistic-vs-pessimistic-checks/#comment-676400">Performance trick : optimistic vs pessimistic checks</a></li><li class="recentcomments"><span class="comment-author-link">Robert Wishlaw</span> on <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/20/performance-trick-optimistic-vs-pessimistic-checks/#comment-676399">Performance trick : optimistic vs pessimistic checks</a></li><li class="recentcomments"><span class="comment-author-link"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/en/" class="url" rel="ugc">Daniel Lemire</a></span> on <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/20/performance-trick-optimistic-vs-pessimistic-checks/#comment-676396">Performance trick : optimistic vs pessimistic checks</a></li><li class="recentcomments"><span class="comment-author-link">KWillets</span> on <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/20/performance-trick-optimistic-vs-pessimistic-checks/#comment-676392">Performance trick : optimistic vs pessimistic checks</a></li><li class="recentcomments"><span class="comment-author-link"><a href="http://web.archive.org/web/20251228032614/https://purplesyringa.moe/" class="url" rel="ugc external nofollow">purplesyringa</a></span> on <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2025/12/20/performance-trick-optimistic-vs-pessimistic-checks/#comment-676386">Performance trick : optimistic vs pessimistic checks</a></li></ul></nav></aside><aside id="pages-3" class="widget widget_pages"><h2 class="widget-title">Pages</h2><nav aria-label="Pages">
+			<ul>
+				<li class="page_item page-item-14034"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/a-short-history-of-technology/">A short history of technology</a></li>
+<li class="page_item page-item-345"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/about-me/">About me</a></li>
+<li class="page_item page-item-4194"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/book-recommendations/">Book recommendations</a></li>
+<li class="page_item page-item-18957"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/cognitive-biases/">Cognitive biases</a></li>
+<li class="page_item page-item-18798"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/interviews-and-talks/">Interviews and talks</a></li>
+<li class="page_item page-item-12110"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/my-bets/">My bets</a></li>
+<li class="page_item page-item-14029"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/my-favorite-articles/">My favorite articles</a></li>
+<li class="page_item page-item-19051"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/favorite-quotes/">My favorite quotes</a></li>
+<li class="page_item page-item-18456"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/my-sayings/">My rules</a></li>
+<li class="page_item page-item-20392"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/newsletter/">Newsletter</a></li>
+<li class="page_item page-item-8035"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/predictions/">Predictions</a></li>
+<li class="page_item page-item-20144"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/privacy-policy/">Privacy Policy</a></li>
+<li class="page_item page-item-18821"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/recommended-video-games/">Recommended video games</a></li>
+<li class="page_item page-item-987"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/terms-of-use/">Terms of use</a></li>
+<li class="page_item page-item-725"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/rules-to-write-a-good-research-paper/">Write  good papers</a></li>
+			</ul>
+
+			</nav></aside><aside id="archives-2" class="widget widget_archive"><h2 class="widget-title">Archives</h2>		<label class="screen-reader-text" for="archives-dropdown-2">Archives</label>
+		<select id="archives-dropdown-2" name="archive-dropdown">
+			
+			<option value="">Select Month</option>
+				<option value="https://lemire.me/blog/2025/12/"> December 2025 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2025/11/"> November 2025 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2025/10/"> October 2025 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2025/09/"> September 2025 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2025/08/"> August 2025 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2025/07/"> July 2025 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2025/06/"> June 2025 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2025/05/"> May 2025 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2025/04/"> April 2025 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2025/03/"> March 2025 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2025/02/"> February 2025 &nbsp;(2)</option>
+	<option value="https://lemire.me/blog/2025/01/"> January 2025 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2024/12/"> December 2024 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2024/11/"> November 2024 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2024/10/"> October 2024 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2024/09/"> September 2024 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2024/08/"> August 2024 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2024/07/"> July 2024 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2024/06/"> June 2024 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2024/05/"> May 2024 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2024/04/"> April 2024 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2024/03/"> March 2024 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2024/02/"> February 2024 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2024/01/"> January 2024 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2023/12/"> December 2023 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2023/11/"> November 2023 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2023/10/"> October 2023 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2023/09/"> September 2023 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2023/08/"> August 2023 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2023/07/"> July 2023 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2023/06/"> June 2023 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2023/05/"> May 2023 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2023/04/"> April 2023 &nbsp;(15)</option>
+	<option value="https://lemire.me/blog/2023/03/"> March 2023 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2023/02/"> February 2023 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2023/01/"> January 2023 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2022/12/"> December 2022 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2022/11/"> November 2022 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2022/10/"> October 2022 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2022/09/"> September 2022 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2022/08/"> August 2022 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2022/07/"> July 2022 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2022/06/"> June 2022 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2022/05/"> May 2022 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2022/04/"> April 2022 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2022/03/"> March 2022 &nbsp;(2)</option>
+	<option value="https://lemire.me/blog/2022/02/"> February 2022 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2022/01/"> January 2022 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2021/12/"> December 2021 &nbsp;(2)</option>
+	<option value="https://lemire.me/blog/2021/11/"> November 2021 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2021/10/"> October 2021 &nbsp;(12)</option>
+	<option value="https://lemire.me/blog/2021/09/"> September 2021 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2021/08/"> August 2021 &nbsp;(2)</option>
+	<option value="https://lemire.me/blog/2021/07/"> July 2021 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2021/06/"> June 2021 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2021/05/"> May 2021 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2021/04/"> April 2021 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2021/03/"> March 2021 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2021/02/"> February 2021 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2021/01/"> January 2021 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2020/12/"> December 2020 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2020/11/"> November 2020 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2020/10/"> October 2020 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2020/09/"> September 2020 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2020/08/"> August 2020 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2020/07/"> July 2020 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2020/06/"> June 2020 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2020/05/"> May 2020 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2020/04/"> April 2020 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2020/03/"> March 2020 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2020/02/"> February 2020 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2020/01/"> January 2020 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2019/12/"> December 2019 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2019/11/"> November 2019 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2019/10/"> October 2019 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2019/09/"> September 2019 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2019/08/"> August 2019 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2019/07/"> July 2019 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2019/06/"> June 2019 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2019/05/"> May 2019 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2019/04/"> April 2019 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2019/03/"> March 2019 &nbsp;(15)</option>
+	<option value="https://lemire.me/blog/2019/02/"> February 2019 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2019/01/"> January 2019 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2018/12/"> December 2018 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2018/11/"> November 2018 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2018/10/"> October 2018 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2018/09/"> September 2018 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2018/08/"> August 2018 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2018/07/"> July 2018 &nbsp;(14)</option>
+	<option value="https://lemire.me/blog/2018/06/"> June 2018 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2018/05/"> May 2018 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2018/04/"> April 2018 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2018/03/"> March 2018 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2018/02/"> February 2018 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2018/01/"> January 2018 &nbsp;(15)</option>
+	<option value="https://lemire.me/blog/2017/12/"> December 2017 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2017/11/"> November 2017 &nbsp;(16)</option>
+	<option value="https://lemire.me/blog/2017/10/"> October 2017 &nbsp;(13)</option>
+	<option value="https://lemire.me/blog/2017/09/"> September 2017 &nbsp;(20)</option>
+	<option value="https://lemire.me/blog/2017/08/"> August 2017 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2017/07/"> July 2017 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2017/06/"> June 2017 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2017/05/"> May 2017 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2017/04/"> April 2017 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2017/03/"> March 2017 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2017/02/"> February 2017 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2017/01/"> January 2017 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2016/12/"> December 2016 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2016/11/"> November 2016 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2016/10/"> October 2016 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2016/09/"> September 2016 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2016/08/"> August 2016 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2016/07/"> July 2016 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2016/06/"> June 2016 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2016/05/"> May 2016 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2016/04/"> April 2016 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2016/03/"> March 2016 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2016/02/"> February 2016 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2016/01/"> January 2016 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2015/12/"> December 2015 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2015/11/"> November 2015 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2015/10/"> October 2015 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2015/09/"> September 2015 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2015/08/"> August 2015 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2015/07/"> July 2015 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2015/06/"> June 2015 &nbsp;(2)</option>
+	<option value="https://lemire.me/blog/2015/05/"> May 2015 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2015/04/"> April 2015 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2015/03/"> March 2015 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2015/02/"> February 2015 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2015/01/"> January 2015 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2014/12/"> December 2014 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2014/11/"> November 2014 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2014/10/"> October 2014 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2014/09/"> September 2014 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2014/08/"> August 2014 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2014/07/"> July 2014 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2014/06/"> June 2014 &nbsp;(2)</option>
+	<option value="https://lemire.me/blog/2014/05/"> May 2014 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2014/04/"> April 2014 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2014/03/"> March 2014 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2014/02/"> February 2014 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2014/01/"> January 2014 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2013/12/"> December 2013 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2013/11/"> November 2013 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2013/10/"> October 2013 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2013/09/"> September 2013 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2013/08/"> August 2013 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2013/07/"> July 2013 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2013/06/"> June 2013 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2013/05/"> May 2013 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2013/04/"> April 2013 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2013/03/"> March 2013 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2013/02/"> February 2013 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2013/01/"> January 2013 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2012/12/"> December 2012 &nbsp;(2)</option>
+	<option value="https://lemire.me/blog/2012/11/"> November 2012 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2012/10/"> October 2012 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2012/09/"> September 2012 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2012/08/"> August 2012 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2012/07/"> July 2012 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2012/06/"> June 2012 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2012/05/"> May 2012 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2012/04/"> April 2012 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2012/03/"> March 2012 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2012/02/"> February 2012 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2012/01/"> January 2012 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2011/12/"> December 2011 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2011/11/"> November 2011 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2011/10/"> October 2011 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2011/09/"> September 2011 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2011/08/"> August 2011 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2011/07/"> July 2011 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2011/06/"> June 2011 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2011/05/"> May 2011 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2011/04/"> April 2011 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2011/03/"> March 2011 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2011/02/"> February 2011 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2011/01/"> January 2011 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2010/12/"> December 2010 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2010/11/"> November 2010 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2010/10/"> October 2010 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2010/09/"> September 2010 &nbsp;(3)</option>
+	<option value="https://lemire.me/blog/2010/08/"> August 2010 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2010/07/"> July 2010 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2010/06/"> June 2010 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2010/05/"> May 2010 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2010/04/"> April 2010 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2010/03/"> March 2010 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2010/02/"> February 2010 &nbsp;(5)</option>
+	<option value="https://lemire.me/blog/2010/01/"> January 2010 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2009/12/"> December 2009 &nbsp;(4)</option>
+	<option value="https://lemire.me/blog/2009/11/"> November 2009 &nbsp;(6)</option>
+	<option value="https://lemire.me/blog/2009/10/"> October 2009 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2009/09/"> September 2009 &nbsp;(8)</option>
+	<option value="https://lemire.me/blog/2009/08/"> August 2009 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2009/07/"> July 2009 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2009/06/"> June 2009 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2009/05/"> May 2009 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2009/04/"> April 2009 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2009/03/"> March 2009 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2009/02/"> February 2009 &nbsp;(13)</option>
+	<option value="https://lemire.me/blog/2009/01/"> January 2009 &nbsp;(14)</option>
+	<option value="https://lemire.me/blog/2008/12/"> December 2008 &nbsp;(16)</option>
+	<option value="https://lemire.me/blog/2008/11/"> November 2008 &nbsp;(25)</option>
+	<option value="https://lemire.me/blog/2008/10/"> October 2008 &nbsp;(13)</option>
+	<option value="https://lemire.me/blog/2008/09/"> September 2008 &nbsp;(15)</option>
+	<option value="https://lemire.me/blog/2008/08/"> August 2008 &nbsp;(14)</option>
+	<option value="https://lemire.me/blog/2008/07/"> July 2008 &nbsp;(15)</option>
+	<option value="https://lemire.me/blog/2008/06/"> June 2008 &nbsp;(14)</option>
+	<option value="https://lemire.me/blog/2008/05/"> May 2008 &nbsp;(15)</option>
+	<option value="https://lemire.me/blog/2008/04/"> April 2008 &nbsp;(20)</option>
+	<option value="https://lemire.me/blog/2008/03/"> March 2008 &nbsp;(17)</option>
+	<option value="https://lemire.me/blog/2008/02/"> February 2008 &nbsp;(12)</option>
+	<option value="https://lemire.me/blog/2008/01/"> January 2008 &nbsp;(19)</option>
+	<option value="https://lemire.me/blog/2007/12/"> December 2007 &nbsp;(20)</option>
+	<option value="https://lemire.me/blog/2007/11/"> November 2007 &nbsp;(24)</option>
+	<option value="https://lemire.me/blog/2007/10/"> October 2007 &nbsp;(19)</option>
+	<option value="https://lemire.me/blog/2007/09/"> September 2007 &nbsp;(13)</option>
+	<option value="https://lemire.me/blog/2007/08/"> August 2007 &nbsp;(23)</option>
+	<option value="https://lemire.me/blog/2007/07/"> July 2007 &nbsp;(18)</option>
+	<option value="https://lemire.me/blog/2007/06/"> June 2007 &nbsp;(15)</option>
+	<option value="https://lemire.me/blog/2007/05/"> May 2007 &nbsp;(19)</option>
+	<option value="https://lemire.me/blog/2007/04/"> April 2007 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2007/03/"> March 2007 &nbsp;(7)</option>
+	<option value="https://lemire.me/blog/2007/02/"> February 2007 &nbsp;(27)</option>
+	<option value="https://lemire.me/blog/2007/01/"> January 2007 &nbsp;(20)</option>
+	<option value="https://lemire.me/blog/2006/12/"> December 2006 &nbsp;(19)</option>
+	<option value="https://lemire.me/blog/2006/11/"> November 2006 &nbsp;(14)</option>
+	<option value="https://lemire.me/blog/2006/10/"> October 2006 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2006/09/"> September 2006 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2006/08/"> August 2006 &nbsp;(25)</option>
+	<option value="https://lemire.me/blog/2006/07/"> July 2006 &nbsp;(10)</option>
+	<option value="https://lemire.me/blog/2006/06/"> June 2006 &nbsp;(18)</option>
+	<option value="https://lemire.me/blog/2006/05/"> May 2006 &nbsp;(27)</option>
+	<option value="https://lemire.me/blog/2006/04/"> April 2006 &nbsp;(22)</option>
+	<option value="https://lemire.me/blog/2006/03/"> March 2006 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2006/02/"> February 2006 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2006/01/"> January 2006 &nbsp;(38)</option>
+	<option value="https://lemire.me/blog/2005/12/"> December 2005 &nbsp;(23)</option>
+	<option value="https://lemire.me/blog/2005/11/"> November 2005 &nbsp;(23)</option>
+	<option value="https://lemire.me/blog/2005/10/"> October 2005 &nbsp;(18)</option>
+	<option value="https://lemire.me/blog/2005/09/"> September 2005 &nbsp;(25)</option>
+	<option value="https://lemire.me/blog/2005/08/"> August 2005 &nbsp;(39)</option>
+	<option value="https://lemire.me/blog/2005/07/"> July 2005 &nbsp;(17)</option>
+	<option value="https://lemire.me/blog/2005/06/"> June 2005 &nbsp;(16)</option>
+	<option value="https://lemire.me/blog/2005/05/"> May 2005 &nbsp;(9)</option>
+	<option value="https://lemire.me/blog/2005/04/"> April 2005 &nbsp;(13)</option>
+	<option value="https://lemire.me/blog/2005/03/"> March 2005 &nbsp;(30)</option>
+	<option value="https://lemire.me/blog/2005/02/"> February 2005 &nbsp;(20)</option>
+	<option value="https://lemire.me/blog/2005/01/"> January 2005 &nbsp;(29)</option>
+	<option value="https://lemire.me/blog/2004/12/"> December 2004 &nbsp;(11)</option>
+	<option value="https://lemire.me/blog/2004/11/"> November 2004 &nbsp;(18)</option>
+	<option value="https://lemire.me/blog/2004/10/"> October 2004 &nbsp;(14)</option>
+	<option value="https://lemire.me/blog/2004/09/"> September 2004 &nbsp;(17)</option>
+	<option value="https://lemire.me/blog/2004/08/"> August 2004 &nbsp;(13)</option>
+	<option value="https://lemire.me/blog/2004/07/"> July 2004 &nbsp;(16)</option>
+	<option value="https://lemire.me/blog/2004/06/"> June 2004 &nbsp;(16)</option>
+	<option value="https://lemire.me/blog/2004/05/"> May 2004 &nbsp;(12)</option>
+
+		</select>
+
+			<script>
+(function() {
+	var dropdown = document.getElementById( "archives-dropdown-2" );
+	function onSelectChange() {
+		if ( dropdown.options[ dropdown.selectedIndex ].value !== '' ) {
+			document.location.href = this.options[ this.selectedIndex ].value;
+		}
+	}
+	dropdown.onchange = onSelectChange;
+})();
+</script>
+</aside><aside id="meta-3" class="widget widget_meta"><h2 class="widget-title">Boring stuff</h2><nav aria-label="Boring stuff">
+		<ul>
+						<li><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/wp-login.php">Log in</a></li>
+			<li><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/feed/">Entries feed</a></li>
+			<li><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/comments/feed/">Comments feed</a></li>
+
+			<li><a href="http://web.archive.org/web/20251228032614/https://wordpress.org/">WordPress.org</a></li>
+		</ul>
+
+		</nav></aside>			</div><!-- .widget-area -->
+		
+	</div><!-- .secondary -->
+
+	</div><!-- .sidebar -->
+
+	<div id="content" class="site-content">
+
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main">
+
+		
+<article id="post-3048" class="post-3048 post type-post status-publish format-standard hentry category-84">
+	
+	<header class="entry-header">
+		<h1 class="entry-title">Breaking news: HTML+CSS is Turing complete</h1>	</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		<p>A programming language is <a href="http://web.archive.org/web/20251228032614/https://en.wikipedia.org/wiki/Turing_complete">Turing complete</a> if it equivalent to a Turing machine. In practice, it means that any algorithm can be implemented. Most programming languages are Turing complete, including <a href="http://web.archive.org/web/20251228032614/https://en.wikipedia.org/wiki/SQL/PSM">SQL</a>, ECMAScript, Java, C, and so on.</p>
+<p><a href="http://web.archive.org/web/20251228032614/http://lambda-the-ultimate.org/node/4222">HTML5 + CSS3</a> is also Turing complete because it can be used to program a <a href="http://web.archive.org/web/20251228032614/https://en.wikipedia.org/wiki/Rule_110">Rule 110 automaton</a>.</p>
+<p><strong>Source</strong>: Thanks to <a href="http://web.archive.org/web/20251228032614/http://jakoblog.de/about/">Jakob VoÃŸ</a> for the pointer.</p>
+<div class="wpcp"><p style="font-size:0.7em; width:40%; margin-left:auto;">Daniel Lemire, "Breaking news: HTML+CSS is Turing complete," in <em>Daniel Lemire&#039;s blog</em>, March 8, 2011, <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/">https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/</a>.
+<br/>
+<a href="#" onclick="event.preventDefault(); window.BibtexSystem.open(this);" style="font-size:0.8em; text-decoration:underline; cursor:pointer;" data-author="Daniel Lemire" data-title="Breaking news: HTML+CSS is Turing complete" data-year="March 8, 2011" data-full-link="<a href=&quot;https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/&quot;>https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/</a>"> [BibTeX]
+</a>
+</p>
+<script>
+(function() {
+    if (window.BibtexSystem) return;
+
+    window.BibtexSystem = {
+        getCurrentAccessedDate: function() {
+            // ... (Helper function remains the same) ...
+            const d = new Date();
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"];
+            return `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+        },
+
+        open: function(el) {
+            let modal = document.getElementById('global-bibtex-modal');
+            // --- Modal Setup (skipped for brevity) ---
+            if (!modal) {
+                // ... (Full modal creation and initialization code here) ...
+                // Note: I am including the full setup below for copy/paste integrity.
+                modal = document.createElement('dialog');
+                modal.id = 'global-bibtex-modal';
+                modal.style.cssText = "padding:0; border:none; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 500px; width: 90%;";
+                
+                modal.innerHTML = `
+                    <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="font-family:sans-serif;">BibTeX Citation</strong>
+                        <button onclick="this.closest('dialog').close()" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">×</button>
+                    </div>
+                    <div style="padding:15px; background:#f8f9fa;">
+                        <pre id="bibtex-target" style="margin:0; white-space:pre-wrap; font-family:monospace;  overflow-x:auto;"></pre>
+                    </div>
+                    <div style="padding:15px; text-align:right;">
+                        <button id="bibtex-copy-btn" style="padding:6px 12px; cursor:pointer;">Copy</button>
+                    </div>
+                `;
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) modal.close();
+                });
+
+                modal.querySelector('#bibtex-copy-btn').addEventListener('click', function() {
+                    const text = modal.querySelector('#bibtex-target').textContent;
+                    navigator.clipboard.writeText(text).then(() => {
+                        const origText = this.innerText;
+                        this.innerText = "Copied!";
+                        setTimeout(() => this.innerText = origText, 1500);
+                    });
+                });
+
+                document.body.appendChild(modal);
+                
+                const style = document.createElement('style');
+                style.innerHTML = `dialog::backdrop { background: rgba(0, 0, 0, 0.5); }`;
+                document.head.appendChild(style);
+            }
+            
+            // 1. Extract the URL
+            const fullLinkHtml = el.dataset.fullLink; 
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = fullLinkHtml; 
+            const linkElement = tempDiv.querySelector('a');
+            const rawUrl = linkElement ? linkElement.href : ''; 
+            
+            // 2. Compute the current access date
+            const accessedDate = this.getCurrentAccessedDate(); 
+
+            // 3. --- NEW LOGIC: Extract ONLY the year (YYYY) ---
+            // Gets the full date string, e.g., "November 23, 2025"
+            const fullDateString = el.dataset.year; 
+            // Use regex to find the four-digit year at the end of the string
+            const match = fullDateString.match(/(\d{4})$/);
+            const publicationYear = match ? match[0] : '????'; // e.g., '2025'
+            
+            // 4. Generate BibTeX Data with the corrected year
+            const safeTitle = el.dataset.title.replace(/[^a-zA-Z0-9]/g, '').substring(0, 15);
+            // Use the clean year for the BibKey
+            const bibKey = (publicationYear + safeTitle); 
+
+            const content = `@misc{${bibKey},
+  author = {${el.dataset.author}},
+  title  = {${el.dataset.title}},
+  year   = {${publicationYear}}, 
+  url    = {${rawUrl}},
+  note   = {Accessed: ${accessedDate}} }`;
+            
+            // 5. Show Modal
+            document.getElementById('bibtex-target').textContent = content;
+            modal.showModal();
+        }
+    };
+})();
+</script></div>	</div><!-- .entry-content -->
+
+	
+<div class="author-info">
+	<h2 class="author-heading">Published by</h2>
+	<div class="author-avatar">
+		<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/a0c6c34cf4a45ff5083d5ea541e7f27c5e4457ac393889e077af10688f6b3831?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/a0c6c34cf4a45ff5083d5ea541e7f27c5e4457ac393889e077af10688f6b3831?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" decoding="async"/>	</div><!-- .author-avatar -->
+
+	<div class="author-description">
+		<h3 class="author-title">Daniel Lemire</h3>
+
+		<p class="author-bio">
+			A computer science professor at the University of Quebec (TELUQ).			<a class="author-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/author/lemire/" rel="author">
+				View all posts by Daniel Lemire			</a>
+		</p><!-- .author-bio -->
+
+	</div><!-- .author-description -->
+</div><!-- .author-info -->
+
+	<footer class="entry-footer">
+		<span class="posted-on"><span class="screen-reader-text">Posted on </span><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/" rel="bookmark"><time class="entry-date published" datetime="2011-03-08T18:50:47+00:00">March 8, 2011</time><time class="updated" datetime="2023-03-02T18:58:10+00:00">March 2, 2023</time></a></span><span class="byline"><span class="screen-reader-text">Author </span><span class="author vcard"><a class="url fn n" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/author/lemire/">Daniel Lemire</a></span></span><span class="cat-links"><span class="screen-reader-text">Categories </span><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/category/84/" rel="category tag"></a></span>			</footer><!-- .entry-footer -->
+
+</article><!-- #post-3048 -->
+
+<div id="comments" class="comments-area">
+
+			<h2 class="comments-title">
+			31 thoughts on &ldquo;Breaking news: HTML+CSS is Turing complete&rdquo;		</h2>
+
+		
+		<ol class="comment-list">
+					<li id="comment-54251" class="comment even thread-even depth-1">
+			<article id="div-comment-54251" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/3e2676c052a790135503a1029aa0daedc92022d5c737bca9baf1661b21dcaa13?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/3e2676c052a790135503a1029aa0daedc92022d5c737bca9baf1661b21dcaa13?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/http://www.hugedomains.com/domain_profile.cfm?d=leduotang&amp;e=com" class="url" rel="ugc external nofollow">Sylvain HallÃ©</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54251"><time datetime="2011-03-08T19:10:58+00:00">March 8, 2011 at 7:10 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>&#8220;Does it rely on specific features of CSS3 and HTML5? Were previous versions of HTML+CSS also Turing complete?&#8221;</p>
+<p>My guess: the CSS in the example uses the -nth-of-type(ax+b) pseudo class, which applies to every (ax+b) child, where a and b are constants and by taking x=0, 1, &#8230; So the CSS can count arbitrary numbers and even perform elementary arithmetic.</p>
+<p>This pseudo-class is new to CSS3, see:<br/>
+<a href="http://web.archive.org/web/20251228032614/http://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo" rel="nofollow ugc">http://www.w3.org/TR/css3-selectors/#nth-of-type-pseudo</a></p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54251#respond" data-commentid="54251" data-postid="3048" data-belowelement="div-comment-54251" data-respondelement="respond" data-replyto="Reply to Sylvain HallÃ©" aria-label="Reply to Sylvain HallÃ©">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54258" class="comment odd alt thread-odd thread-alt depth-1 parent">
+			<article id="div-comment-54258" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/caa2f21c4f0ec07926e812648900da7e24221cc7671c0ce06867ec55f807e35f?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/caa2f21c4f0ec07926e812648900da7e24221cc7671c0ce06867ec55f807e35f?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/https://mobile.twitter.com/siah" class="url" rel="ugc external nofollow">Siah</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54258"><time datetime="2011-03-09T01:23:19+00:00">March 9, 2011 at 1:23 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Is SQL Turing complete? I doubt it.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54258#respond" data-commentid="54258" data-postid="3048" data-belowelement="div-comment-54258" data-respondelement="respond" data-replyto="Reply to Siah" aria-label="Reply to Siah">Reply</a></div>			</article><!-- .comment-body -->
+		<ol class="children">
+		<li id="comment-242694" class="comment even depth-2 parent">
+			<article id="div-comment-242694" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/31411a78c547a6eb3c4ea891af74f8daff0df485afc54c740997d211002662a1?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/31411a78c547a6eb3c4ea891af74f8daff0df485afc54c740997d211002662a1?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">balping</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-242694"><time datetime="2016-05-29T21:25:35+00:00">May 29, 2016 at 9:25 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Yes, it is. You can have variables, you have if-else structure, you can define loops, even functions and methods. What else would you need?</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=242694#respond" data-commentid="242694" data-postid="3048" data-belowelement="div-comment-242694" data-respondelement="respond" data-replyto="Reply to balping" aria-label="Reply to balping">Reply</a></div>			</article><!-- .comment-body -->
+		<ol class="children">
+		<li id="comment-262605" class="comment odd alt depth-3 parent">
+			<article id="div-comment-262605" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/5488c277163f2a5ef0fd52e87be1fd8356b049d63d81c1ca41a1e8437443734d?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/5488c277163f2a5ef0fd52e87be1fd8356b049d63d81c1ca41a1e8437443734d?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Praveen Kumar</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-262605"><time datetime="2016-12-16T06:11:24+00:00">December 16, 2016 at 6:11 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>It is not purely SQL but it is PL/SQL or T-sql which has all the features you mentioned. So, SQL is not Turing complete but pl/SQL and T-sql are.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=262605#respond" data-commentid="262605" data-postid="3048" data-belowelement="div-comment-262605" data-respondelement="respond" data-replyto="Reply to Praveen Kumar" aria-label="Reply to Praveen Kumar">Reply</a></div>			</article><!-- .comment-body -->
+		<ol class="children">
+		<li id="comment-263044" class="comment byuser comment-author-lemire bypostauthor even depth-4">
+			<article id="div-comment-263044" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/a0c6c34cf4a45ff5083d5ea541e7f27c5e4457ac393889e077af10688f6b3831?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/a0c6c34cf4a45ff5083d5ea541e7f27c5e4457ac393889e077af10688f6b3831?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/en/" class="url" rel="ugc">Daniel Lemire</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-263044"><time datetime="2016-12-19T20:33:31+00:00">December 19, 2016 at 8:33 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>The SQL standard itself is Turing complete.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=263044#respond" data-commentid="263044" data-postid="3048" data-belowelement="div-comment-263044" data-respondelement="respond" data-replyto="Reply to Daniel Lemire" aria-label="Reply to Daniel Lemire">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-285097" class="comment odd alt depth-4">
+			<article id="div-comment-285097" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/291e1300791d8e0fec3e335f37a9a6295ea24a8d7b25d71dc32ac3b0a24211ba?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/291e1300791d8e0fec3e335f37a9a6295ea24a8d7b25d71dc32ac3b0a24211ba?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Bert</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-285097"><time datetime="2017-08-28T12:54:55+00:00">August 28, 2017 at 12:54 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Just what I was thinking.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=285097#respond" data-commentid="285097" data-postid="3048" data-belowelement="div-comment-285097" data-respondelement="respond" data-replyto="Reply to Bert" aria-label="Reply to Bert">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-649607" class="comment even depth-4">
+			<article id="div-comment-649607" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/0414b87678b60b612aebea606dfcefebe5011f9fe52e0ce15e456d4b3dcbca04?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/0414b87678b60b612aebea606dfcefebe5011f9fe52e0ce15e456d4b3dcbca04?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Mayuresh Kathe</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-649607"><time datetime="2023-03-03T18:04:03+00:00">March 3, 2023 at 6:04 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Yes, and I also remember PL/SQL and even T-SQL not supporting recursion, which isn&#8217;t such a big hindrance because it can be provided for by implementing a Y-combinator.</p>
+<p>I have a long-term goal of implementing a mini/micro-Kanren using SQL-PL (under IBM DB2) to perform deductive reasoning over records without incurring the performance penalty imposed by moving data out (and back into) of the database to be reasoned with using something like Datalog (or even Prolog).</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=649607#respond" data-commentid="649607" data-postid="3048" data-belowelement="div-comment-649607" data-respondelement="respond" data-replyto="Reply to Mayuresh Kathe" aria-label="Reply to Mayuresh Kathe">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+		<li id="comment-287303" class="comment odd alt depth-2">
+			<article id="div-comment-287303" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/7cf4c1b3fb56684f78a6b773212f23ec8b92e404c38c72d5def6ded17cc071a8?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/7cf4c1b3fb56684f78a6b773212f23ec8b92e404c38c72d5def6ded17cc071a8?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">sameer</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-287303"><time datetime="2017-09-27T19:20:07+00:00">September 27, 2017 at 7:20 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>It is not. sql depends on axioms of relational algebra  and not turing axioms, in order to be correct.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=287303#respond" data-commentid="287303" data-postid="3048" data-belowelement="div-comment-287303" data-respondelement="respond" data-replyto="Reply to sameer" aria-label="Reply to sameer">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-412897" class="comment even depth-2">
+			<article id="div-comment-412897" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/fd1c893436e81dbab29a2b50ba4ec47e8ca42f2aa45f4ac84818f64d4b5f2e88?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/fd1c893436e81dbab29a2b50ba4ec47e8ca42f2aa45f4ac84818f64d4b5f2e88?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Negarrak</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-412897"><time datetime="2019-06-21T21:44:47+00:00">June 21, 2019 at 9:44 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>if you can put &#8220;if&#8221; statements and &#8220;goto&#8221;, yes, it&#8217;s only what it takes.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=412897#respond" data-commentid="412897" data-postid="3048" data-belowelement="div-comment-412897" data-respondelement="respond" data-replyto="Reply to Negarrak" aria-label="Reply to Negarrak">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-592432" class="comment odd alt depth-2">
+			<article id="div-comment-592432" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/ec2e46c156565d45c93b4706d4f87acf38e6bc8702d8b729d0323208bda4f2e9?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/ec2e46c156565d45c93b4706d4f87acf38e6bc8702d8b729d0323208bda4f2e9?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">kncklcht</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-592432"><time datetime="2021-07-28T15:36:08+00:00">July 28, 2021 at 3:36 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Someone implemented a raytracing renderer in SQL&#8230;</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=592432#respond" data-commentid="592432" data-postid="3048" data-belowelement="div-comment-592432" data-respondelement="respond" data-replyto="Reply to kncklcht" aria-label="Reply to kncklcht">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+		<li id="comment-54261" class="comment even thread-even depth-1 parent">
+			<article id="div-comment-54261" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo avatar-default" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Ex</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54261"><time datetime="2011-03-09T06:58:13+00:00">March 9, 2011 at 6:58 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Erm C is not turing complete (except, possibly, with file IO).</p>
+<p>A turing complete programming language would be able to handle unbounded memory. In C all memory must be directly addressable, and all pointers must be castable to a void* which must be of finite size.</p>
+<p>This results in C not being Turing complete 🙂</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54261#respond" data-commentid="54261" data-postid="3048" data-belowelement="div-comment-54261" data-respondelement="respond" data-replyto="Reply to Ex" aria-label="Reply to Ex">Reply</a></div>			</article><!-- .comment-body -->
+		<ol class="children">
+		<li id="comment-669014" class="comment odd alt depth-2">
+			<article id="div-comment-669014" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/82cc93e2a76f1718fdef6dfb850289031ffb3fa91777535a09665e57b36da1d9?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/82cc93e2a76f1718fdef6dfb850289031ffb3fa91777535a09665e57b36da1d9?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">e7th04sh</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-669014"><time datetime="2024-11-25T23:38:14+00:00">November 25, 2024 at 11:38 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>13 years later, for the record, Ex makes wrong assumption that all that constitutes memory in relation to Turing completeness and what constitutes memory in language standard is a one to one mapping. That is, if C cannot address infinite memory space natively, it means it&#8217;s not Turing complete. It, however can easily work with infinite memory with an API. There was no reason to make a native implementation of working with system&#8217;s memory, but if an actual infinite memory hardware is provided, a C program can interface with it with whatever addressing convention works, like using null terminated character strings as addresses.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=669014#respond" data-commentid="669014" data-postid="3048" data-belowelement="div-comment-669014" data-respondelement="respond" data-replyto="Reply to e7th04sh" aria-label="Reply to e7th04sh">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-675000" class="comment even depth-2">
+			<article id="div-comment-675000" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/1c88dbe9b80f2843c278e2cd1aac9af80757089070a5556462515218aa602eaa?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/1c88dbe9b80f2843c278e2cd1aac9af80757089070a5556462515218aa602eaa?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">VRG</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-675000"><time datetime="2025-07-23T16:19:49+00:00">July 23, 2025 at 4:19 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Calling this comment nonsense is generous. If I say that all unicrons in my room are pink that&#8217;s also a true statement ( since there are no unicorns in my room ). Unicorns don&#8217;t exist, and neither does infinite memory.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=675000#respond" data-commentid="675000" data-postid="3048" data-belowelement="div-comment-675000" data-respondelement="respond" data-replyto="Reply to VRG" aria-label="Reply to VRG">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+		<li id="comment-54264" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-54264" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/51cdcda865024744ce2524b09a12a8dece0b3f12780794eaa796f31fc7869483?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/51cdcda865024744ce2524b09a12a8dece0b3f12780794eaa796f31fc7869483?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Billy O'Neal</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54264"><time datetime="2011-03-09T09:20:22+00:00">March 9, 2011 at 9:20 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@Ex: That is incorrect. Obviously real machines are limited in memory and therefore cannot act like true Turing machines; they are technically speaking linear bounded automata. However, real machines are still &#8220;said to be&#8221; Turing complete if they can meet all requirements except that of unlimited memory. See the second paragraph of <a href="http://web.archive.org/web/20251228032614/https://en.wikipedia.org/wiki/Turing_completeness#Overview" rel="nofollow ugc">http://en.wikipedia.org/wiki/Turing_completeness#Overview</a> .</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54264#respond" data-commentid="54264" data-postid="3048" data-belowelement="div-comment-54264" data-respondelement="respond" data-replyto="Reply to Billy O'Neal" aria-label="Reply to Billy O'Neal">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54259" class="comment even thread-even depth-1">
+			<article id="div-comment-54259" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/acc2233b651667560f50b312062361b542f7836fac4117c2efefdcce832d62ac?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/acc2233b651667560f50b312062361b542f7836fac4117c2efefdcce832d62ac?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/http://www.mostlymaths.net/" class="url" rel="ugc external nofollow">Ruben Berenguel</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54259"><time datetime="2011-03-09T06:15:21+00:00">March 9, 2011 at 6:15 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Well, I (personally) think the manners of the company reflect the owner and creator. A few months ago I read an article about some cellular automata (I don&#8217;t remember exactly what the details were, I was just curious, after all I&#8217;m in dynamical systems), and his view of the proof/result was&#8230; Well, along the lines of &#8220;it is not interesting as I have not done it&#8221;. This is only from memory, but that&#8217;s the impression I got, it can&#8217;t be too far off.</p>
+<p>Cheers, </p>
+<p>Ruben</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54259#respond" data-commentid="54259" data-postid="3048" data-belowelement="div-comment-54259" data-respondelement="respond" data-replyto="Reply to Ruben Berenguel" aria-label="Reply to Ruben Berenguel">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54260" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-54260" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/db9c06e57c83afb8364d50e45c01ed928a38ec79116f2eb891070a1739f2f58b?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/db9c06e57c83afb8364d50e45c01ed928a38ec79116f2eb891070a1739f2f58b?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/http://www.mrspeaker.net/" class="url" rel="ugc external nofollow">Mr Speaker</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54260"><time datetime="2011-03-09T06:24:04+00:00">March 9, 2011 at 6:24 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>It also relies on human interaction every tick&#8230; so don&#8217;t get your hopes up about writing all javascript in Lisp anytime soon 😉</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54260#respond" data-commentid="54260" data-postid="3048" data-belowelement="div-comment-54260" data-respondelement="respond" data-replyto="Reply to Mr Speaker" aria-label="Reply to Mr Speaker">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54263" class="comment even thread-even depth-1">
+			<article id="div-comment-54263" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/e8bf2651374b91e32e1e13b9150b198fd1204b898ae1a5f5dd65fd84ce885b9c?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/e8bf2651374b91e32e1e13b9150b198fd1204b898ae1a5f5dd65fd84ce885b9c?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Itman</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54263"><time datetime="2011-03-09T09:13:10+00:00">March 9, 2011 at 9:13 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Ex,<br/>
+Clearly, no computer is strictly Turing complete, because the storage is always limited. The term TC, is used in a loose form, IMHO. That is, it the language is TC as long, it can simulate a TM with a limited size tape. Yet, there should be no principal limit: if we have a larger computer, we can simulate a larger Turing machine (without changing the program, IMHO).</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54263#respond" data-commentid="54263" data-postid="3048" data-belowelement="div-comment-54263" data-respondelement="respond" data-replyto="Reply to Itman" aria-label="Reply to Itman">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54265" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-54265" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/f7f5f4054e498f43fdefb09cab7b4b448871063dd4db73fdadb6145ae42793d7?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/f7f5f4054e498f43fdefb09cab7b4b448871063dd4db73fdadb6145ae42793d7?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/http://jakoblog.de/" class="url" rel="ugc external nofollow">Jakob</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54265"><time datetime="2011-03-09T10:17:40+00:00">March 9, 2011 at 10:17 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@Siah The current SQL specification is a monster, every RDBMS implements his subset plus some proprietary goodies. So I bet that some dialects of SQL are turing complete. To answer the question, you should first define what you mean by SQL (the latest version of SQL that a test suite was provided for was SQL-92).</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54265#respond" data-commentid="54265" data-postid="3048" data-belowelement="div-comment-54265" data-respondelement="respond" data-replyto="Reply to Jakob" aria-label="Reply to Jakob">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54266" class="comment even thread-even depth-1">
+			<article id="div-comment-54266" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/9fb7df4b1217b99950f2524257de6db8e81b261412c8fef89c6d7e1fcca4b529?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/9fb7df4b1217b99950f2524257de6db8e81b261412c8fef89c6d7e1fcca4b529?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/" class="url" rel="ugc">Daniel Lemire</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54266"><time datetime="2011-03-09T16:39:15+00:00">March 9, 2011 at 4:39 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@Siah @Jakob</p>
+<p>By &#8220;SQL&#8221;, I meant either SQL 2003 or any of the popular dialects.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54266#respond" data-commentid="54266" data-postid="3048" data-belowelement="div-comment-54266" data-respondelement="respond" data-replyto="Reply to Daniel Lemire" aria-label="Reply to Daniel Lemire">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54267" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-54267" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/4e56b051b93dc6397806d30832be3e1084f83c377e4061f68b52af8377e3b35a?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/4e56b051b93dc6397806d30832be3e1084f83c377e4061f68b52af8377e3b35a?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">rvasques</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54267"><time datetime="2011-03-09T17:17:30+00:00">March 9, 2011 at 5:17 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p><em>This post censored for violation of the <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/terms-of-use/" rel="nofollow">terms of use</a>: &#8220;You can criticize me or the other people who post on this blog, but being rude is likely to get your comment deleted. Go start your own blog if you want to be insulting.&#8221;.</em></p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54267#respond" data-commentid="54267" data-postid="3048" data-belowelement="div-comment-54267" data-respondelement="respond" data-replyto="Reply to rvasques" aria-label="Reply to rvasques">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-54818" class="comment even thread-even depth-1">
+			<article id="div-comment-54818" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/90cf4e3baabb9fdde0eaf04cceec957331928953ac21d3d5fe89b64f0c8bd769?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/90cf4e3baabb9fdde0eaf04cceec957331928953ac21d3d5fe89b64f0c8bd769?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/http://www.marnen.org/" class="url" rel="ugc external nofollow">Marnen Laibow-Koser</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-54818"><time datetime="2011-11-28T18:14:11+00:00">November 28, 2011 at 6:14 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>About Cook&#8217;s proof: as I understand it, he was under NDA regarding the research he was doing for Wolfram (so Wolfram could publish it in his book). Silly NDA, but he should have respected it&#8230;</p>
+<p>Comment #3: based on what I&#8217;ve seen of Wolfram himself (I was a student at NKS Summer School 2010), that would surprise me. He seems to be extremely curious about what other people make of cellular automata.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=54818#respond" data-commentid="54818" data-postid="3048" data-belowelement="div-comment-54818" data-respondelement="respond" data-replyto="Reply to Marnen Laibow-Koser" aria-label="Reply to Marnen Laibow-Koser">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-55019" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-55019" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/3e2676c052a790135503a1029aa0daedc92022d5c737bca9baf1661b21dcaa13?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/3e2676c052a790135503a1029aa0daedc92022d5c737bca9baf1661b21dcaa13?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/http://www.hugedomains.com/domain_profile.cfm?d=leduotang&amp;e=com" class="url" rel="ugc external nofollow">Sylvain HallÃ©</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-55019"><time datetime="2012-03-03T08:17:27+00:00">March 3, 2012 at 8:17 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@Christian: Yes, but we should keep in mind that the Postscript format, dating back from the 1980s, was already a full-fledged programming language.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=55019#respond" data-commentid="55019" data-postid="3048" data-belowelement="div-comment-55019" data-respondelement="respond" data-replyto="Reply to Sylvain HallÃ©" aria-label="Reply to Sylvain HallÃ©">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-55018" class="comment even thread-even depth-1">
+			<article id="div-comment-55018" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/1faa7eec80f25d55e35e4c6deedb8eb4dd069f48f43274ac7fac9ce643ce3b67?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/1faa7eec80f25d55e35e4c6deedb8eb4dd069f48f43274ac7fac9ce643ce3b67?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Christian Berger</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-55018"><time datetime="2012-03-03T07:43:03+00:00">March 3, 2012 at 7:43 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Isn&#8217;t it scary that even important file formats which are the base of much of our computing world are now so complex they are Turing complete?</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=55018#respond" data-commentid="55018" data-postid="3048" data-belowelement="div-comment-55018" data-respondelement="respond" data-replyto="Reply to Christian Berger" aria-label="Reply to Christian Berger">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-55020" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-55020" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/5649e67dea44218ce6af3d392774a88ec75d4d5b0dd0312bfc2198383679f38c?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/5649e67dea44218ce6af3d392774a88ec75d4d5b0dd0312bfc2198383679f38c?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Simon</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-55020"><time datetime="2012-03-03T14:04:53+00:00">March 3, 2012 at 2:04 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>This thread may be of interest (especially the comment by usr):<br/>
+<a href="http://web.archive.org/web/20251228032614/http://stackoverflow.com/questions/5357725/how-does-this-implementation-of-turing-complete-rule-110-in-html5css3-work" rel="nofollow ugc">http://stackoverflow.com/questions/5357725/how-does-this-implementation-of-turing-complete-rule-110-in-html5css3-work</a></p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=55020#respond" data-commentid="55020" data-postid="3048" data-belowelement="div-comment-55020" data-respondelement="respond" data-replyto="Reply to Simon" aria-label="Reply to Simon">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-55286" class="comment even thread-even depth-1">
+			<article id="div-comment-55286" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/bf064fddeead3ad280dee61a19c1791de7660cdb83021dd0071dba907f7a5827?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/bf064fddeead3ad280dee61a19c1791de7660cdb83021dd0071dba907f7a5827?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Misha</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-55286"><time datetime="2012-06-03T15:38:07+00:00">June 3, 2012 at 3:38 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@EX: It is indeed true that their maybe no Turing *machine* due to the bounds on memory but we could easily image a Turing complete language that could scale to the memory size of any machine.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=55286#respond" data-commentid="55286" data-postid="3048" data-belowelement="div-comment-55286" data-respondelement="respond" data-replyto="Reply to Misha" aria-label="Reply to Misha">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-55287" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-55287" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/51cdcda865024744ce2524b09a12a8dece0b3f12780794eaa796f31fc7869483?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/51cdcda865024744ce2524b09a12a8dece0b3f12780794eaa796f31fc7869483?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Billy O'Neal</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-55287"><time datetime="2012-06-03T21:14:32+00:00">June 3, 2012 at 9:14 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@Misha: What looping construct exists in CSS and HTML? A turing machine needs such a construct.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=55287#respond" data-commentid="55287" data-postid="3048" data-belowelement="div-comment-55287" data-respondelement="respond" data-replyto="Reply to Billy O'Neal" aria-label="Reply to Billy O'Neal">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-73915" class="comment even thread-even depth-1">
+			<article id="div-comment-73915" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo avatar-default" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">flip</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-73915"><time datetime="2013-03-02T05:47:22+00:00">March 2, 2013 at 5:47 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@Billy O&#8217;Neal </p>
+<p>Or you need to implement the SKI-calculus, the one instruction processor, some cellular automata or certain rewrite systems. There are a lot of possibilities, you only need to show, that system A is equivalent to system B, which is turing complete and you have proved it.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=73915#respond" data-commentid="73915" data-postid="3048" data-belowelement="div-comment-73915" data-respondelement="respond" data-replyto="Reply to flip" aria-label="Reply to flip">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-74214" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-74214" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo avatar-default" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Anonymous</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-74214"><time datetime="2013-03-04T11:03:26+00:00">March 4, 2013 at 11:03 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@flip: My assertion is that showing equivalence to a Turing machine requires a looping construct. Or at least a &#8220;goto&#8221; construct which could be used to construct a looping construct. For instance, it is easy to build a Turing Machine that runs forever; this is not possible with HTML5 + CSS.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=74214#respond" data-commentid="74214" data-postid="3048" data-belowelement="div-comment-74214" data-respondelement="respond" data-replyto="Reply to Anonymous" aria-label="Reply to Anonymous">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-74215" class="comment even thread-even depth-1">
+			<article id="div-comment-74215" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/51cdcda865024744ce2524b09a12a8dece0b3f12780794eaa796f31fc7869483?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/51cdcda865024744ce2524b09a12a8dece0b3f12780794eaa796f31fc7869483?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Billy O'Neal</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-74215"><time datetime="2013-03-04T11:03:38+00:00">March 4, 2013 at 11:03 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>@flip: My assertion is that showing equivalence to a Turing machine requires a looping construct. Or at least a &#8220;goto&#8221; construct which could be used to construct a looping construct. For instance, it is easy to build a Turing Machine that runs forever; this is not possible with HTML5 + CSS.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=74215#respond" data-commentid="74215" data-postid="3048" data-belowelement="div-comment-74215" data-respondelement="respond" data-replyto="Reply to Billy O'Neal" aria-label="Reply to Billy O'Neal">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-412898" class="comment odd alt thread-odd thread-alt depth-1">
+			<article id="div-comment-412898" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/fd1c893436e81dbab29a2b50ba4ec47e8ca42f2aa45f4ac84818f64d4b5f2e88?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/fd1c893436e81dbab29a2b50ba4ec47e8ca42f2aa45f4ac84818f64d4b5f2e88?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn">Negarrak</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-412898"><time datetime="2019-06-21T21:45:33+00:00">June 21, 2019 at 9:45 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Please, take a look into my Kialo discussion about it.<br/>
+<a href="http://web.archive.org/web/20251228032614/https://www.kialo.com/is-html-a-programming-language-29611?path=29611.0~29611.1&amp;active=~29611.1" rel="nofollow">https://www.kialo.com/is-html-a-programming-language-29611?path=29611.0~29611.1&#038;active=~29611.1</a></p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=412898#respond" data-commentid="412898" data-postid="3048" data-belowelement="div-comment-412898" data-respondelement="respond" data-replyto="Reply to Negarrak" aria-label="Reply to Negarrak">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		<li id="comment-657278" class="comment even thread-even depth-1">
+			<article id="div-comment-657278" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+						<img alt="" src="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/1f5eed23211d6e7005d2409d668cdb355326a7dddff10d70183d140788620e6e?s=56&amp;d=mm&amp;r=g" srcset="http://web.archive.org/web/20251228032614im_/https://secure.gravatar.com/avatar/1f5eed23211d6e7005d2409d668cdb355326a7dddff10d70183d140788620e6e?s=112&amp;d=mm&amp;r=g 2x" class="avatar avatar-56 photo" height="56" width="56" loading="lazy" decoding="async"/>						<b class="fn"><a href="http://web.archive.org/web/20251228032614/https://bryanveloso.com/" class="url" rel="ugc external nofollow">Bryan Veloso</a></b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#comment-657278"><time datetime="2023-12-24T03:26:01+00:00">December 24, 2023 at 3:26 am</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>13 years later and we’re still debating this. ChatGPT 4 told me it’s not turing complete, even I specifically mentioned HTML5+CSS3 and the Rule 110 Automation.</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/?replytocom=657278#respond" data-commentid="657278" data-postid="3048" data-belowelement="div-comment-657278" data-respondelement="respond" data-replyto="Reply to Bryan Veloso" aria-label="Reply to Bryan Veloso">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		</ol><!-- .comment-list -->
+
+		
+	
+	
+		<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title">Leave a Reply <small><a rel="nofollow" id="cancel-comment-reply-link" href="/web/20251228032614/https://lemire.me/blog/2011/03/08/breaking-news-htmlcss-is-turing-complete/#respond" style="display:none;">Cancel reply</a></small></h3><form action="http://web.archive.org/web/20251228032614/https://lemire.me/blog/wp-comments-post.php" method="post" id="commentform" class="comment-form"><p class="comment_notes">Your email address will not be published.</p><p class="comment-form-comment"><label for="comment">Comment <span class="required">*</span></label> <textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525" required></textarea></p><p class="comment-form-author"><label for="author">Name <span class="required">*</span></label> <input id="author" name="author" type="text" value="" size="30" maxlength="245" autocomplete="name" required/></p>
+<p class="comment-form-email"><label for="email">Email <span class="required">*</span></label> <input id="email" name="email" type="email" value="" size="30" maxlength="100" autocomplete="email" required/></p>
+<p class="comment-form-url"><label for="url">Website</label> <input id="url" name="url" type="url" value="" size="30" maxlength="200" autocomplete="url"/></p>
+<p class="comment-form-cookies-consent"><input id="wp-comment-cookies-consent" name="wp-comment-cookies-consent" type="checkbox" value="yes"/> <label for="wp-comment-cookies-consent">Save my name, email, and website in this browser for the next time I comment.</label></p>
+<p class="form-submit"><input name="submit" type="submit" id="submit" class="submit" value="Post Comment"/> <input type="hidden" name="comment_post_ID" value="3048" id="comment_post_ID"/>
+<input type="hidden" name="comment_parent" id="comment_parent" value="0"/>
+</p><p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="55e2324216"/></p><p style="display: none !important;" class="akismet-fields-container" data-prefix="ak_"><label>&#916;<textarea name="ak_hp_textarea" cols="45" rows="8" maxlength="100"></textarea></label><input type="hidden" id="ak_js_1" name="ak_js" value="113"/><script>document.getElementById( "ak_js_1" ).setAttribute( "value", ( new Date() ).getTime() );</script></p></form>	</div><!-- #respond -->
+	<p class="comment_text_after"><p>You can also <a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/newsletter/">subscribe by email</a> to this blog (non commercial, no ads, weekly email)</p>
+<p>If you want to post code, consider formatting it with a tool like <a href="http://web.archive.org/web/20251228032614/https://tohtml.com/">tohtml</a>.</p>
+</p>
+</div><!-- .comments-area -->
+
+	<nav class="navigation post-navigation" aria-label="Posts">
+		<h2 class="screen-reader-text">Post navigation</h2>
+		<div class="nav-links"><div class="nav-previous"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/07/jobless-recovery-the-luddite-fallacy-and-the-4-hour-workweek/" rel="prev"><span class="meta-nav" aria-hidden="true">Previous</span> <span class="screen-reader-text">Previous post:</span> <span class="post-title">Jobless recovery, the Luddite fallacy and the 4-hour workweek</span></a></div><div class="nav-next"><a href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/2011/03/16/governments-should-stop-funding-higher-education/" rel="next"><span class="meta-nav" aria-hidden="true">Next</span> <span class="screen-reader-text">Next post:</span> <span class="post-title">Governments should stop funding higher education?</span></a></div></div>
+	</nav>
+		</main><!-- .site-main -->
+	</div><!-- .content-area -->
+
+
+	</div><!-- .site-content -->
+
+	<footer id="colophon" class="site-footer">
+		<div class="site-info">
+						<a class="privacy-policy-link" href="http://web.archive.org/web/20251228032614/https://lemire.me/blog/terms-of-use/" rel="privacy-policy">Terms of use</a><span role="separator" aria-hidden="true"></span>			<a href="http://web.archive.org/web/20251228032614/https://wordpress.org/" class="imprint">
+				Proudly powered by WordPress			</a>
+		</div><!-- .site-info -->
+	</footer><!-- .site-footer -->
+
+</div><!-- .site -->
+
+<script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"\/blog\/*"},{"not":{"href_matches":["\/blog\/wp-*.php","\/blog\/wp-admin\/*","\/blog\/wp-content\/uploads\/*","\/blog\/wp-content\/*","\/blog\/wp-content\/plugins\/*","\/blog\/wp-content\/themes\/twentyfifteen\/*","\/blog\/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<script id="wp_power_stats-js-extra">
+var PowerStatsParams = {"ajaxurl":"http:\/\/web.archive.org\/web\/20251228032614\/https:\/\/lemire.me\/blog\/wp-admin\/admin-ajax.php","ci":"YTo0OntzOjEyOiJjb250ZW50X3R5cGUiO3M6NDoicG9zdCI7czo4OiJjYXRlZ29yeSI7czoyOiI4NCI7czoxMDoiY29udGVudF9pZCI7aTozMDQ4O3M6NjoiYXV0aG9yIjtzOjY6ImxlbWlyZSI7fQ==.e4863e553a8e80e1051bdd5e3720119d"};
+</script>
+<script src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-content/plugins/wp-power-stats/wp-power-stats.js" id="wp_power_stats-js"></script>
+<script src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-content/plugins/custom-css-js-php/assets/js/wcjp-frontend.js?ver=6.8.3" id="wcjp-frontend.js-js"></script>
+<script src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-includes/js/comment-reply.min.js?ver=6.8.3" id="comment-reply-js" async data-wp-strategy="async"></script>
+<script id="newsletter-js-extra">
+var newsletter_data = {"action_url":"http:\/\/web.archive.org\/web\/20251228032614\/https:\/\/lemire.me\/blog\/wp-admin\/admin-ajax.php"};
+</script>
+<script src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-content/plugins/newsletter/main.js?ver=9.0.7" id="newsletter-js"></script>
+<script defer src="http://web.archive.org/web/20251228032614js_/https://lemire.me/blog/wp-content/plugins/akismet/_inc/akismet-frontend.js?ver=1763166226" id="akismet-frontend-js"></script>
+	<script>
+	jQuery(document).ready(function ($) {
+		$(function() {
+			$("[href*=\"amazon\"]").attr("href", function(i, h) {
+				return h + (h.indexOf("?") != -1 ? "&tag=daniellemires-20" : "?tag=daniellemires-20");
+			});
+		});
+	});
+	</script>
+	
+<script defer src="http://web.archive.org/web/20251228032614js_/https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;6f8e2d7870844f40b19f211c3f8e5c10&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+</body>
+</html>
+<!--
+     FILE ARCHIVED ON 03:26:14 Dec 28, 2025 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 19:04:01 Aug 30, 2026.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+-->
+<!--
+playback timings (ms):
+  captures_list: 0.362
+  exclusion.robots: 0.039
+  exclusion.robots.policy: 0.032
+  esindex: 0.006
+  cdx.remote: 6.847
+  LoadShardBlock: 1090.427 (3)
+  PetaboxLoader3.datanode: 284.055 (4)
+  PetaboxLoader3.resolve: 1927.456 (2)
+  load_resource: 1136.823
+-->
