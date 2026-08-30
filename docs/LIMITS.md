@@ -74,8 +74,11 @@ and the README says so.
 | `@property` | 85+ | 128+ | 16.4+ |
 | `color-mix()` (LED styling only) | 111+ | 113+ | 16.2+ |
 
-Floor = Firefox 128+. No experimental flags. Style queries are *not* used
-(Firefox comparison-operator gap found in experiments; see ARCHITECTURE).
+Floor = Chromium 111+ / Firefox 128+ for the full experience (LED styling
+needs `color-mix()`; math needs `@property` + `:has()`). Safari 16.4+
+should support the mechanics but is **not tested in this repo**. No
+experimental flags. Style queries are *not* used (Firefox
+comparison-operator gap found in experiments; see ARCHITECTURE).
 
 ## What breaks first
 

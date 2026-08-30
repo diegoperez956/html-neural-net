@@ -119,27 +119,21 @@ body.rt:has(#g8:checked) { --g8: 1; }
 .l_clspre_2 { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--cls_bias714_b2_sum)) * 100%)); }
 .l_clspre_3 { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--cls_bias714_b3_sum)) * 100%)); }
 .l_clspre_4 { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--cls_bias714_b4_sum)) * 100%)); }
-.d_a::after { counter-reset: v calc((1 * var(--var(--a)))); content: counter(v); }
-.d_b::after { counter-reset: v calc((1 * var(--var(--b)))); content: counter(v); }
-.d_ha::after { counter-reset: v calc((1 * var(--var(--ha_sum))) + (2 * var(--var(--ha_carry)))); content: counter(v); }
-.d_fa::after { counter-reset: v calc((1 * var(--var(--fa_sum))) + (2 * var(--var(--fa_carry)))); content: counter(v); }
-.d_add2::after { counter-reset: v calc((1 * var(--var(--add2_b0_sum))) + (2 * var(--var(--add2_b1_sum))) + (4 * var(--var(--add2_b2_sum)))); content: counter(v); }
-.d_mul2::after { counter-reset: v calc((1 * var(--var(--mul2_row1_b0_sum))) + (2 * var(--var(--mul2_row1_b1_sum))) + (4 * var(--var(--mul2_row1_b2_sum))) + (8 * var(--var(--mul2_row1_b3_sum)))); content: counter(v); }
-.d_add4::after { counter-reset: v calc((1 * var(--var(--add4_b0_sum))) + (2 * var(--var(--add4_b1_sum))) + (4 * var(--var(--add4_b2_sum))) + (8 * var(--var(--add4_b3_sum))) + (16 * var(--var(--add4_b4_sum)))); content: counter(v); }
-.d_dot::after { counter-reset: v calc((1 * var(--var(--dot_sum_b0_sum))) + (2 * var(--var(--dot_sum_b1_sum))) + (4 * var(--var(--dot_sum_b2_sum))) + (8 * var(--var(--dot_sum_b3_sum))) + (16 * var(--var(--dot_sum_b4_sum))) + (32 * var(--var(--dot_sum_b5_sum)))); content: counter(v); }
-.d_mv0::after { counter-reset: v calc((1 * var(--var(--mv_row0_b0_sum))) + (2 * var(--var(--mv_row0_b1_sum))) + (4 * var(--var(--mv_row0_b2_sum))) + (8 * var(--var(--mv_row0_b3_sum)))); content: counter(v); }
-.d_mv1::after { counter-reset: v calc((1 * var(--var(--mv_row1_b0_sum))) + (2 * var(--var(--mv_row1_b1_sum))) + (4 * var(--var(--mv_row1_b2_sum))) + (8 * var(--var(--mv_row1_b3_sum)))); content: counter(v); }
-.d_npre::after { counter-reset: v calc((1 * var(--var(--n1_bias237_b0_sum))) + (2 * var(--var(--n1_bias237_b1_sum))) + (4 * var(--var(--n1_bias237_b2_sum))) + (8 * var(--var(--n1_bias237_b3_sum)))); content: counter(v); }
-.d_n::after { counter-reset: v calc((1 * var(--var(--n1_out)))); content: counter(v); }
-.d_h::after { counter-reset: v calc((1 * var(--var(--xor_h1_out))) + (2 * var(--var(--xor_h2_out)))); content: counter(v); }
-.d_xor::after { counter-reset: v calc((1 * var(--var(--xor_out_out)))); content: counter(v); }
-.d_nb_h1pre::after { counter-reset: v calc((1 * var(--nb_h1pre))); content: counter(v); }
-.d_nb_h2pre::after { counter-reset: v calc((1 * var(--nb_h2pre))); content: counter(v); }
-.d_nb_outpre::after { counter-reset: v calc((1 * var(--nb_outpre))); content: counter(v); }
-.d_nb_mv0::after { counter-reset: v calc((1 * var(--nb_mv0))); content: counter(v); }
-.d_nb_mv1::after { counter-reset: v calc((1 * var(--nb_mv1))); content: counter(v); }
-.d_clspre::after { counter-reset: v calc((1 * var(--var(--cls_bias714_b0_sum))) + (2 * var(--var(--cls_bias714_b1_sum))) + (4 * var(--var(--cls_bias714_b2_sum))) + (8 * var(--var(--cls_bias714_b3_sum))) + (16 * var(--var(--cls_bias714_b4_sum)))); content: counter(v); }
-.d_cls::after { counter-reset: v calc((1 * var(--var(--cls_out)))); content: counter(v); }
+.d_add2::after { counter-reset: v var(--add2_dec); content: counter(v); }
+.d_mul2::after { counter-reset: v var(--mul2_dec); content: counter(v); }
+.d_add4::after { counter-reset: v var(--add4_dec); content: counter(v); }
+.d_dot::after { counter-reset: v var(--dot_dec); content: counter(v); }
+.d_mv0::after { counter-reset: v var(--mv0_dec); content: counter(v); }
+.d_mv1::after { counter-reset: v var(--mv1_dec); content: counter(v); }
+.d_npre::after { counter-reset: v var(--npre_dec); content: counter(v); }
+.d_xor::after { counter-reset: v var(--xor_dec); content: counter(v); }
+.d_nb_h1pre::after { counter-reset: v var(--nb_h1pre_dec); content: counter(v); }
+.d_nb_h2pre::after { counter-reset: v var(--nb_h2pre_dec); content: counter(v); }
+.d_nb_outpre::after { counter-reset: v var(--nb_outpre_dec); content: counter(v); }
+.d_nb_out::after { counter-reset: v var(--nb_out_dec); content: counter(v); }
+.d_nb_mv0::after { counter-reset: v var(--nb_mv0_dec); content: counter(v); }
+.d_nb_mv1::after { counter-reset: v var(--nb_mv1_dec); content: counter(v); }
+.d_clspre::after { counter-reset: v var(--clspre_dec); content: counter(v); }
 
 @property --a { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --a0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -159,6 +153,7 @@ body.rt:has(#g8:checked) { --g8: 1; }
 @property --add2_b2_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --add2_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --add2_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --add2_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --add4_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --add4_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --add4_b0_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -184,6 +179,7 @@ body.rt:has(#g8:checked) { --g8: 1; }
 @property --add4_b4_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --add4_b4_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --add4_b4_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --add4_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --b { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --b0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --b1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -486,12 +482,14 @@ body.rt:has(#g8:checked) { --g8: 1; }
 @property --cls_t8_m0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --cls_t8_m1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --cls_t8_m2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --clspre_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --d0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --d1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --d2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --d3 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --d_u0v0_pp0_0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --d_u1v1_pp0_0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --dot_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --dot_sum_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --dot_sum_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --dot_sum_b0_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -542,6 +540,7 @@ body.rt:has(#g8:checked) { --g8: 1; }
 @property --g_xor { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --ha_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --ha_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --mul2_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mul2_pp0_0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mul2_pp0_1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mul2_pp1_0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -566,6 +565,8 @@ body.rt:has(#g8:checked) { --g8: 1; }
 @property --mul2_row1_b3_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mul2_row1_b3_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mul2_row1_b3_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --mv0_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --mv1_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mv_row0_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mv_row0_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --mv_row0_b0_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -693,18 +694,26 @@ body.rt:has(#g8:checked) { --g8: 1; }
 @property --n1_t1_neg_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_h1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_h1pre { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_h1pre_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_h2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_h2pre { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_h2pre_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_mv0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_mv0_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_mv1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_mv1_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_out { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_out_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --nb_outpre { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_outpre_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --npre_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --u0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --u1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --v0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --v1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --x0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --x1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --xor_dec { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --xor_h1_add286_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --xor_h1_add286_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --xor_h1_add286_b0_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -1649,6 +1658,21 @@ body.rt:has(#g8:checked) { --g8: 1; }
 .rt { --nb_out: max(0, min(1, calc(var(--nb_outpre) + 1))); }
 .rt { --nb_mv0: calc((2 * var(--v1)) + (1 * var(--v0))); }
 .rt { --nb_mv1: calc((1 * var(--v1)) + (2 * var(--v0))); }
+.rt { --add2_dec: calc((1 * var(--add2_b0_sum)) + (2 * var(--add2_b1_sum)) + (4 * var(--add2_b2_sum))); }
+.rt { --mul2_dec: calc((1 * var(--mul2_row1_b0_sum)) + (2 * var(--mul2_row1_b1_sum)) + (4 * var(--mul2_row1_b2_sum)) + (8 * var(--mul2_row1_b3_sum))); }
+.rt { --add4_dec: calc((1 * var(--add4_b0_sum)) + (2 * var(--add4_b1_sum)) + (4 * var(--add4_b2_sum)) + (8 * var(--add4_b3_sum)) + (16 * var(--add4_b4_sum))); }
+.rt { --dot_dec: calc((1 * var(--dot_sum_b0_sum)) + (2 * var(--dot_sum_b1_sum)) + (4 * var(--dot_sum_b2_sum)) + (8 * var(--dot_sum_b3_sum)) + (16 * var(--dot_sum_b4_sum)) + (32 * var(--dot_sum_b5_sum))); }
+.rt { --mv0_dec: calc((1 * var(--mv_row0_b0_sum)) + (2 * var(--mv_row0_b1_sum)) + (4 * var(--mv_row0_b2_sum)) + (8 * var(--mv_row0_b3_sum))); }
+.rt { --mv1_dec: calc((1 * var(--mv_row1_b0_sum)) + (2 * var(--mv_row1_b1_sum)) + (4 * var(--mv_row1_b2_sum)) + (8 * var(--mv_row1_b3_sum))); }
+.rt { --npre_dec: calc((1 * var(--n1_bias237_b0_sum)) + (2 * var(--n1_bias237_b1_sum)) + (4 * var(--n1_bias237_b2_sum)) + (-8 * var(--n1_bias237_b3_sum))); }
+.rt { --xor_dec: calc((1 * var(--xor_out_out))); }
+.rt { --nb_h1pre_dec: calc((1 * var(--nb_h1pre))); }
+.rt { --nb_h2pre_dec: calc((1 * var(--nb_h2pre))); }
+.rt { --nb_outpre_dec: calc((1 * var(--nb_outpre))); }
+.rt { --nb_out_dec: calc((1 * var(--nb_out))); }
+.rt { --nb_mv0_dec: calc((1 * var(--nb_mv0))); }
+.rt { --nb_mv1_dec: calc((1 * var(--nb_mv1))); }
+.rt { --clspre_dec: calc((1 * var(--cls_bias714_b0_sum)) + (2 * var(--cls_bias714_b1_sum)) + (4 * var(--cls_bias714_b2_sum)) + (8 * var(--cls_bias714_b3_sum)) + (-16 * var(--cls_bias714_b4_sum))); }
 </style>
 </head>
 <body class="rt">
@@ -1768,9 +1792,9 @@ body.rt:has(#g8:checked) { --g8: 1; }
   <div class="row"><span class="kbd">h1 = max(0, min(1, 2x₁−2x₀))</span> <span class="led l_nb_h1"></span></div>
   <div class="row"><span class="kbd">h2 = max(0, min(1, −2x₁+2x₀))</span> <span class="led l_nb_h2"></span></div>
   <div class="row"><span class="kbd">out = max(0, min(1, 2h1+2h2−1))</span> <span class="led l_nb_out"></span>
-  <span class="v d_xor"></span></div>
+  <span class="v d_nb_out"></span></div>
   <div class="row"><span class="kbd">Wx row 0 / row 1</span> <span class="v d_nb_mv0"></span> / <span class="v d_nb_mv1"></span></div>
-  <div class="tag">~14 declarations total vs 753 gate signals above. Same outputs, opposite philosophy.
+  <div class="tag">~14 declarations total vs 768 gate signals above. Same outputs, opposite philosophy.
   Because var()×var() is illegal in CSS, native mode only exists when one operand is a build-time constant —
   which is true for inference weights, and exactly why structural composition is unavoidable for interactive multiplication.</div>
 </section>

@@ -49,10 +49,12 @@ def led_css(signal: str, cls: str) -> str:
     )
 
 
-def dec_css(bits, cls: str) -> str:
-    """Native-calc decimal VIEW (labeled, display only). bits: signal names LSB first."""
+def dec_css(bits, cls: str, sig: str) -> str:
+    """Native-calc decimal VIEW (labeled, display only). bits: bare signal names LSB first.
+    The value is materialized as registered signal --{sig} (testable via computed style)
+    and rendered via one clean var() into a counter."""
     terms = " + ".join(f"({2 ** i} * var(--{b}))" for i, b in enumerate(bits))
-    return f'.{cls}::after {{ counter-reset: v calc({terms}); content: counter(v); }}'
+    return (f'.{cls}::after {{ counter-reset: v var(--{sig}); content: counter(v); }}')
 
 
 def main(path):
@@ -166,25 +168,38 @@ def main(path):
         led_css(cls_out, "l_cls_out"),
         *[led_css(b, f"l_clspre_{i}") for i, b in enumerate(cls_pre)],
     ])
+    # decimal view signals: native-calc conversions materialized as registered
+    # properties (display-only; testable via computed style)
+    for sig, bits in {
+        "add2_dec": s2, "mul2_dec": p2, "add4_dec": s4, "dot_dec": dot_bits,
+        "mv0_dec": row0, "mv1_dec": row1, "npre_dec": n_pre, "xor_dec": [out],
+        "nb_h1pre_dec": ["nb_h1pre"], "nb_h2pre_dec": ["nb_h2pre"],
+        "nb_outpre_dec": ["nb_outpre"], "nb_out_dec": ["nb_out"],
+        "nb_mv0_dec": ["nb_mv0"], "nb_mv1_dec": ["nb_mv1"],
+        "clspre_dec": cls_pre,
+    }.items():
+        terms = " + ".join(
+            f"({(-(2 ** i) if (sig in ("npre_dec", "clspre_dec") and i == len(bits) - 1) else 2 ** i)} * var(--{b}))"
+            for i, b in enumerate(bits)
+        )
+        c.emit(sig, f"calc({terms})")
+
     dec_css_all = "\n".join([
-        dec_css([ref("a")], "d_a"), dec_css([ref("b")], "d_b"),
-        dec_css([ref(ha_s), ref(ha_c)], "d_ha"),
-        dec_css([ref(fa_s), ref(fa_c)], "d_fa"),
-        dec_css([ref(s) for s in s2], "d_add2"),
-        dec_css([ref(p) for p in p2], "d_mul2"),
-        dec_css([ref(s) for s in s4], "d_add4"),
-        dec_css([ref(b) for b in dot_bits], "d_dot"),
-        dec_css([ref(b) for b in row0], "d_mv0"),
-        dec_css([ref(b) for b in row1], "d_mv1"),
-        dec_css([ref(b) for b in n_pre], "d_npre"),
-        dec_css([ref(n_out)], "d_n"),
-        dec_css([ref(h1), ref(h2)], "d_h"),
-        dec_css([ref(out)], "d_xor"),
-        dec_css(["nb_h1pre"], "d_nb_h1pre"), dec_css(["nb_h2pre"], "d_nb_h2pre"),
-        dec_css(["nb_outpre"], "d_nb_outpre"),
-        dec_css(["nb_mv0"], "d_nb_mv0"), dec_css(["nb_mv1"], "d_nb_mv1"),
-        dec_css([ref(b) for b in cls_pre], "d_clspre"),
-        dec_css([ref(cls_out)], "d_cls"),
+        dec_css([s for s in s2], "d_add2", "add2_dec"),
+        dec_css([p for p in p2], "d_mul2", "mul2_dec"),
+        dec_css([s for s in s4], "d_add4", "add4_dec"),
+        dec_css([b for b in dot_bits], "d_dot", "dot_dec"),
+        dec_css([b for b in row0], "d_mv0", "mv0_dec"),
+        dec_css([b for b in row1], "d_mv1", "mv1_dec"),
+        dec_css([b for b in n_pre], "d_npre", "npre_dec"),
+        dec_css([out], "d_xor", "xor_dec"),
+        dec_css(["nb_h1pre"], "d_nb_h1pre", "nb_h1pre_dec"),
+        dec_css(["nb_h2pre"], "d_nb_h2pre", "nb_h2pre_dec"),
+        dec_css(["nb_outpre"], "d_nb_outpre", "nb_outpre_dec"),
+        dec_css(["nb_out"], "d_nb_out", "nb_out_dec"),
+        dec_css(["nb_mv0"], "d_nb_mv0", "nb_mv0_dec"),
+        dec_css(["nb_mv1"], "d_nb_mv1", "nb_mv1_dec"),
+        dec_css([b for b in cls_pre], "d_clspre", "clspre_dec"),
     ])
 
     input_css = "\n".join(
@@ -313,7 +328,7 @@ def main(path):
   <div class="row"><span class="kbd">h1 = max(0, min(1, 2x₁−2x₀))</span> <span class="led l_nb_h1"></span></div>
   <div class="row"><span class="kbd">h2 = max(0, min(1, −2x₁+2x₀))</span> <span class="led l_nb_h2"></span></div>
   <div class="row"><span class="kbd">out = max(0, min(1, 2h1+2h2−1))</span> <span class="led l_nb_out"></span>
-  <span class="v d_xor"></span></div>
+  <span class="v d_nb_out"></span></div>
   <div class="row"><span class="kbd">Wx row 0 / row 1</span> <span class="v d_nb_mv0"></span> / <span class="v d_nb_mv1"></span></div>
   <div class="tag">~14 declarations total vs {n_signals} gate signals above. Same outputs, opposite philosophy.
   Because var()×var() is illegal in CSS, native mode only exists when one operand is a build-time constant —

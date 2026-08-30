@@ -290,6 +290,62 @@ class ClassifierTests(Base):
             self.check([rng.randint(0, 1) for _ in range(9)])
 
 
+class DisplayTests(Base):
+    """The rendered decimal views must actually resolve (adversarial BLOCK-1)."""
+
+    def counter_reset(self, cls):
+        return self.page.evaluate(
+            "(cls) => getComputedStyle(document.querySelector(cls), '::after').counterReset",
+            f".{cls}",
+        )
+
+    def assert_view(self, cls, expect_int):
+        got = self.counter_reset(cls)
+        self.assertEqual(got, f"v {expect_int}", f".{cls}::after rendered counter")
+
+    def test_adder_and_multiplier_views(self):
+        self.set_bits(a1=1, a0=0, b1=1, b0=1)          # a=2, b=3
+        self.assert_view("d_add2", 5)
+        self.assert_view("d_mul2", 6)
+
+    def test_add4_view(self):
+        bits = {f"c{i}": (10 >> i) & 1 for i in range(4)}
+        bits.update({f"d{i}": (5 >> i) & 1 for i in range(4)})
+        self.set_bits(**bits)
+        self.assert_view("d_add4", 15)
+
+    def test_dot_view(self):
+        self.set_bits(u1=1, u0=0, v1=1, v0=0)          # u=2, v=2 -> 0*0 + 1*1
+        self.assert_view("d_dot", 1)
+
+    def test_matvec_views(self):
+        self.set_bits(v1=1, v0=0)
+        self.assert_view("d_mv0", 2)
+        self.assert_view("d_mv1", 1)
+        self.assert_view("d_nb_mv0", 2)
+        self.assert_view("d_nb_mv1", 1)
+
+    def test_neuron_and_xor_views(self):
+        self.set_bits(x1=1, x0=0)
+        self.assert_view("d_npre", 1)
+        self.assert_view("d_xor", 1)
+        self.assert_view("d_nb_out", 1)
+
+    def test_negative_view(self):
+        self.set_bits(x1=0, x0=1)
+        self.assert_view("d_npre", -3)
+
+    def test_classifier_view(self):
+        self.set_bits(g0=1, g1=1, g2=1)                # top bar -> class 1
+        self.assert_view("d_clspre", 1)
+
+    def test_ax_tree_has_rendered_digits(self):
+        self.set_bits(a1=1, a0=0, b1=1, b0=1)          # 5 and 6 rendered
+        snap = self.page.locator("body").aria_snapshot()
+        self.assertIn("5", snap)
+        self.assertIn("6", snap)
+
+
 class XorTests(Base):
     def test_all_4_states_with_intermediates(self):
         for x1 in (0, 1):
@@ -315,7 +371,8 @@ def engine_case(name, engine):
 for engine in ENGINES:
     for base in (StaticChecks, GateTests, HalfAdderTests, FullAdderTests,
                  Add2Tests, Mul2Tests, Add4Tests, DotTests, MatVecTests,
-                 NeuronTests, XorTests, NativeModeTests, ClassifierTests):
+                 NeuronTests, XorTests, NativeModeTests, ClassifierTests,
+                 DisplayTests):
         cls = type(f"{base.__name__}_{engine}", (base,), {"engine": engine})
         cls.__module__ = __name__
         globals()[cls.__name__] = cls

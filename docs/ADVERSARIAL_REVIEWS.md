@@ -36,3 +36,29 @@ Raw output preserved in git history (`docs/ADVERSARIAL_REVIEWS.md` first version
 ### Adopted experiment list
 
 The reviewer's 12 experiments become `tests/` acceptance list: (1) zero-script/offline static gate; (2) typing probe both @property and unregistered; (3) exhaustive gate truth tables + bit-invariant assertion; (4) scope invariance between visible intermediate and downstream consumer; (5) structural adder/multiplier static check (no operand-pair lookup selectors); (6) display-path policy; (7) hidden-layer same-named-signal proof; (8) full network vs independent reference; (9) per-stage overflow width table; (10) scalability growth curve; (11) prior-art citations; (12) deterministic rebuild byte-identity.
+
+## Checkpoint 2 — final pre-release review (DeepSeek V4 Pro High, 2026-08-30)
+
+Reviewer reproduced `make build` + `make test` (34 tests green at review time), confirmed zero-JS/offline, genuine composition (no lookup selectors), correct math, deterministic rebuild, honest prior-art framing.
+
+### Blocker
+
+- **BLOCK-1** decimal readouts silently dead: `dec_css` double-wrapped `var(--var(--…))`, so 10 of 11 gate-mode decimal views rendered "0" always; test suite blind because it read computed custom properties, not rendered text. → **FIXED:** decimal views now materialize as registered `*_dec` signals (single clean `var()` into the counter); signed views use a negative sign-bit coefficient (verified: `−3` renders); new `DisplayTests` assert resolved `::after counter-reset` values (`v 5`, `v −3`, …) plus rendered digits in the accessibility tree; dead view CSS removed.
+
+### High
+
+- **H-1** section 11 (native comparison) showed the gate-mode `d_xor` signal instead of `d_nb_out`. → **FIXED:** now `d_nb_out`, asserted by test.
+- **H-2** display layer never end-to-end tested; dead view classes present. → **FIXED:** see BLOCK-1; 7 rendered-display tests added (both engines).
+
+### Medium
+
+- **M-1** "~14 declarations" vs "~8" inconsistency. → **FIXED:** demo says 8.
+- **M-2** README floor said Chromium 105+ but `color-mix()` needs 111+. → **FIXED:** floor stated as Chromium 111+.
+- **M-3** Safari listed as supported, never tested. → **FIXED:** README + LIMITS now say "should work, not tested here".
+
+### Low
+
+- `negate()` dead variable. → **FIXED.**
+- "pure wiring" overstatement for ±2 weight application. → **FIXED:** reworded to "reduces to wiring (no multiplier circuit needed)".
+
+Final state: 58 tests green across Chromium + Firefox.

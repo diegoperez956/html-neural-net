@@ -146,7 +146,6 @@ class Circuit:
         """Two's complement negation: bitwise NOT (gates) + 1 via ripple add."""
         nb = [self.gate("NOT", b, name=f"{name}_n{i}") for i, b in enumerate(bits)]
         zero = ["0"] * len(bits)
-        one = ["1"] + ["0"] * (len(bits) - 1)
         return self.ripple_add(f"{name}_neg", nb, zero, "1")
 
 

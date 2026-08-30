@@ -18,7 +18,7 @@ make build   # trains the classifier + generates dist/index.html
 xdg-open dist/index.html
 ```
 
-or just open the prebuilt `dist/index.html`. Firefox 128+, Chromium 105+.
+or just open the prebuilt `dist/index.html`. Firefox 128+, Chromium 111+.
 
 ## Why this is interesting
 
@@ -56,7 +56,8 @@ out = step(+2h1 + 2h2 − 1)
 
 All four input states are verified against an independent Python
 reference, including hidden preactivations. Weights ±2 are deliberate: a
-power-of-two weight times a bit is pure wiring, so the network is 100%
+power-of-two weight times a bit reduces to wiring (no multiplier circuit
+needed), so the network is 100%
 gate-built at 4-bit signed width.
 
 ## Is HTML actually doing the math?
@@ -101,10 +102,10 @@ make test    # builds, then 34 Playwright tests × Chromium + Firefox
 
 ## Browser support
 
-Chromium 105+ / Firefox 128+ / Safari 16.4+ (needs `:has()` and
-`@property`; LED styling needs `color-mix()`). Tested headlessly in
-Chromium 149 and Firefox 151. See `docs/LIMITS.md` for the measured
-scaling story.
+Chromium 111+ / Firefox 128+ (needs `:has()`, `@property`, and
+`color-mix()` for LED styling). Safari 16.4+ should work but is **not
+tested in this repo** — only Chromium 149 and Firefox 151 run in CI. See
+`docs/LIMITS.md` for the measured scaling story.
 
 ## Prior art (and what this adds)
 
