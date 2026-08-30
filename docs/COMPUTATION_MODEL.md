@@ -126,7 +126,7 @@ Stage widths (two's complement where signed):
 - N-bit unsigned adder: width N+1 (carry included);
 - N×N unsigned multiplier: width 2N;
 - dot product of two 2-bit unsigned operands: products width 2, sum width 5 (max 18);
-- 2×2 matrix × 2-bit vector: same widths per row;
+- 2×2 matrix × 1-bit vector: each entry is a gate-masked constant weight; row sums fit 4 bits;
 - XOR MLP neuron: weight ±2 needs 3-bit signed product words (−4..7); neuron preactivation is sum of two 3-bit products plus bias (−1): width 4 signed (−8..7); threshold = sign bit;
 - overflow is impossible for these maxima by construction, and exhaustive tests assert it.
 

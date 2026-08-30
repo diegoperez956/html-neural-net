@@ -1,0 +1,276 @@
+#!/usr/bin/env python3
+"""htmlnet demo generator. Build-time only; output is HTML+CSS with zero JS.
+
+Usage: python3 scripts/generate.py [out.html]
+"""
+import sys
+from circuit import Circuit, Net, ref, render
+
+BASE_CSS = """
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: #0b0e14; color: #cfe3ff;
+    font: 15px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 28px 0 8px; border-top: 1px solid #1e2a3d; padding-top: 14px; }
+  .sub { color: #7d8fa9; font-size: 13px; margin-bottom: 12px; }
+  section { max-width: 900px; }
+  .row { margin: 4px 0; }
+  label { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; }
+  input[type="checkbox"] { accent-color: #38ff8c; width: 15px; height: 15px; }
+  .led { display: inline-block; width: 11px; height: 11px; margin: 0 1px; border-radius: 2px;
+         background: #223; vertical-align: middle; }
+  .bits { display: inline-flex; gap: 2px; align-items: center; margin-right: 8px; }
+  .v { color: #7CFC9B; }
+  .tag { color: #5f7190; font-size: 12px; }
+  .kbd { color: #8fa8c8; }
+"""
+
+
+def led_css(signal: str, cls: str) -> str:
+    return (
+        f'.{cls} {{ background: color-mix(in srgb, #38ff8c, #101826 '
+        f'calc((1 - var(--{signal})) * 100%)); }}'
+    )
+
+
+def dec_css(bits, cls: str) -> str:
+    """Native-calc decimal VIEW (labeled, display only). bits: signal names LSB first."""
+    terms = " + ".join(f"({2 ** i} * var(--{b}))" for i, b in enumerate(bits))
+    return f'.{cls}::after {{ counter-reset: v calc({terms}); content: counter(v); }}'
+
+
+def main(path):
+    c = Circuit()
+    n = Net(c)
+
+    # ---------------- 1. primary bits x1, x0 (master XOR pair) -------------
+    # ---------------- 2. gates: a, b toggles ---------------------------------
+    inputs = ["x1", "x0", "a", "b", "cin",
+              "a1", "a0", "b1", "b0",
+              "c3", "c2", "c1", "c0", "d3", "d2", "d1", "d0",
+              "u1", "u0", "v1", "v0"]
+    for name in inputs:
+        c.emit(name, "0")  # placeholder; overridden by :has rules
+
+    not_a = c.gate("NOT", ref("a"), name="g_not")
+    and_g = c.gate("AND", ref("a"), ref("b"), name="g_and")
+    or_g = c.gate("OR", ref("a"), ref("b"), name="g_or")
+    xor_g = c.gate("XOR", ref("a"), ref("b"), name="g_xor")
+
+    # half adder (M2)
+    ha_s, ha_c = c.half_adder("ha", ref("a"), ref("b"))
+    # full adder (M3)
+    fa_s, fa_c = c.full_adder("fa", ref("a"), ref("b"), ref("cin"))
+
+    # 2-bit adder + 2x2 multiplier (M4/M5)
+    s2 = c.ripple_add("add2", [ref("a0"), ref("a1"), "0"], [ref("b0"), ref("b1"), "0"], "0")
+    p2 = c.unsigned_mult("mul2", [ref("a0"), ref("a1")], [ref("b0"), ref("b1")])
+
+    # 4-bit adder (M4 exhaustively testable)
+    s4 = c.ripple_add("add4",
+                      [ref("c0"), ref("c1"), ref("c2"), ref("c3"), "0"],
+                      [ref("d0"), ref("d1"), ref("d2"), ref("d3"), "0"], "0")
+
+    # dot product of two 2-bit vectors u = (u1,u0), v = (v1,v0): u0*v0 + u1*v1
+    p_u0v0 = c.unsigned_mult("d_u0v0", [ref("u0")], [ref("v0")])          # 1 bit
+    p_u1v1 = c.unsigned_mult("d_u1v1", [ref("u1")], [ref("v1")])          # 1 bit
+    dot_bits = c.ripple_add("dot_sum",
+                            p_u0v0 + ["0", "0", "0", "0"],
+                            p_u1v1 + ["0", "0", "0", "0"],
+                            "0")
+
+    # matrix x vector: fixed W = [[2,1],[1,2]] x [v1,v0] -> two outputs.
+    # weight x input = gate-masked magnitude bits (wiring), row = ripple sum.
+    def row_of(name, wx1, wx0, x1name, x0name):
+        def mask(v):
+            return [str((v >> i) & 1) for i in range(4)]
+        t1 = [c.gate("AND", m, ref(x1name), name=f"{name}_t0_{j}")
+              for j, m in enumerate(mask(wx1))]  # wx1*x1
+        t0 = [c.gate("AND", m, ref(x0name), name=f"{name}_t1_{j}")
+              for j, m in enumerate(mask(wx0))]  # wx0*x0
+        return c.ripple_add(name, t1, t0, "0")
+
+    row0 = row_of("mv_row0", 2, 1, "v1", "v0")
+    row1 = row_of("mv_row1", 1, 2, "v1", "v0")
+
+    # neuron (h1 of the XOR net) + full XOR MLP with stable test aliases
+    n_out, n_pre = n.neuron("n1", [+2, -2], [-1], [ref("x1"), ref("x0")])
+    for i, b in enumerate(n_pre):
+        c.emit(f"n1_pre_b{i}", ref(b))
+
+    h1, h1_pre = n.neuron("xor_h1", [+2, -2], [-1], [ref("x1"), ref("x0")])
+    h2, h2_pre = n.neuron("xor_h2", [-2, +2], [-1], [ref("x1"), ref("x0")])
+    out, out_pre = n.neuron("xor_out", [+2, +2], [-1], [ref(h1), ref(h2)])
+    for tag, pre in (("h1", h1_pre), ("h2", h2_pre), ("out", out_pre)):
+        for i, b in enumerate(pre):
+            c.emit(f"xor_{tag}_pre_b{i}", ref(b))
+
+    # ---------------- CSS ----------------------------------------------------
+    led_css_all = "\n".join([
+        led_css("g_not", "l_not"), led_css("g_and", "l_and"),
+        led_css("g_or", "l_or"), led_css("g_xor", "l_xor"),
+        led_css(ha_s, "l_ha_s"), led_css(ha_c, "l_ha_c"),
+        led_css(fa_s, "l_fa_s"), led_css(fa_c, "l_fa_c"),
+        *[led_css(s, f"l_add2_{i}") for i, s in enumerate(s2)],
+        *[led_css(p, f"l_mul2_{i}") for i, p in enumerate(p2)],
+        *[led_css(s, f"l_add4_{i}") for i, s in enumerate(s4)],
+        *[led_css(b, f"l_dot_{i}") for i, b in enumerate(dot_bits)],
+        *[led_css(b, f"l_mv0_{i}") for i, b in enumerate(row0)],
+        *[led_css(b, f"l_mv1_{i}") for i, b in enumerate(row1)],
+        led_css(n_out, "l_n_out"),
+        *[led_css(b, f"l_npre_{i}") for i, b in enumerate(n_pre)],
+        led_css(h1, "l_h1"), led_css(h2, "l_h2"), led_css(out, "l_xor_out"),
+    ])
+    dec_css_all = "\n".join([
+        dec_css([ref("a")], "d_a"), dec_css([ref("b")], "d_b"),
+        dec_css([ref(ha_s), ref(ha_c)], "d_ha"),
+        dec_css([ref(fa_s), ref(fa_c)], "d_fa"),
+        dec_css([ref(s) for s in s2], "d_add2"),
+        dec_css([ref(p) for p in p2], "d_mul2"),
+        dec_css([ref(s) for s in s4], "d_add4"),
+        dec_css([ref(b) for b in dot_bits], "d_dot"),
+        dec_css([ref(b) for b in row0], "d_mv0"),
+        dec_css([ref(b) for b in row1], "d_mv1"),
+        dec_css([ref(b) for b in n_pre], "d_npre"),
+        dec_css([ref(n_out)], "d_n"),
+        dec_css([ref(h1), ref(h2)], "d_h"),
+        dec_css([ref(out)], "d_xor"),
+    ])
+
+    input_css = "\n".join(
+        f"body.rt:has(#{name}:checked) {{ --{name}: 1; }}" for name in inputs
+    )
+
+    extra = BASE_CSS + "\n" + input_css + "\n" + led_css_all + "\n" + dec_css_all
+
+    def leds(cls, nbits):
+        return "".join(f'<span class="led {cls}_{i}"></span>' for i in range(nbits))
+
+    body = f"""
+<h1>htmlnet — a neural network from HTML + CSS, zero JavaScript</h1>
+<div class="sub">checked form state → bits → gates → adders → multiplication → dot product → matrix×vector → neurons → XOR MLP. Composed at build time; evaluated by the browser's style engine at runtime. <span class="kbd">File → open → toggle.</span></div>
+
+<section>
+  <h2>1 · input bits</h2>
+  <div class="row"><label><input type="checkbox" id="x1"> x1</label>
+  <label><input type="checkbox" id="x0"> x0</label>
+  <span class="tag">— shared inputs for the neuron and XOR network below</span></div>
+</section>
+
+<section>
+  <h2>2 · logic gates (truth-table verified)</h2>
+  <div class="row"><label><input type="checkbox" id="a"> a</label>
+  <label><input type="checkbox" id="b"> b</label></div>
+  <div class="row"><span class="kbd">NOT a</span> <span class="led l_not"></span> <span class="tag">= 1−a</span></div>
+  <div class="row"><span class="kbd">a AND b</span> <span class="led l_and"></span> <span class="tag">= min(a,b)</span></div>
+  <div class="row"><span class="kbd">a OR b</span> <span class="led l_or"></span> <span class="tag">= max(a,b)</span></div>
+  <div class="row"><span class="kbd">a XOR b</span> <span class="led l_xor"></span> <span class="tag">= max(a,b)−min(a,b)</span></div>
+</section>
+
+<section>
+  <h2>3 · half adder (uses a, b above)</h2>
+  <div class="row"><span class="kbd">sum</span> <span class="led l_ha_s"></span>
+  <span class="kbd">carry</span> <span class="led l_ha_c"></span>
+  <span class="tag">sum = a⊕b, carry = a∧b</span></div>
+</section>
+
+<section>
+  <h2>4 · full adder</h2>
+  <div class="row"><label><input type="checkbox" id="cin"> carry-in</label>
+  <span class="tag">(a, b shared)</span></div>
+  <div class="row"><span class="kbd">sum</span> <span class="led l_fa_s"></span>
+  <span class="kbd">carry-out</span> <span class="led l_fa_c"></span>
+  <span class="tag">2 XOR + 2 AND + 1 OR, connected by named wires</span></div>
+</section>
+
+<section>
+  <h2>5 · 2-bit adder and 2×2 multiplier</h2>
+  <div class="row">
+    <label><input type="checkbox" id="a1"> a1</label>
+    <label><input type="checkbox" id="a0"> a0</label>
+    <label><input type="checkbox" id="b1"> b1</label>
+    <label><input type="checkbox" id="b0"> b0</label>
+  </div>
+  <div class="row"><span class="kbd">a + b =</span> <span class="bits">{leds('l_add2', 3)}</span>
+  <span class="v d_add2"></span></div>
+  <div class="row"><span class="kbd">a × b =</span> <span class="bits">{leds('l_mul2', 4)}</span>
+  <span class="v d_mul2"></span>
+  <span class="tag">partial products (AND gates) + ripple addition</span></div>
+</section>
+
+<section>
+  <h2>6 · 4-bit adder (256-state exhaustively tested)</h2>
+  <div class="row">
+    <label><input type="checkbox" id="c3"> c3</label>
+    <label><input type="checkbox" id="c2"> c2</label>
+    <label><input type="checkbox" id="c1"> c1</label>
+    <label><input type="checkbox" id="c0"> c0</label>
+    <label><input type="checkbox" id="d3"> d3</label>
+    <label><input type="checkbox" id="d2"> d2</label>
+    <label><input type="checkbox" id="d1"> d1</label>
+    <label><input type="checkbox" id="d0"> d0</label>
+  </div>
+  <div class="row"><span class="kbd">c + d =</span> <span class="bits">{leds('l_add4', 5)}</span>
+  <span class="v d_add4"></span>
+  <span class="tag">4 full adders, carries chained as named wires</span></div>
+</section>
+
+<section>
+  <h2>7 · dot product u·v (2-bit entries)</h2>
+  <div class="row">
+    <label><input type="checkbox" id="u1"> u1</label>
+    <label><input type="checkbox" id="u0"> u0</label>
+    <label><input type="checkbox" id="v1"> v1</label>
+    <label><input type="checkbox" id="v0"> v0</label>
+  </div>
+  <div class="row"><span class="kbd">u₀v₀ + u₁v₁ =</span> <span class="bits">{leds('l_dot', 5)}</span>
+  <span class="v d_dot"></span>
+  <span class="tag">two multipliers + shared ripple adder</span></div>
+</section>
+
+<section>
+  <h2>8 · matrix × vector — W = [[2,1],[1,2]], x = (v₁,v₀)</h2>
+  <div class="row"><span class="kbd">row 0</span> <span class="bits">{leds('l_mv0', 4)}</span>
+  <span class="v d_mv0"></span> <span class="tag">= 2v₁ + 1v₀</span></div>
+  <div class="row"><span class="kbd">row 1</span> <span class="bits">{leds('l_mv1', 4)}</span>
+  <span class="v d_mv1"></span> <span class="tag">= 1v₁ + 2v₀</span></div>
+  <div class="tag">fixed weights are build-time constants; weight × input uses gate-masked magnitudes</div>
+</section>
+
+<section>
+  <h2>9 · neuron — y = step(+2x₁ − 2x₀ − 1)</h2>
+  <div class="row"><span class="kbd">preactivation (4-bit two's complement)</span>
+  <span class="bits">{leds('l_npre', 4)}</span> <span class="v d_npre"></span></div>
+  <div class="row"><span class="kbd">activation</span> <span class="led l_n_out"></span>
+  <span class="tag">= 1 if preactivation ≥ 0 (sign bit)</span></div>
+</section>
+
+<section>
+  <h2>10 · XOR — solved by a 2-2-1 MLP</h2>
+  <div class="row"><span class="kbd">h1 = step(+2x₁−2x₀−1)</span> <span class="led l_h1"></span></div>
+  <div class="row"><span class="kbd">h2 = step(−2x₁+2x₀−1)</span> <span class="led l_h2"></span></div>
+  <div class="row"><span class="kbd">out = step(+2h1+2h2−1)</span> <span class="led l_xor_out"></span>
+  <span class="v d_xor"></span></div>
+  <div class="tag">a single linear neuron cannot learn XOR; two hidden neurons can. All four inputs verified against an independent reference model.</div>
+</section>
+
+<section>
+  <h2>honesty label</h2>
+  <div class="tag">
+  Runtime: HTML + CSS only (no script, no WASM, no network, works from file://).<br>
+  Gates are named bit identities over native CSS min()/max()/calc() — the browser's arithmetic is the substrate; we compose circuits on top.<br>
+  Decimal numbers in green are native-calc display views, outside the gate circuit. LEDs read gate signals directly.<br>
+  Generated by scripts/generate.py at build time; rebuilds are deterministic.
+  </div>
+</section>
+"""
+    html = render(c, extra, body, "htmlnet — neural network in HTML + CSS, zero JS")
+    open(path, "w").write(html)
+    print(f"wrote {path}: {len(c.signals)} signals, {len(html)} bytes")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1] if len(sys.argv) > 1 else "dist/index.html")
