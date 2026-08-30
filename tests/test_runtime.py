@@ -55,8 +55,12 @@ class Base(unittest.TestCase):
         self.page.close()
 
     def set_bits(self, **ids):
-        for name, val in ids.items():
-            self.page.set_checked(f"#{name}", bool(val))
+        # test-side JS sets form state directly (the artifact itself stays JS-free)
+        self.page.evaluate(
+            "(ids) => { for (const [n, v] of Object.entries(ids)) "
+            "{ const el = document.getElementById(n); el.checked = v; } }",
+            ids,
+        )
 
     def read(self, *names):
         props = ",".join(f"'--{n}'" for n in names)
@@ -224,6 +228,57 @@ class NativeModeTests(Base):
                 self.assertEqual(r1, v1 + 2 * v0)
 
 
+class ClassifierTests(Base):
+    """M10: perceptron-trained 3x3 glyph classifier (top bar vs left bar)."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        import json
+        with open(os.path.join(ROOT, "scripts", "weights.json")) as f:
+            w = json.load(f)
+        cls.bias = w["bias"]
+        cls.weights = w["weights"]
+
+    def ref(self, bits):
+        s = self.bias + sum(w * b for w, b in zip(self.weights, bits))
+        return s, 1 if s >= 0 else 0
+
+    def check(self, bits, expect_s=None):
+        s, out = self.ref(bits)
+        if expect_s is not None:
+            self.assertEqual(s, expect_s)
+        bits_map = {f"g{i}": bits[i] for i in range(9)}
+        self.set_bits(**bits_map)
+        pre = s2c(dec(self.read(*[f"cls_pre_b{i}" for i in range(5)])), 5)
+        got_out = self.read("cls_out")[0]
+        self.assertEqual(pre, s, f"preactivation bits={bits}")
+        self.assertEqual(got_out, out, f"class bits={bits}")
+
+    def test_training_exemplars(self):
+        import json
+        # same exemplars as scripts/train.py (kept in sync by test, not runtime)
+        exemplars = [
+            ([1, 1, 1, 0, 0, 0, 0, 0, 0], 1),
+            ([1, 1, 1, 0, 1, 0, 0, 0, 0], 1),
+            ([1, 1, 1, 0, 0, 0, 0, 0, 1], 1),
+            ([1, 0, 0, 1, 0, 0, 1, 0, 0], 0),
+            ([1, 0, 0, 1, 1, 0, 1, 0, 0], 0),
+            ([1, 0, 0, 1, 0, 0, 1, 0, 1], 0),
+            ([0, 0, 0, 0, 0, 0, 0, 0, 0], 0),
+            ([0, 1, 0, 0, 0, 0, 0, 0, 0], 0),
+            ([0, 0, 0, 0, 1, 0, 0, 0, 0], 0),
+        ]
+        for bits, label in exemplars:
+            self.check(bits)
+
+    def test_random_states(self):
+        import random
+        rng = random.Random(42)
+        for _ in range(32):
+            self.check([rng.randint(0, 1) for _ in range(9)])
+
+
 class XorTests(Base):
     def test_all_4_states_with_intermediates(self):
         for x1 in (0, 1):
@@ -249,7 +304,7 @@ def engine_case(name, engine):
 for engine in ENGINES:
     for base in (StaticChecks, GateTests, HalfAdderTests, FullAdderTests,
                  Add2Tests, Mul2Tests, Add4Tests, DotTests, MatVecTests,
-                 NeuronTests, XorTests, NativeModeTests):
+                 NeuronTests, XorTests, NativeModeTests, ClassifierTests):
         cls = type(f"{base.__name__}_{engine}", (base,), {"engine": engine})
         cls.__module__ = __name__
         globals()[cls.__name__] = cls

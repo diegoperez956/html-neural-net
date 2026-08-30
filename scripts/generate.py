@@ -3,6 +3,7 @@
 
 Usage: python3 scripts/generate.py [out.html]
 """
+import os
 import sys
 from circuit import Circuit, Net, ref, render
 
@@ -32,6 +33,11 @@ BASE_CSS = """
   section:focus-within h2 { color: #7CFC9B; }
   .caption { color: #4c5f7a; font-size: 11px; }
   footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #1e2a3d; }
+  .grid { display: grid; grid-template-columns: repeat(3, 34px); gap: 6px; margin: 8px 0; }
+  .cell { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid #223; border-radius: 4px; cursor: pointer; }
+  .cell:has(input:checked) { border-color: #38ff8c; box-shadow: 0 0 6px #38ff8c55 inset; }
+  .cell input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .cell:has(input:focus-visible) { outline: 2px solid #38ff8c; outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 """
 
@@ -58,7 +64,7 @@ def main(path):
     inputs = ["x1", "x0", "a", "b", "cin",
               "a1", "a0", "b1", "b0",
               "c3", "c2", "c1", "c0", "d3", "d2", "d1", "d0",
-              "u1", "u0", "v1", "v0"]
+              "u1", "u0", "v1", "v0"] + [f"g{i}" for i in range(9)]
     for name in inputs:
         c.emit(name, "0")  # placeholder; overridden by :has rules
 
@@ -115,6 +121,17 @@ def main(path):
         for i, b in enumerate(pre):
             c.emit(f"xor_{tag}_pre_b{i}", ref(b))
 
+    # ---------------- trained classifier (M10) ------------------------------
+    import json as _json
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "weights.json")) as f:
+        trained = _json.load(f)
+    cls_bias = trained["bias"]
+    cls_weights = trained["weights"]
+    cls_inputs = [ref(f"g{i}") for i in range(9)]
+    cls_out, cls_pre = n.neuron("cls", cls_weights, [cls_bias], cls_inputs, swidth=5)
+    for i, b in enumerate(cls_pre):
+        c.emit(f"cls_pre_b{i}", ref(b))
+
     # ---------------- Mode B: native CSS arithmetic (comparison baseline) ---
     # var() * var() is illegal in CSS, so native mode only works where weights
     # are literal constants — which is exactly the neural-inference case here.
@@ -146,6 +163,8 @@ def main(path):
         *[led_css(b, f"l_npre_{i}") for i, b in enumerate(n_pre)],
         led_css(h1, "l_h1"), led_css(h2, "l_h2"), led_css(out, "l_xor_out"),
         led_css("nb_h1", "l_nb_h1"), led_css("nb_h2", "l_nb_h2"), led_css("nb_out", "l_nb_out"),
+        led_css(cls_out, "l_cls_out"),
+        *[led_css(b, f"l_clspre_{i}") for i, b in enumerate(cls_pre)],
     ])
     dec_css_all = "\n".join([
         dec_css([ref("a")], "d_a"), dec_css([ref("b")], "d_b"),
@@ -164,6 +183,8 @@ def main(path):
         dec_css(["nb_h1pre"], "d_nb_h1pre"), dec_css(["nb_h2pre"], "d_nb_h2pre"),
         dec_css(["nb_outpre"], "d_nb_outpre"),
         dec_css(["nb_mv0"], "d_nb_mv0"), dec_css(["nb_mv1"], "d_nb_mv1"),
+        dec_css([ref(b) for b in cls_pre], "d_clspre"),
+        dec_css([ref(cls_out)], "d_cls"),
     ])
 
     input_css = "\n".join(
@@ -297,6 +318,17 @@ def main(path):
   <div class="tag">~14 declarations total vs {n_signals} gate signals above. Same outputs, opposite philosophy.
   Because var()×var() is illegal in CSS, native mode only exists when one operand is a build-time constant —
   which is true for inference weights, and exactly why structural composition is unavoidable for interactive multiplication.</div>
+</section>
+
+<section>
+  <h2>12 · trained classifier — 3×3 glyph → “top bar” vs “left bar”</h2>
+  <div class="tag">trained at build time by a plain perceptron (scripts/train.py) on 9 exemplars; weights compiled into the gate netlist. bias = {cls_bias}, w = {cls_weights}. This is the only learned part of the demo.</div>
+  <div class="grid" role="group" aria-label="3 by 3 glyph grid">
+    {"".join(f'<label class="cell"><input type="checkbox" id="g{i}" aria-label="cell {i//3},{i%3}"></label>' for i in range(9))}
+  </div>
+  <div class="row"><span class="kbd">preactivation (5-bit signed)</span> <span class="bits">{leds('l_clspre', 5)}</span> <span class="v d_clspre"></span></div>
+  <div class="row"><span class="kbd">class</span> <span class="led l_cls_out"></span>
+  <span class="tag">1 = top bar, 0 = left bar / other</span></div>
 </section>
 
 <section>
