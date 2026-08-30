@@ -89,6 +89,9 @@ body.rt:has(#v0:checked) { --v0: 1; }
 .l_h1 { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--xor_h1_out)) * 100%)); }
 .l_h2 { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--xor_h2_out)) * 100%)); }
 .l_xor_out { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--xor_out_out)) * 100%)); }
+.l_nb_h1 { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--nb_h1)) * 100%)); }
+.l_nb_h2 { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--nb_h2)) * 100%)); }
+.l_nb_out { background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--nb_out)) * 100%)); }
 .d_a::after { counter-reset: v calc((1 * var(--var(--a)))); content: counter(v); }
 .d_b::after { counter-reset: v calc((1 * var(--var(--b)))); content: counter(v); }
 .d_ha::after { counter-reset: v calc((1 * var(--var(--ha_sum))) + (2 * var(--var(--ha_carry)))); content: counter(v); }
@@ -103,6 +106,11 @@ body.rt:has(#v0:checked) { --v0: 1; }
 .d_n::after { counter-reset: v calc((1 * var(--var(--n1_out)))); content: counter(v); }
 .d_h::after { counter-reset: v calc((1 * var(--var(--xor_h1_out))) + (2 * var(--var(--xor_h2_out)))); content: counter(v); }
 .d_xor::after { counter-reset: v calc((1 * var(--var(--xor_out_out)))); content: counter(v); }
+.d_nb_h1pre::after { counter-reset: v calc((1 * var(--nb_h1pre))); content: counter(v); }
+.d_nb_h2pre::after { counter-reset: v calc((1 * var(--nb_h2pre))); content: counter(v); }
+.d_nb_outpre::after { counter-reset: v calc((1 * var(--nb_outpre))); content: counter(v); }
+.d_nb_mv0::after { counter-reset: v calc((1 * var(--nb_mv0))); content: counter(v); }
+.d_nb_mv1::after { counter-reset: v calc((1 * var(--nb_mv1))); content: counter(v); }
 
 @property --a { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --a0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -351,6 +359,14 @@ body.rt:has(#v0:checked) { --v0: 1; }
 @property --n1_t1_neg_b2_carry { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --n1_t1_neg_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --n1_t1_neg_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_h1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_h1pre { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_h2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_h2pre { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_mv0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_mv1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_out { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --nb_outpre { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --u0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --u1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
 @property --v0 { syntax: "<integer>"; inherits: true; initial-value: 0; }
@@ -990,6 +1006,14 @@ body.rt:has(#v0:checked) { --v0: 1; }
 .rt { --xor_out_pre_b1: var(--xor_out_bias409_b1_sum); }
 .rt { --xor_out_pre_b2: var(--xor_out_bias409_b2_sum); }
 .rt { --xor_out_pre_b3: var(--xor_out_bias409_b3_sum); }
+.rt { --nb_h1pre: calc((2 * var(--x1)) - (2 * var(--x0)) - 1); }
+.rt { --nb_h1: max(0, min(1, calc(var(--nb_h1pre) + 1))); }
+.rt { --nb_h2pre: calc((2 * var(--x0)) - (2 * var(--x1)) - 1); }
+.rt { --nb_h2: max(0, min(1, calc(var(--nb_h2pre) + 1))); }
+.rt { --nb_outpre: calc((2 * var(--nb_h1)) + (2 * var(--nb_h2)) - 1); }
+.rt { --nb_out: max(0, min(1, calc(var(--nb_outpre) + 1))); }
+.rt { --nb_mv0: calc((2 * var(--v1)) + (1 * var(--v0))); }
+.rt { --nb_mv1: calc((1 * var(--v1)) + (2 * var(--v0))); }
 </style>
 </head>
 <body class="rt">
@@ -1099,6 +1123,18 @@ body.rt:has(#v0:checked) { --v0: 1; }
   <div class="row"><span class="kbd">out = step(+2h1+2h2−1)</span> <span class="led l_xor_out"></span>
   <span class="v d_xor"></span></div>
   <div class="tag">a single linear neuron cannot learn XOR; two hidden neurons can. All four inputs verified against an independent reference model.</div>
+</section>
+
+<section>
+  <h2>11 · comparison — the same XOR in native CSS arithmetic</h2>
+  <div class="row"><span class="kbd">h1 = max(0, min(1, 2x₁−2x₀))</span> <span class="led l_nb_h1"></span></div>
+  <div class="row"><span class="kbd">h2 = max(0, min(1, −2x₁+2x₀))</span> <span class="led l_nb_h2"></span></div>
+  <div class="row"><span class="kbd">out = max(0, min(1, 2h1+2h2−1))</span> <span class="led l_nb_out"></span>
+  <span class="v d_xor"></span></div>
+  <div class="row"><span class="kbd">Wx row 0 / row 1</span> <span class="v d_nb_mv0"></span> / <span class="v d_nb_mv1"></span></div>
+  <div class="tag">~14 declarations total vs 450 gate signals above. Same outputs, opposite philosophy.
+  Because var()×var() is illegal in CSS, native mode only exists when one operand is a build-time constant —
+  which is true for inference weights, and exactly why structural composition is unavoidable for interactive multiplication.</div>
 </section>
 
 <section>

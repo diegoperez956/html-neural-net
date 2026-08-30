@@ -201,6 +201,29 @@ class NeuronTests(Base):
                 self.assertEqual(out, 1 if expect >= 0 else 0)
 
 
+class NativeModeTests(Base):
+    """Mode B: same XOR + matvec via direct native CSS arithmetic."""
+
+    def test_xor_all_4_states(self):
+        for x1 in (0, 1):
+            for x0 in (0, 1):
+                self.set_bits(x1=x1, x0=x0)
+                nb_h1, nb_h2, nb_out = self.read("nb_h1", "nb_h2", "nb_out")
+                h1 = 1 if 2 * x1 - 2 * x0 - 1 >= 0 else 0
+                h2 = 1 if 2 * x0 - 2 * x1 - 1 >= 0 else 0
+                self.assertEqual(nb_h1, h1)
+                self.assertEqual(nb_h2, h2)
+                self.assertEqual(nb_out, x1 ^ x0)
+
+    def test_matvec_all_4_states(self):
+        for v1 in (0, 1):
+            for v0 in (0, 1):
+                self.set_bits(v1=v1, v0=v0)
+                r0, r1 = self.read("nb_mv0", "nb_mv1")
+                self.assertEqual(r0, 2 * v1 + v0)
+                self.assertEqual(r1, v1 + 2 * v0)
+
+
 class XorTests(Base):
     def test_all_4_states_with_intermediates(self):
         for x1 in (0, 1):
@@ -226,7 +249,7 @@ def engine_case(name, engine):
 for engine in ENGINES:
     for base in (StaticChecks, GateTests, HalfAdderTests, FullAdderTests,
                  Add2Tests, Mul2Tests, Add4Tests, DotTests, MatVecTests,
-                 NeuronTests, XorTests):
+                 NeuronTests, XorTests, NativeModeTests):
         cls = type(f"{base.__name__}_{engine}", (base,), {"engine": engine})
         cls.__module__ = __name__
         globals()[cls.__name__] = cls

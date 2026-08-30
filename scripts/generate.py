@@ -108,6 +108,21 @@ def main(path):
         for i, b in enumerate(pre):
             c.emit(f"xor_{tag}_pre_b{i}", ref(b))
 
+    # ---------------- Mode B: native CSS arithmetic (comparison baseline) ---
+    # var() * var() is illegal in CSS, so native mode only works where weights
+    # are literal constants — which is exactly the neural-inference case here.
+    for sig, expr in {
+        "nb_h1pre": "calc((2 * var(--x1)) - (2 * var(--x0)) - 1)",
+        "nb_h1": "max(0, min(1, calc(var(--nb_h1pre) + 1)))",
+        "nb_h2pre": "calc((2 * var(--x0)) - (2 * var(--x1)) - 1)",
+        "nb_h2": "max(0, min(1, calc(var(--nb_h2pre) + 1)))",
+        "nb_outpre": "calc((2 * var(--nb_h1)) + (2 * var(--nb_h2)) - 1)",
+        "nb_out": "max(0, min(1, calc(var(--nb_outpre) + 1)))",
+        "nb_mv0": "calc((2 * var(--v1)) + (1 * var(--v0)))",
+        "nb_mv1": "calc((1 * var(--v1)) + (2 * var(--v0)))",
+    }.items():
+        c.emit(sig, expr)
+
     # ---------------- CSS ----------------------------------------------------
     led_css_all = "\n".join([
         led_css("g_not", "l_not"), led_css("g_and", "l_and"),
@@ -123,6 +138,7 @@ def main(path):
         led_css(n_out, "l_n_out"),
         *[led_css(b, f"l_npre_{i}") for i, b in enumerate(n_pre)],
         led_css(h1, "l_h1"), led_css(h2, "l_h2"), led_css(out, "l_xor_out"),
+        led_css("nb_h1", "l_nb_h1"), led_css("nb_h2", "l_nb_h2"), led_css("nb_out", "l_nb_out"),
     ])
     dec_css_all = "\n".join([
         dec_css([ref("a")], "d_a"), dec_css([ref("b")], "d_b"),
@@ -138,6 +154,9 @@ def main(path):
         dec_css([ref(n_out)], "d_n"),
         dec_css([ref(h1), ref(h2)], "d_h"),
         dec_css([ref(out)], "d_xor"),
+        dec_css(["nb_h1pre"], "d_nb_h1pre"), dec_css(["nb_h2pre"], "d_nb_h2pre"),
+        dec_css(["nb_outpre"], "d_nb_outpre"),
+        dec_css(["nb_mv0"], "d_nb_mv0"), dec_css(["nb_mv1"], "d_nb_mv1"),
     ])
 
     input_css = "\n".join(
@@ -149,6 +168,7 @@ def main(path):
     def leds(cls, nbits):
         return "".join(f'<span class="led {cls}_{i}"></span>' for i in range(nbits))
 
+    n_signals = len(c.signals)
     body = f"""
 <h1>htmlnet — a neural network from HTML + CSS, zero JavaScript</h1>
 <div class="sub">checked form state → bits → gates → adders → multiplication → dot product → matrix×vector → neurons → XOR MLP. Composed at build time; evaluated by the browser's style engine at runtime. <span class="kbd">File → open → toggle.</span></div>
@@ -258,6 +278,18 @@ def main(path):
 </section>
 
 <section>
+  <h2>11 · comparison — the same XOR in native CSS arithmetic</h2>
+  <div class="row"><span class="kbd">h1 = max(0, min(1, 2x₁−2x₀))</span> <span class="led l_nb_h1"></span></div>
+  <div class="row"><span class="kbd">h2 = max(0, min(1, −2x₁+2x₀))</span> <span class="led l_nb_h2"></span></div>
+  <div class="row"><span class="kbd">out = max(0, min(1, 2h1+2h2−1))</span> <span class="led l_nb_out"></span>
+  <span class="v d_xor"></span></div>
+  <div class="row"><span class="kbd">Wx row 0 / row 1</span> <span class="v d_nb_mv0"></span> / <span class="v d_nb_mv1"></span></div>
+  <div class="tag">~14 declarations total vs {n_signals} gate signals above. Same outputs, opposite philosophy.
+  Because var()×var() is illegal in CSS, native mode only exists when one operand is a build-time constant —
+  which is true for inference weights, and exactly why structural composition is unavoidable for interactive multiplication.</div>
+</section>
+
+<section>
   <h2>honesty label</h2>
   <div class="tag">
   Runtime: HTML + CSS only (no script, no WASM, no network, works from file://).<br>
@@ -269,7 +301,7 @@ def main(path):
 """
     html = render(c, extra, body, "htmlnet — neural network in HTML + CSS, zero JS")
     open(path, "w").write(html)
-    print(f"wrote {path}: {len(c.signals)} signals, {len(html)} bytes")
+    print(f"wrote {path}: {n_signals} signals, {len(html)} bytes")
 
 
 if __name__ == "__main__":
