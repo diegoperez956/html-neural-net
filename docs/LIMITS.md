@@ -7,14 +7,14 @@ generated artifacts, Chromium 149 / Firefox 151 via Playwright.
 
 | metric | value |
 |---|---|
-| file size | ~152 KB |
-| signal declarations (custom properties) | 753 |
+| file size | ~153 KB |
+| signal declarations (custom properties) | 768 |
 | of which XOR MLP | 123 |
 | of which trained 3×3 classifier | ~260 |
-| of which Mode B (native comparison) | 8 |
-| `@property` registrations | 753 |
-| CSS rules | ~1 700 |
-| DOM elements | ~220 |
+| of which Mode B (native comparison) | 8 + 15 decimal-view signals |
+| `@property` registrations | 768 |
+| CSS rules | 1 659 |
+| DOM elements | 264 |
 
 ## Scaling: N-bit ripple adder (generated in isolation)
 
