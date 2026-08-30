@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>lead proof: gate-built XOR MLP</title>
+<style>
+    body { background: #0b0e14; color: #cfe3ff; font: 15px/1.5 ui-monospace, monospace; }
+    .row { margin: 6px 0; }
+    label { margin-right: 16px; }
+    @property --h1_out { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b0_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b0_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b0_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b1_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b1_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b1_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b1_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b1_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b2_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b2_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b2_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b3_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b3_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b3_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b3_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_pre_b3_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b0_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b0_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b0_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b1_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b1_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b1_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b1_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b1_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b2_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b2_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b2_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b3_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b3_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b3_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b3_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h1_tmp_b3_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_out { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b0_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b0_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b0_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b1_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b1_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b1_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b1_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b1_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b2_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b2_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b2_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b3_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b3_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b3_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b3_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_pre_b3_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b0_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b0_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b0_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b1_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b1_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b1_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b1_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b1_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b2_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b2_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b2_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b3_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b3_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b3_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b3_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --h2_tmp_b3_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_out { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b0_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b0_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b0_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b1_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b1_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b1_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b1_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b1_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b2_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b2_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b2_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b3_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b3_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b3_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b3_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_pre_b3_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b0_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b0_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b0_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b0_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b0_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b1_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b1_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b1_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b1_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b1_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b2_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b2_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b2_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b2_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b2_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b3_c1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b3_c2 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b3_cout { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b3_s1 { syntax: "<integer>"; inherits: true; initial-value: 0; }
+    @property --out_tmp_b3_sum { syntax: "<integer>"; inherits: true; initial-value: 0; }
+
+    /* primary inputs: form state -> bits */
+    .rt { --x1: 0; --x0: 0; }
+    body.rt:has(#x1:checked) { --x1: 1; }
+    body.rt:has(#x0:checked) { --x0: 1; }
+
+    /* netlist (generated) */
+    .rt { --h1_tmp_b0_s1: calc(max(0, 0) - min(0, 0)); }
+    .rt { --h1_tmp_b0_c1: min(0, 0); }
+    .rt { --h1_tmp_b0_sum: calc(max(var(--h1_tmp_b0_s1), 0) - min(var(--h1_tmp_b0_s1), 0)); }
+    .rt { --h1_tmp_b0_c2: min(var(--h1_tmp_b0_s1), 0); }
+    .rt { --h1_tmp_b0_cout: max(var(--h1_tmp_b0_c1), var(--h1_tmp_b0_c2)); }
+    .rt { --h1_tmp_b1_s1: calc(max(var(--x1), var(--x0)) - min(var(--x1), var(--x0))); }
+    .rt { --h1_tmp_b1_c1: min(var(--x1), var(--x0)); }
+    .rt { --h1_tmp_b1_sum: calc(max(var(--h1_tmp_b1_s1), var(--h1_tmp_b0_cout)) - min(var(--h1_tmp_b1_s1), var(--h1_tmp_b0_cout))); }
+    .rt { --h1_tmp_b1_c2: min(var(--h1_tmp_b1_s1), var(--h1_tmp_b0_cout)); }
+    .rt { --h1_tmp_b1_cout: max(var(--h1_tmp_b1_c1), var(--h1_tmp_b1_c2)); }
+    .rt { --h1_tmp_b2_s1: calc(max(0, var(--x0)) - min(0, var(--x0))); }
+    .rt { --h1_tmp_b2_c1: min(0, var(--x0)); }
+    .rt { --h1_tmp_b2_sum: calc(max(var(--h1_tmp_b2_s1), var(--h1_tmp_b1_cout)) - min(var(--h1_tmp_b2_s1), var(--h1_tmp_b1_cout))); }
+    .rt { --h1_tmp_b2_c2: min(var(--h1_tmp_b2_s1), var(--h1_tmp_b1_cout)); }
+    .rt { --h1_tmp_b2_cout: max(var(--h1_tmp_b2_c1), var(--h1_tmp_b2_c2)); }
+    .rt { --h1_tmp_b3_s1: calc(max(0, var(--x0)) - min(0, var(--x0))); }
+    .rt { --h1_tmp_b3_c1: min(0, var(--x0)); }
+    .rt { --h1_tmp_b3_sum: calc(max(var(--h1_tmp_b3_s1), var(--h1_tmp_b2_cout)) - min(var(--h1_tmp_b3_s1), var(--h1_tmp_b2_cout))); }
+    .rt { --h1_tmp_b3_c2: min(var(--h1_tmp_b3_s1), var(--h1_tmp_b2_cout)); }
+    .rt { --h1_tmp_b3_cout: max(var(--h1_tmp_b3_c1), var(--h1_tmp_b3_c2)); }
+    .rt { --h1_pre_b0_s1: calc(max(var(--h1_tmp_b0_sum), 1) - min(var(--h1_tmp_b0_sum), 1)); }
+    .rt { --h1_pre_b0_c1: min(var(--h1_tmp_b0_sum), 1); }
+    .rt { --h1_pre_b0_sum: calc(max(var(--h1_pre_b0_s1), 0) - min(var(--h1_pre_b0_s1), 0)); }
+    .rt { --h1_pre_b0_c2: min(var(--h1_pre_b0_s1), 0); }
+    .rt { --h1_pre_b0_cout: max(var(--h1_pre_b0_c1), var(--h1_pre_b0_c2)); }
+    .rt { --h1_pre_b1_s1: calc(max(var(--h1_tmp_b1_sum), 1) - min(var(--h1_tmp_b1_sum), 1)); }
+    .rt { --h1_pre_b1_c1: min(var(--h1_tmp_b1_sum), 1); }
+    .rt { --h1_pre_b1_sum: calc(max(var(--h1_pre_b1_s1), var(--h1_pre_b0_cout)) - min(var(--h1_pre_b1_s1), var(--h1_pre_b0_cout))); }
+    .rt { --h1_pre_b1_c2: min(var(--h1_pre_b1_s1), var(--h1_pre_b0_cout)); }
+    .rt { --h1_pre_b1_cout: max(var(--h1_pre_b1_c1), var(--h1_pre_b1_c2)); }
+    .rt { --h1_pre_b2_s1: calc(max(var(--h1_tmp_b2_sum), 1) - min(var(--h1_tmp_b2_sum), 1)); }
+    .rt { --h1_pre_b2_c1: min(var(--h1_tmp_b2_sum), 1); }
+    .rt { --h1_pre_b2_sum: calc(max(var(--h1_pre_b2_s1), var(--h1_pre_b1_cout)) - min(var(--h1_pre_b2_s1), var(--h1_pre_b1_cout))); }
+    .rt { --h1_pre_b2_c2: min(var(--h1_pre_b2_s1), var(--h1_pre_b1_cout)); }
+    .rt { --h1_pre_b2_cout: max(var(--h1_pre_b2_c1), var(--h1_pre_b2_c2)); }
+    .rt { --h1_pre_b3_s1: calc(max(var(--h1_tmp_b3_sum), 1) - min(var(--h1_tmp_b3_sum), 1)); }
+    .rt { --h1_pre_b3_c1: min(var(--h1_tmp_b3_sum), 1); }
+    .rt { --h1_pre_b3_sum: calc(max(var(--h1_pre_b3_s1), var(--h1_pre_b2_cout)) - min(var(--h1_pre_b3_s1), var(--h1_pre_b2_cout))); }
+    .rt { --h1_pre_b3_c2: min(var(--h1_pre_b3_s1), var(--h1_pre_b2_cout)); }
+    .rt { --h1_pre_b3_cout: max(var(--h1_pre_b3_c1), var(--h1_pre_b3_c2)); }
+    .rt { --h1_out: calc(1 - (var(--h1_pre_b3_sum))); }
+    .rt { --h2_tmp_b0_s1: calc(max(0, 0) - min(0, 0)); }
+    .rt { --h2_tmp_b0_c1: min(0, 0); }
+    .rt { --h2_tmp_b0_sum: calc(max(var(--h2_tmp_b0_s1), 0) - min(var(--h2_tmp_b0_s1), 0)); }
+    .rt { --h2_tmp_b0_c2: min(var(--h2_tmp_b0_s1), 0); }
+    .rt { --h2_tmp_b0_cout: max(var(--h2_tmp_b0_c1), var(--h2_tmp_b0_c2)); }
+    .rt { --h2_tmp_b1_s1: calc(max(var(--x1), var(--x0)) - min(var(--x1), var(--x0))); }
+    .rt { --h2_tmp_b1_c1: min(var(--x1), var(--x0)); }
+    .rt { --h2_tmp_b1_sum: calc(max(var(--h2_tmp_b1_s1), var(--h2_tmp_b0_cout)) - min(var(--h2_tmp_b1_s1), var(--h2_tmp_b0_cout))); }
+    .rt { --h2_tmp_b1_c2: min(var(--h2_tmp_b1_s1), var(--h2_tmp_b0_cout)); }
+    .rt { --h2_tmp_b1_cout: max(var(--h2_tmp_b1_c1), var(--h2_tmp_b1_c2)); }
+    .rt { --h2_tmp_b2_s1: calc(max(var(--x1), 0) - min(var(--x1), 0)); }
+    .rt { --h2_tmp_b2_c1: min(var(--x1), 0); }
+    .rt { --h2_tmp_b2_sum: calc(max(var(--h2_tmp_b2_s1), var(--h2_tmp_b1_cout)) - min(var(--h2_tmp_b2_s1), var(--h2_tmp_b1_cout))); }
+    .rt { --h2_tmp_b2_c2: min(var(--h2_tmp_b2_s1), var(--h2_tmp_b1_cout)); }
+    .rt { --h2_tmp_b2_cout: max(var(--h2_tmp_b2_c1), var(--h2_tmp_b2_c2)); }
+    .rt { --h2_tmp_b3_s1: calc(max(var(--x1), 0) - min(var(--x1), 0)); }
+    .rt { --h2_tmp_b3_c1: min(var(--x1), 0); }
+    .rt { --h2_tmp_b3_sum: calc(max(var(--h2_tmp_b3_s1), var(--h2_tmp_b2_cout)) - min(var(--h2_tmp_b3_s1), var(--h2_tmp_b2_cout))); }
+    .rt { --h2_tmp_b3_c2: min(var(--h2_tmp_b3_s1), var(--h2_tmp_b2_cout)); }
+    .rt { --h2_tmp_b3_cout: max(var(--h2_tmp_b3_c1), var(--h2_tmp_b3_c2)); }
+    .rt { --h2_pre_b0_s1: calc(max(var(--h2_tmp_b0_sum), 1) - min(var(--h2_tmp_b0_sum), 1)); }
+    .rt { --h2_pre_b0_c1: min(var(--h2_tmp_b0_sum), 1); }
+    .rt { --h2_pre_b0_sum: calc(max(var(--h2_pre_b0_s1), 0) - min(var(--h2_pre_b0_s1), 0)); }
+    .rt { --h2_pre_b0_c2: min(var(--h2_pre_b0_s1), 0); }
+    .rt { --h2_pre_b0_cout: max(var(--h2_pre_b0_c1), var(--h2_pre_b0_c2)); }
+    .rt { --h2_pre_b1_s1: calc(max(var(--h2_tmp_b1_sum), 1) - min(var(--h2_tmp_b1_sum), 1)); }
+    .rt { --h2_pre_b1_c1: min(var(--h2_tmp_b1_sum), 1); }
+    .rt { --h2_pre_b1_sum: calc(max(var(--h2_pre_b1_s1), var(--h2_pre_b0_cout)) - min(var(--h2_pre_b1_s1), var(--h2_pre_b0_cout))); }
+    .rt { --h2_pre_b1_c2: min(var(--h2_pre_b1_s1), var(--h2_pre_b0_cout)); }
+    .rt { --h2_pre_b1_cout: max(var(--h2_pre_b1_c1), var(--h2_pre_b1_c2)); }
+    .rt { --h2_pre_b2_s1: calc(max(var(--h2_tmp_b2_sum), 1) - min(var(--h2_tmp_b2_sum), 1)); }
+    .rt { --h2_pre_b2_c1: min(var(--h2_tmp_b2_sum), 1); }
+    .rt { --h2_pre_b2_sum: calc(max(var(--h2_pre_b2_s1), var(--h2_pre_b1_cout)) - min(var(--h2_pre_b2_s1), var(--h2_pre_b1_cout))); }
+    .rt { --h2_pre_b2_c2: min(var(--h2_pre_b2_s1), var(--h2_pre_b1_cout)); }
+    .rt { --h2_pre_b2_cout: max(var(--h2_pre_b2_c1), var(--h2_pre_b2_c2)); }
+    .rt { --h2_pre_b3_s1: calc(max(var(--h2_tmp_b3_sum), 1) - min(var(--h2_tmp_b3_sum), 1)); }
+    .rt { --h2_pre_b3_c1: min(var(--h2_tmp_b3_sum), 1); }
+    .rt { --h2_pre_b3_sum: calc(max(var(--h2_pre_b3_s1), var(--h2_pre_b2_cout)) - min(var(--h2_pre_b3_s1), var(--h2_pre_b2_cout))); }
+    .rt { --h2_pre_b3_c2: min(var(--h2_pre_b3_s1), var(--h2_pre_b2_cout)); }
+    .rt { --h2_pre_b3_cout: max(var(--h2_pre_b3_c1), var(--h2_pre_b3_c2)); }
+    .rt { --h2_out: calc(1 - (var(--h2_pre_b3_sum))); }
+    .rt { --out_tmp_b0_s1: calc(max(0, 0) - min(0, 0)); }
+    .rt { --out_tmp_b0_c1: min(0, 0); }
+    .rt { --out_tmp_b0_sum: calc(max(var(--out_tmp_b0_s1), 0) - min(var(--out_tmp_b0_s1), 0)); }
+    .rt { --out_tmp_b0_c2: min(var(--out_tmp_b0_s1), 0); }
+    .rt { --out_tmp_b0_cout: max(var(--out_tmp_b0_c1), var(--out_tmp_b0_c2)); }
+    .rt { --out_tmp_b1_s1: calc(max(var(--h1_out), var(--h2_out)) - min(var(--h1_out), var(--h2_out))); }
+    .rt { --out_tmp_b1_c1: min(var(--h1_out), var(--h2_out)); }
+    .rt { --out_tmp_b1_sum: calc(max(var(--out_tmp_b1_s1), var(--out_tmp_b0_cout)) - min(var(--out_tmp_b1_s1), var(--out_tmp_b0_cout))); }
+    .rt { --out_tmp_b1_c2: min(var(--out_tmp_b1_s1), var(--out_tmp_b0_cout)); }
+    .rt { --out_tmp_b1_cout: max(var(--out_tmp_b1_c1), var(--out_tmp_b1_c2)); }
+    .rt { --out_tmp_b2_s1: calc(max(0, 0) - min(0, 0)); }
+    .rt { --out_tmp_b2_c1: min(0, 0); }
+    .rt { --out_tmp_b2_sum: calc(max(var(--out_tmp_b2_s1), var(--out_tmp_b1_cout)) - min(var(--out_tmp_b2_s1), var(--out_tmp_b1_cout))); }
+    .rt { --out_tmp_b2_c2: min(var(--out_tmp_b2_s1), var(--out_tmp_b1_cout)); }
+    .rt { --out_tmp_b2_cout: max(var(--out_tmp_b2_c1), var(--out_tmp_b2_c2)); }
+    .rt { --out_tmp_b3_s1: calc(max(0, 0) - min(0, 0)); }
+    .rt { --out_tmp_b3_c1: min(0, 0); }
+    .rt { --out_tmp_b3_sum: calc(max(var(--out_tmp_b3_s1), var(--out_tmp_b2_cout)) - min(var(--out_tmp_b3_s1), var(--out_tmp_b2_cout))); }
+    .rt { --out_tmp_b3_c2: min(var(--out_tmp_b3_s1), var(--out_tmp_b2_cout)); }
+    .rt { --out_tmp_b3_cout: max(var(--out_tmp_b3_c1), var(--out_tmp_b3_c2)); }
+    .rt { --out_pre_b0_s1: calc(max(var(--out_tmp_b0_sum), 1) - min(var(--out_tmp_b0_sum), 1)); }
+    .rt { --out_pre_b0_c1: min(var(--out_tmp_b0_sum), 1); }
+    .rt { --out_pre_b0_sum: calc(max(var(--out_pre_b0_s1), 0) - min(var(--out_pre_b0_s1), 0)); }
+    .rt { --out_pre_b0_c2: min(var(--out_pre_b0_s1), 0); }
+    .rt { --out_pre_b0_cout: max(var(--out_pre_b0_c1), var(--out_pre_b0_c2)); }
+    .rt { --out_pre_b1_s1: calc(max(var(--out_tmp_b1_sum), 1) - min(var(--out_tmp_b1_sum), 1)); }
+    .rt { --out_pre_b1_c1: min(var(--out_tmp_b1_sum), 1); }
+    .rt { --out_pre_b1_sum: calc(max(var(--out_pre_b1_s1), var(--out_pre_b0_cout)) - min(var(--out_pre_b1_s1), var(--out_pre_b0_cout))); }
+    .rt { --out_pre_b1_c2: min(var(--out_pre_b1_s1), var(--out_pre_b0_cout)); }
+    .rt { --out_pre_b1_cout: max(var(--out_pre_b1_c1), var(--out_pre_b1_c2)); }
+    .rt { --out_pre_b2_s1: calc(max(var(--out_tmp_b2_sum), 1) - min(var(--out_tmp_b2_sum), 1)); }
+    .rt { --out_pre_b2_c1: min(var(--out_tmp_b2_sum), 1); }
+    .rt { --out_pre_b2_sum: calc(max(var(--out_pre_b2_s1), var(--out_pre_b1_cout)) - min(var(--out_pre_b2_s1), var(--out_pre_b1_cout))); }
+    .rt { --out_pre_b2_c2: min(var(--out_pre_b2_s1), var(--out_pre_b1_cout)); }
+    .rt { --out_pre_b2_cout: max(var(--out_pre_b2_c1), var(--out_pre_b2_c2)); }
+    .rt { --out_pre_b3_s1: calc(max(var(--out_tmp_b3_sum), 1) - min(var(--out_tmp_b3_sum), 1)); }
+    .rt { --out_pre_b3_c1: min(var(--out_tmp_b3_sum), 1); }
+    .rt { --out_pre_b3_sum: calc(max(var(--out_pre_b3_s1), var(--out_pre_b2_cout)) - min(var(--out_pre_b3_s1), var(--out_pre_b2_cout))); }
+    .rt { --out_pre_b3_c2: min(var(--out_pre_b3_s1), var(--out_pre_b2_cout)); }
+    .rt { --out_pre_b3_cout: max(var(--out_pre_b3_c1), var(--out_pre_b3_c2)); }
+    .rt { --out_out: calc(1 - (var(--out_pre_b3_sum))); }
+
+    /* per-bit LEDs */
+    .h1pre_b0::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h1_pre_b0_sum)) * 100%); }
+    .h1pre_b1::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h1_pre_b1_sum)) * 100%); }
+    .h1pre_b2::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h1_pre_b2_sum)) * 100%); }
+    .h1pre_b3::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h1_pre_b3_sum)) * 100%); }
+    .h2pre_b0::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h2_pre_b0_sum)) * 100%); }
+    .h2pre_b1::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h2_pre_b1_sum)) * 100%); }
+    .h2pre_b2::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h2_pre_b2_sum)) * 100%); }
+    .h2pre_b3::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--h2_pre_b3_sum)) * 100%); }
+    .outpre_b0::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--out_pre_b0_sum)) * 100%); }
+    .outpre_b1::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--out_pre_b1_sum)) * 100%); }
+    .outpre_b2::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--out_pre_b2_sum)) * 100%); }
+    .outpre_b3::after { content: ""; display: inline-block; width: 10px; height: 10px; margin: 1px; background: color-mix(in srgb, #38ff8c, #0b0e14 var(--ledoff, 0%)); --ledoff: calc((1 - var(--out_pre_b3_sum)) * 100%); }
+
+    /* composite decimal views: native calc, display only */
+    .h1pre_dec::after { counter-reset: v calc((1 * var(--h1_pre_b0_sum)) + (2 * var(--h1_pre_b1_sum)) + (4 * var(--h1_pre_b2_sum)) + (8 * var(--h1_pre_b3_sum))); content: counter(v); }
+    .h2pre_dec::after { counter-reset: v calc((1 * var(--h2_pre_b0_sum)) + (2 * var(--h2_pre_b1_sum)) + (4 * var(--h2_pre_b2_sum)) + (8 * var(--h2_pre_b3_sum))); content: counter(v); }
+    .outpre_dec::after { counter-reset: v calc((1 * var(--out_pre_b0_sum)) + (2 * var(--out_pre_b1_sum)) + (4 * var(--out_pre_b2_sum)) + (8 * var(--out_pre_b3_sum))); content: counter(v); }
+    .h1v_dec::after { counter-reset: v calc((1 * var(--h1_out))); content: counter(v); }
+    .h2v_dec::after { counter-reset: v calc((1 * var(--h2_out))); content: counter(v); }
+    .outv_dec::after { counter-reset: v calc((1 * var(--out_out))); content: counter(v); }
+    .tag { color: #7d8fa9; font-size: 12px; }
+</style>
+</head>
+<body class="rt">
+  <div class="row">
+    <label><input type="checkbox" id="x1"> x1</label>
+    <label><input type="checkbox" id="x0"> x0</label>
+  </div>
+  <div class="row">h1 = step(+2x1 - 2x0 - 1) &nbsp; LED: <span class="h1pre_b3"></span><span class="h1pre_b2"></span><span class="h1pre_b1"></span><span class="h1pre_b0"></span> = <span class="h1pre_dec"></span> &nbsp; h1 = <span class="h1v_dec"></span></div>
+  <div class="row">h2 = step(-2x1 + 2x0 - 1) &nbsp; LED: <span class="h2pre_b3"></span><span class="h2pre_b2"></span><span class="h2pre_b1"></span><span class="h2pre_b0"></span> = <span class="h2pre_dec"></span> &nbsp; h2 = <span class="h2v_dec"></span></div>
+  <div class="row">out = step(+2h1 + 2h2 - 1) &nbsp; LED: <span class="outpre_b3"></span><span class="outpre_b2"></span><span class="outpre_b1"></span><span class="outpre_b0"></span> = <span class="outpre_dec"></span> &nbsp; XOR = <span class="outv_dec"></span></div>
+  <div class="row tag">LEDs read gate signals directly. Decimal views use native calc() (display only, outside gate circuit).</div>
+</body>
+</html>

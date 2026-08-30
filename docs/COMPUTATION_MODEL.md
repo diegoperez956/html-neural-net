@@ -6,11 +6,11 @@ This document defines what this project counts as computation. It is deliberatel
 
 > Neural-network inference implemented with HTML and CSS, with zero JavaScript at runtime.
 
-A stronger claim is allowed only for the gate-derived path:
+A stronger claim is allowed only for the gate-derived path, and only in this wording:
 
-> A tiny neural network constructed from composable logic and arithmetic primitives implemented in HTML/CSS.
+> A tiny neural network composed at build time from named bit-domain logic gates and adder/multiplier circuits, all hosted on native CSS arithmetic (`min()`/`max()`/`calc()`) as a custom-property netlist.
 
-“HTML performs matrix multiplication,” “HTML is a CPU,” and unqualified novelty claims are not accurate.
+"HTML performs matrix multiplication," "HTML is a CPU," "logic primitives implemented in HTML/CSS," and unqualified novelty claims are not accurate.
 
 ## Runtime boundary
 
@@ -54,7 +54,7 @@ Persistent user-controlled state exists only in checked form controls. Primary b
 body:has(#x:checked) .runtime { --x: 1; }
 ```
 
-A derived signal is a named, typed integer custom property constrained by construction to `0` or `1`. It is computed style, not mutable HTML state. Derived signals can feed later declarations through `var(--signal)`; they cannot become `:checked`, and selectors cannot in general inspect their computed numeric value.
+A derived **bit signal** is a named, registered-integer custom property constrained by construction and by test to `0` or `1`. A derived **word signal** is a named integer custom property holding a fixed-width two's-complement value (width per stage, see Numeric formats). Both are computed style, not mutable HTML state. Derived signals can feed later declarations through `var(--signal)`; they cannot become `:checked`, and selectors cannot in general inspect their computed numeric value.
 
 Visual LEDs and digits are views of signals, not additional state.
 
@@ -71,7 +71,9 @@ For operands known to be bits, gate mode uses this CSS-math basis:
 \end{aligned}
 \]
 
-A **logic gate** in this project is a named signal declaration generated from one of those equations, with bit-valued inputs and an exhaustively verified truth table. `min()` and `max()` are browser arithmetic/comparison primitives, not gates we built from transistors. This is the bottom of our derivation.
+These are **basis primitives**: four named bit-domain identities over two native browser operations (integer subtraction, `min()`/`max()` comparison-arithmetic). They are not reduced to a smaller functionally complete set (e.g. NAND), and they are not gates we built from transistors. This is the bottom of the derivation, and the wording of every public claim must keep it that way.
+
+A **logic gate** in this project is a named bit signal declaration generated from one of those equations, with bit-valued inputs and an exhaustively verified truth table.
 
 Gate mode does not use native CSS multiplication or a whole-network weighted-sum expression. Its additions and multiplications are circuit structures made from named gates:
 
@@ -109,6 +111,28 @@ Gate-mode multiplication means binary long multiplication:
 3. visible product bits are outputs of that circuit.
 
 A selector listing every operand pair, or direct `calc(a * b)`, is not gate-mode multiplication.
+
+## Typing and scope invariants
+
+Every signal (bit or word) is registered via `@property { syntax: "<integer>"; inherits: true }` and declared on one common `.runtime` ancestor element; UI elements read signals as descendants. This gives engine-enforced integer typing, one canonical scope, and computed values readable by tests through `getComputedStyle`.
+
+Support floor for this mechanism: Chromium 85+, Firefox 128+, Safari 16.4+. No experimental flags. The floor is a deliberate trade: unregistered custom properties would widen support but leave typing unenforced and computed-value probing engine-dependent.
+
+## Numeric formats
+
+Stage widths (two's complement where signed):
+
+- bit signal: width 1;
+- N-bit unsigned adder: width N+1 (carry included);
+- N×N unsigned multiplier: width 2N;
+- dot product of two 2-bit unsigned operands: products width 2, sum width 5 (max 18);
+- 2×2 matrix × 2-bit vector: same widths per row;
+- XOR MLP neuron: weight ±2 needs 3-bit signed product words (−4..7); neuron preactivation is sum of two 3-bit products plus bias (−1): width 4 signed (−8..7); threshold = sign bit;
+- overflow is impossible for these maxima by construction, and exhaustive tests assert it.
+
+## Display path policy
+
+Gate-mode primary displays are per-bit LEDs reading individual bit signals. Where a composite decimal number is shown, it is computed by a native-calc expression such as `calc(b0 + 2*b1 + 4*b2)` — native multiplication by powers of two. That expression is a **view** for human readability, outside the gate circuit, and is labeled as such in the demo. It never feeds back into gate logic.
 
 ## Runtime sequence
 
