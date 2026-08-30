@@ -101,6 +101,16 @@ A single linear neuron cannot solve XOR (proof + brute force in
 `experiments/network-demo/XOR_LINEAR_PROOF.md`, worker D). Two hidden
 threshold neurons can. That is the demo's mathematical point.
 
+## Trained classifier (M10)
+
+The only learned part of the demo. `scripts/train.py` runs a plain
+perceptron (deterministic, stdlib-only) on 9 exemplars of two 3×3 glyph
+classes — top bar vs left bar — and writes `scripts/weights.json`.
+`scripts/generate.py` compiles those weights into the gate netlist:
+products of weight × pixel are gate-masked magnitudes (wiring for ±1/±2),
+summed with the trained bias at 5-bit signed width; threshold = sign bit.
+Training happens at build time; inference happens in CSS.
+
 ## Mode B — native CSS arithmetic
 
 The same XOR and matrix rows computed with direct `calc()`/`min()`/`max()`
@@ -141,7 +151,9 @@ repaint. No script, no event handler, no network. Works from `file://`.
 * 2-bit adder + 2×2 multiplier: 16 states; 4-bit adder: 256 states;
 * dot product: 16 states; matrix-vector: 4; neuron preactivation+activation;
 * XOR MLP: all 4 states including hidden preactivations and hidden outputs;
-* Mode B: same XOR/matvec against the same reference.
+* Mode B: same XOR/matvec against the same reference;
+* trained classifier: 9 exemplars + 32 seeded-random states vs an
+  independent reference recomputed from `scripts/weights.json`.
 
 Every intermediate the tests read is the same named signal the next stage
 consumes — the "genuine composition" acceptance check from

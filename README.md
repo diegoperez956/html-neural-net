@@ -2,7 +2,7 @@
 
 **A neural network built from logic gates and arithmetic circuits using HTML + CSS. Zero JavaScript at runtime.**
 
-Open `dist/index.html` in any modern browser (offline, `file://` works) and toggle the switches. The page evaluates gates, adders, a multiplier, dot products, a matrix-vector product, and a 2-2-1 XOR neural network — with no script, no WASM, no network, no server.
+Open `dist/index.html` in any modern browser (offline, `file://` works) and toggle the switches. The page evaluates gates, adders, a multiplier, dot products, a matrix-vector product, a 2-2-1 XOR neural network, and a perceptron-trained 3×3 glyph classifier — with no script, no WASM, no network, no server.
 
 ```
 HTML checkbox state → bits → logic gates → adders → multiplication
@@ -14,7 +14,7 @@ The hierarchy is real: every stage is composed from the previous stage's named s
 ## Demo
 
 ```bash
-make build   # python3 scripts/generate.py dist/index.html
+make build   # trains the classifier + generates dist/index.html
 xdg-open dist/index.html
 ```
 
@@ -29,7 +29,8 @@ Two independent curiosities:
    `XOR=max−min`). Half adders, full adders, ripple carries, AND partial
    products, two's-complement negation, signed sums, and threshold
    activations are all composed from those gates at build time — 123 gate
-   signals for the XOR network alone, ~450 for the whole page.
+   signals for the XOR network alone, ~750 for the whole page including a
+   perceptron-trained 3×3 glyph classifier.
 2. **Native-CSS mode (the sane baseline).** The *same* XOR network
    computed with direct `calc()`/`min()`/`max()` expressions — ~8
    declarations. The demo shows both modes side by side, producing
@@ -85,7 +86,7 @@ flat and deterministic.
 ## Correctness
 
 ```bash
-make test    # builds, then 30 Playwright tests × Chromium + Firefox
+make test    # builds, then 34 Playwright tests × Chromium + Firefox
 ```
 
 * static: no `<script>`, handlers, `javascript:`, WASM, external resource;
@@ -94,7 +95,9 @@ make test    # builds, then 30 Playwright tests × Chromium + Firefox
 * 2-bit adder & 2×2 multiplier 16 states; 4-bit adder **256 states**;
 * dot product 16 states; matrix-vector 4; neuron preactivation+activation;
 * XOR MLP: 4 states, hidden preactivations and hidden outputs included;
-* Mode B: same outputs from native arithmetic.
+* Mode B: same outputs from native arithmetic;
+* trained classifier: 9 training exemplars + 32 random states against an
+  independent reference computed from `scripts/weights.json`.
 
 ## Browser support
 

@@ -128,6 +128,7 @@ Stage widths (two's complement where signed):
 - dot product of two 2-bit unsigned operands: products width 2, sum width 5 (max 18);
 - 2×2 matrix × 1-bit vector: each entry is a gate-masked constant weight; row sums fit 4 bits;
 - XOR MLP neuron: weight ±2 needs 3-bit signed product words (−4..7); neuron preactivation is sum of two 3-bit products plus bias (−1): width 4 signed (−8..7); threshold = sign bit;
+- trained 3×3 classifier: nine weights in {−1,0,1,2}, bias −2; preactivation is the sum of nine bit products plus bias: width 5 signed (−16..15); threshold = sign bit;
 - overflow is impossible for these maxima by construction, and exhaustive tests assert it.
 
 ## Display path policy

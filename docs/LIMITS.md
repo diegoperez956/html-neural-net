@@ -7,13 +7,14 @@ generated artifacts, Chromium 149 / Firefox 151 via Playwright.
 
 | metric | value |
 |---|---|
-| file size | ~93 KB |
-| signal declarations (custom properties) | 450 |
+| file size | ~152 KB |
+| signal declarations (custom properties) | 753 |
 | of which XOR MLP | 123 |
+| of which trained 3×3 classifier | ~260 |
 | of which Mode B (native comparison) | 8 |
-| `@property` registrations | 450 |
-| CSS rules | ~950 |
-| DOM elements | ~180 |
+| `@property` registrations | 753 |
+| CSS rules | ~1 700 |
+| DOM elements | ~220 |
 
 ## Scaling: N-bit ripple adder (generated in isolation)
 
@@ -57,12 +58,13 @@ that synchronously per paint.
 ## Practical ceiling (honest estimate)
 
 Gate-built arithmetic stays tractable through 8–12 bit adders (≈ 60–90
-signals, ≈ 10–15 KB) and 4×4 multipliers. The XOR MLP at 123 signals is
-far below the pain point. A learned classifier with, say, 16 inputs × 8
-hidden × 2 outputs at 3-bit signed weights would cost on the order of a
-few thousand signals and a few hundred KB — possible, but the demo gets
-worse, not better, past XOR. That is why XOR is the shippable demo and the
-README says so.
+signals, ≈ 10–15 KB) and 4×4 multipliers. The XOR MLP at 123 signals and
+the 3×3 classifier at ~260 signals are far below the pain point. A larger
+learned classifier (say 16 inputs × 8 hidden × 2 outputs at 3-bit signed
+weights) would cost on the order of a few thousand signals and a few
+hundred KB — possible, but the demo gets worse, not better, past this
+point. That is why XOR plus one trained classifier is the shippable demo
+and the README says so.
 
 ## Browser support
 

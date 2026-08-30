@@ -1,7 +1,10 @@
-.PHONY: build test clean
+.PHONY: build train test clean
 
-build:
-	python3 scripts/generate.py
+build: train
+	python3 scripts/generate.py dist/index.html
+
+train:
+	python3 scripts/train.py
 
 test: build
 	python3 -m unittest discover -s tests -v
