@@ -409,13 +409,15 @@ class DisplayTests(Base):
         import json
         with open(os.path.join(ROOT, "scripts", "weights_mnist.json")) as f:
             w = json.load(f)
-        bits49 = w["exemplars"]["7"]                  # scores: [.. class6=-12, class7=18 ..]
+        bits49 = w["exemplars"]["7"]
         self.set_bits(**{f"mn{i}": bits49[i] for i in range(49)})
         self.assert_view("d_mnist_digit", 7)
-        self.assert_view("d_mnist_score7", 18)
-        self.assert_view("d_mnist_score6", -12)        # negative score case
+        # Per-class scores derived from the JSON (not hardcoded) -- this test
+        # is meant to stay valid across retrains, same as MnistClassifierTests.
         sc = [w["bias"][k] + sum(w["weights"][k][i] * bits49[i] for i in range(49))
               for k in range(10)]
+        for k in range(10):
+            self.assert_view(f"d_mnist_score{k}", sc[k])
         srt = sorted(sc)
         self.assert_view("d_mnist_margin", srt[-1] - srt[-2])
 
