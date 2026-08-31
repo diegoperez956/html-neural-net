@@ -203,8 +203,9 @@ repaint. No script, no event handler, no network. Works from `file://`.
 
 `tests/test_runtime.py` (Playwright, Chromium + Firefox):
 
-* static: no `<script`, handlers, `javascript:`, WASM, external resources,
-  network URLs;
+* static: exactly one `<script>` (the input shim — checked for size and
+  absence of computation/network APIs), no handlers, `javascript:`, WASM,
+  external resources, network URLs;
 * deterministic rebuild (byte-identical);
 * gates: exhaustive truth tables; half adder 4 states; full adder 8;
 * 2-bit adder + 2×2 multiplier: 16 states; 4-bit adder: 256 states;

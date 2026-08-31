@@ -1,8 +1,8 @@
 # htmlnet
 
-**A neural network built from logic gates and arithmetic circuits using HTML + CSS. Zero JavaScript at runtime.**
+**A neural network built from logic gates and arithmetic circuits using HTML + CSS. The network computes in pure CSS; the only JavaScript on the page is a ~20-line input shim for drag-to-draw.**
 
-Open `dist/index.html` in any modern browser (offline, `file://` works) and toggle the switches. The page evaluates gates, adders, a multiplier, dot products, a matrix-vector product, a 2-2-1 XOR neural network, a perceptron-trained 3×3 glyph classifier, and a 10-class linear digit classifier — draw a digit on a 7×7 grid, its argmax winner is decoded through gates onto a seven-segment display — with no script, no WASM, no network, no server.
+Open `dist/index.html` in any modern browser (offline, `file://` works) and toggle the switches. The page evaluates gates, adders, a multiplier, dot products, a matrix-vector product, a 2-2-1 XOR neural network, a perceptron-trained 3×3 glyph classifier, and a 10-class linear digit classifier — draw a digit on a 7×7 grid, its argmax winner is decoded through gates onto a seven-segment display — with no WASM, no network, no server. Delete the one `<script>` tag and the page still works, one click per cell.
 
 ```
 HTML checkbox state → bits → logic gates → adders → multiplication
@@ -79,7 +79,10 @@ dependency graph that the HTML/CSS artifact describes.**
   a CPU. The netlist is combinational, feed-forward, and fixed — which is
   exactly what a trained MLP's inference graph is, so the honest
   description is also the accurate one: *neural-network inference
-  implemented with HTML and CSS, with zero JavaScript at runtime.*
+  implemented with HTML and CSS.* The network itself, the display, and
+  every readout are computed with zero JavaScript; the page's one
+  `<script>` is an input shim that turns pointer drags into checkbox
+  toggles and computes nothing.
 
 Build-time Python (allowed, never shipped) elaborates the circuit,
 generates repetitive CSS, and computes references. The runtime artifact is
@@ -91,7 +94,9 @@ flat and deterministic.
 make test    # builds, then 65 Playwright tests × Chromium + Firefox
 ```
 
-* static: no `<script>`, handlers, `javascript:`, WASM, external resource;
+* static: exactly one `<script>` (the input shim, checked for size and for
+  absence of computation/network APIs), no handlers, no `javascript:`, no
+  WASM, no external resource;
 * deterministic rebuilds (byte-identical);
 * gates exhaustively; half adder 4 states; full adder 8;
 * 2-bit adder & 2×2 multiplier 16 states; 4-bit adder **256 states**;
