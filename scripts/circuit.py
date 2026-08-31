@@ -140,14 +140,6 @@ class Circuit:
             acc = self.ripple_add(f"{name}_row{k}", acc, rows[k], "0")
         return acc
 
-    # --- two's complement helpers ----------------------------------------
-
-    def negate(self, name: str, bits):
-        """Two's complement negation: bitwise NOT (gates) + 1 via ripple add."""
-        nb = [self.gate("NOT", b, name=f"{name}_n{i}") for i, b in enumerate(bits)]
-        zero = ["0"] * len(bits)
-        return self.ripple_add(f"{name}_neg", nb, zero, "1")
-
     # --- popcount (carry-save reduction) ----------------------------------
 
     def popcount(self, name: str, bits):
