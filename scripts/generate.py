@@ -15,7 +15,7 @@ BASE_CSS = """
     font-family: 'JetBrains Mono', Courier, monospace; font-size: 13px; line-height: 1.7;
   }
   .wrap { max-width: 680px; margin: 0 auto; }
-  h1 { font-size: 16px; margin: 0 0 6px; color: #ebdbb2; font-weight: 700; }
+  h1 { font-size: 22px; margin: 0 0 6px; color: #ebdbb2; font-weight: 700; }
   .sub { color: #928374; font-size: 13px; margin: 0 0 24px; max-width: 58ch; }
 
   /* the app window: MS Paint served from a terminal */
@@ -350,7 +350,7 @@ def main(path):
     body = f"""
 <main class="wrap">
 <h1>draw a digit</h1>
-<p class="sub">a neural network in html + css — the network computes in logic gates compiled from mnist weights at build time. drag to draw; the only javascript is a 20-line input shim, delete it and clicking still works.</p>
+<p class="sub">a neural network in html + css. drag to draw — it guesses through logic gates compiled from mnist weights. the only javascript is a 20-line input shim; delete it and clicking still works.</p>
 
 <div class="app">
   <div class="titlebar">
