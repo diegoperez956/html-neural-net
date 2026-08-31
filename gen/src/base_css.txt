@@ -18,20 +18,22 @@
   .titletext { color: #a89984; }
   .statusbar { background: #3c3836; color: #928374; font-size: 11px;
                padding: 5px 10px; border-top: 1px solid #504945; }
-  .stage { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; padding: 16px; }
+  .idle { color: #7c6f64; }
+  .app:has(.grid7 input:checked) .idle { display: none; }
+  .stage { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 16px; }
 
   /* the drawing box: one canvas, not 49 widgets */
   .pad { display: flex; flex-direction: column; gap: 10px; }
   .grid7 {
     display: grid; grid-template-columns: repeat(7, 42px); grid-auto-rows: 42px;
-    border: 1px solid #504945; border-radius: 4px; overflow: hidden;
+    border: 1px solid #504945; border-radius: 0; overflow: hidden;
     background: #1d2021; cursor: crosshair; touch-action: none;
   }
   .cell7 { position: relative; width: 100%; height: 100%; background: #282828;
            box-shadow: inset 0 0 0 1px #3c3836; transition: background .1s ease; }
   .cell7:hover { background: #fe801926; }
   .cell7:active { background: #fe80194d; }
-  .cell7:has(input:checked) { background: #fe8019; box-shadow: none; }
+  .cell7:has(input:checked) { background: #fe8019; box-shadow: inset 0 0 0 1px #282828; }
   .cell7 input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: crosshair; }
   .cell7:has(input:focus-visible) { outline: 2px solid #fe8019; outline-offset: -2px; z-index: 1; }
   input[type="reset"] {
@@ -42,22 +44,18 @@
 
   /* the answer: wakes up when the box has ink */
   .guess { display: flex; flex-direction: column; align-items: center; gap: 14px;
-           opacity: .3; transition: opacity .2s ease; }
+           opacity: .55; transition: opacity .2s ease; }
   .stage:has(.grid7 input:checked) .guess { opacity: 1; }
   .digit7 { position: relative; width: 90px; height: 150px; }
   .seg { position: absolute; background: #3c3836; border-radius: 3px; transition: background .18s ease; }
   .seg-a { top: 0; left: 12px; width: 66px; height: 12px; }
-  .seg-b { top: 9px; right: 0; width: 12px; height: 66px; }
+  .seg-b { top: 9px; right: 0; width: 12px; height: 64px; }
   .seg-c { bottom: 9px; right: 0; width: 12px; height: 66px; }
   .seg-d { bottom: 0; left: 12px; width: 66px; height: 12px; }
   .seg-e { bottom: 9px; left: 0; width: 12px; height: 66px; }
-  .seg-f { top: 9px; left: 0; width: 12px; height: 66px; }
+  .seg-f { top: 9px; left: 0; width: 12px; height: 64px; }
   .seg-g { top: 69px; left: 12px; width: 66px; height: 12px; }
   .mn-digits { display: flex; gap: 9px; font-size: 17px; }
-  .meter { width: 122px; height: 6px; border-radius: 3px; background: #3c3836; overflow: hidden; }
-  .meter-fill { height: 100%; background: #fabd2f;
-                width: calc(min(100, var(--mnist_margin_dec) * 4) * 1%);
-                transition: width .18s ease; }
 
   /* under the hood: the whole composition ladder, opt-in */
   details.hood { border-top: 1px solid #504945; padding-top: 18px; }
