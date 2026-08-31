@@ -8,19 +8,20 @@ Firefox 151 via Playwright.
 
 | metric | value |
 |---|---|
-| file size | ~1.01 MB |
-| signal declarations (custom properties) | 4 971 |
+| file size | ~1.18 MB (1 182 392 bytes) |
+| signal declarations (custom properties) | 5 669 |
 | of which XOR MLP | 123 |
 | of which trained 3×3 classifier (M10) | ~260 |
 | of which Mode B (native comparison) | 8 + 15 decimal-view signals |
-| of which drawn-digit MNIST classifier (M11) | 4 192 |
-| `@property` registrations | 4 971 |
-| CSS rules | 10 165 |
-| DOM elements | 417 |
+| of which drawn-digit MNIST classifier (M11) | 4 852 |
+| `@property` registrations | 5 669 |
+| CSS rules | 11 577 |
+| DOM elements | 424 |
 
-M11 breakdown: 10 per-class weighted scores (bit-plane popcount) ~328
-signals each (3 284 total), argmax tournament 742, digit minterms 68,
-seven-segment decode 49.
+M11 breakdown: 10 per-class weighted scores (bit-plane popcount) ~318
+signals each (3 178 total), argmax tournament (streaming top-2 + margin)
+1 545, digit minterms 68, seven-segment decode 49, confidence-meter
+decimal-view readouts (score/digit/margin displays) 12.
 
 ## Scaling: N-bit ripple adder (generated in isolation)
 
@@ -94,7 +95,7 @@ drawn-digit classifier (4 192 signals: 10 popcount-decomposed scores,
 argmax tournament, minterms, seven-segment decode) is the first M-series
 piece large enough to need the scaling question answered rather than
 assumed — `benchmarks/signal_scaling.csv` answers it: recalc p95 is flat
-from 6k through 10k signals, and the whole page at 4 971 signals sits
+from 6k through 10k signals, and the whole page at 5 669 signals sits
 comfortably below that flat region. A per-term neuron-sum encoding of the
 same 10-class classifier (no bit-plane popcount) was estimated at ~25k
 signals — the popcount decomposition is what kept M11 inside the
@@ -105,7 +106,7 @@ benchmarked range instead of past it (see `docs/DECISIONS.md` D-006).
 * M10 (3×3 glyph, two classes): trained on 9 hand-built exemplars, no held-out
   test set — a toy proof that gate-composed weighted sums work, not an
   accuracy claim.
-* M11 (7×7 drawn digit, ten classes): 79.98% on the full 10k MNIST test set;
+* M11 (7×7 drawn digit, ten classes): 82.46% on the full 10k MNIST test set;
   a single-layer linear classifier over a 7×7 binary grid, so this is the
   ceiling for that model class, not a bug to chase. On the canonical
   drawn-glyph fidelity set it gets 8/10, with known misses at 6 (predicted
@@ -141,7 +142,7 @@ comparison-operator gap found in experiments; see ARCHITECTURE).
    past 2^12 states.
 5. **Update cost:** one toggle invalidates the whole DAG. Measured flat
    through 10 000 signals (recalc p95 ~52 ms Chromium / ~73 ms Firefox,
-   `benchmarks/signal_scaling.csv`); the 4 971-signal page is well inside
+   `benchmarks/signal_scaling.csv`); the 5 669-signal page is well inside
    that range. Past whatever point recalc stops being flat, per-section
    isolation (containment) is the fix — the architecture supports it, the
    demo hasn't needed it yet.

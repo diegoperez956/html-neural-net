@@ -4,7 +4,7 @@ Status: design. Backed by measured numbers in `RESEARCH_SCALE.md`.
 
 ## Goal
 
-Linear 10-class classifier (~80% MNIST test) -> one hidden layer of
+Linear 10-class classifier (~82% MNIST test) -> one hidden layer of
 threshold neurons, target 90%+, still pure HTML+CSS at runtime.
 
 ## Architecture

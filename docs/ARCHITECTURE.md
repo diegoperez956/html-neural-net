@@ -162,7 +162,7 @@ a centered square (aspect preserved), area-resample to 7×7 coverage
 fractions, threshold at `t=0.3` (grid-searched) into bits. An 8-epoch
 multiclass perceptron trains on the full 60k training set, then weights
 are quantized to `[-3,3]` (scale factor grid-searched) with bias in
-`[-7,10]`. Result: 79.98% accuracy on the full 10k MNIST test set, 8/10 on
+`[-6,8]`. Result: 82.46% accuracy on the full 10k MNIST test set, 8/10 on
 the canonical drawn-glyph fidelity set (misses: 6→5, 9→3). Fast path:
 `scripts/train_mnist.py` skips retraining and reuses
 `scripts/weights_mnist.json` if it already exists (`--force` to retrain).
