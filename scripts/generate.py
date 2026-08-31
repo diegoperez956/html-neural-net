@@ -510,7 +510,7 @@ def main(path):
 """
     html = render(c, extra, body, "htmlnet — draw a digit, zero JavaScript")
     open(path, "w").write(html)
-    print(f"wrote {path}: {n_signals} signals, {len(html)} bytes")
+    print(f"wrote {path}: {n_signals} signals, {len(html.encode('utf-8'))} bytes")
 
 
 if __name__ == "__main__":

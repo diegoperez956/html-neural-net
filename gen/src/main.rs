@@ -594,5 +594,5 @@ fn main() {
     fs::write(&out_path, &html).unwrap();
     // python's message uses len(html) on the str, i.e. Unicode codepoints, not
     // UTF-8 bytes -- match that for parity of the stdout message too.
-    println!("wrote {out_path}: {n_signals} signals, {} bytes", html.chars().count());
+    println!("wrote {out_path}: {n_signals} signals, {} bytes", html.len());
 }
