@@ -12,14 +12,32 @@ use std::path::Path;
 const BASE_CSS: &str = include_str!("base_css.txt");
 
 fn led_css(signal: &str, cls: &str) -> String {
+    led_css_lit(signal, cls, "#fe8019")
+}
+
+fn led_css_lit(signal: &str, cls: &str, lit: &str) -> String {
     format!(
-        ".{cls} {{ background: color-mix(in srgb, #38ff8c, #101826 calc((1 - var(--{signal})) * 100%)); }}"
+        ".{cls} {{ background: color-mix(in srgb, {lit}, #3c3836 calc((1 - var(--{signal})) * 100%)); }}"
     )
 }
 
 fn text_led_css(signal: &str, cls: &str) -> String {
     format!(
-        ".{cls} {{ color: color-mix(in srgb, #38ff8c, #4c5f7a calc((1 - var(--{signal})) * 100%)); }}"
+        ".{cls} {{ color: color-mix(in srgb, #fabd2f, #7c6f64 calc((1 - var(--{signal})) * 100%)); }}"
+    )
+}
+
+/// @font-face rules embedding JetBrains Mono as base64 data URIs (single-file
+/// constraint: no external font requests). Read at generation time from
+/// assets/fonts/*.b64 -- same files the Python generator reads, verbatim.
+fn font_css(manifest_dir: &str) -> String {
+    let assets = Path::new(manifest_dir).join("..").join("assets").join("fonts");
+    let reg = fs::read_to_string(assets.join("JetBrainsMono-Regular.b64")).unwrap();
+    let bold = fs::read_to_string(assets.join("JetBrainsMono-Bold.b64")).unwrap();
+    let reg = reg.trim();
+    let bold = bold.trim();
+    format!(
+        "\n@font-face {{\n  font-family: 'JetBrains Mono';\n  src: url(data:font/woff2;base64,{reg}) format(\"woff2\");\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap;\n}}\n@font-face {{\n  font-family: 'JetBrains Mono';\n  src: url(data:font/woff2;base64,{bold}) format(\"woff2\");\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n}}\n"
     )
 }
 
@@ -268,7 +286,7 @@ fn main() {
         "abcdefg"
             .chars()
             .zip(mnist_segs.iter())
-            .map(|(letter, b)| led_css(b, &format!("l_mn_seg_{letter}"))),
+            .map(|(letter, b)| led_css_lit(b, &format!("l_mn_seg_{letter}"), "#fabd2f")),
     );
     led_css_parts.extend(
         mnist_minterms
@@ -349,7 +367,7 @@ fn main() {
         .collect::<Vec<_>>()
         .join("\n");
 
-    let extra = format!("{BASE_CSS}\n{input_css}\n{led_css_all}\n{dec_css_all}");
+    let extra = format!("{}\n{BASE_CSS}\n{input_css}\n{led_css_all}\n{dec_css_all}", font_css(manifest_dir));
 
     let n_signals = c.signals.len();
 
@@ -392,30 +410,36 @@ fn main() {
         r####"
 <main class="wrap">
 <h1>draw a digit</h1>
-<p class="sub">a neural network running entirely in HTML + CSS, zero JavaScript. trained on MNIST at build time, compiled into logic gates. paint cells in the box; the display reads the network's answer. drag to draw — a small pointer shim feeds the checkboxes; every computed bit is CSS, and the page still works with the script deleted (one click per cell).</p>
+<p class="sub">a neural network in html + css — the network computes in logic gates compiled from mnist weights at build time. drag to draw; the only javascript is a 20-line input shim, delete it and clicking still works.</p>
 
-<div class="stage">
-  <form class="pad">
-    <div class="grid7" role="group" aria-label="7 by 7 drawing box">
-      {mn_cells}
-    </div>
-    <input type="reset" value="clear">
-  </form>
-  <div class="guess">
-    <div class="digit7" role="img" aria-label="predicted digit">
-      <div class="seg seg-a l_mn_seg_a"></div>
-      <div class="seg seg-b l_mn_seg_b"></div>
-      <div class="seg seg-c l_mn_seg_c"></div>
-      <div class="seg seg-d l_mn_seg_d"></div>
-      <div class="seg seg-e l_mn_seg_e"></div>
-      <div class="seg seg-f l_mn_seg_f"></div>
-      <div class="seg seg-g l_mn_seg_g"></div>
-    </div>
-    <div class="mn-digits" role="group" aria-label="lit digit indicator">
-      {digit_labels}
-    </div>
-    <div class="meter" role="img" aria-label="confidence"><div class="meter-fill"></div></div>
+<div class="app">
+  <div class="titlebar">
+    <span class="titletext">untitled_digit.png — paint.css</span>
+    <input type="reset" form="draw" value="[ clear ]">
   </div>
+  <div class="stage">
+    <form class="pad" id="draw">
+      <div class="grid7" role="group" aria-label="7 by 7 drawing box">
+        {mn_cells}
+      </div>
+    </form>
+    <div class="guess">
+      <div class="digit7" role="img" aria-label="predicted digit">
+        <div class="seg seg-a l_mn_seg_a"></div>
+        <div class="seg seg-b l_mn_seg_b"></div>
+        <div class="seg seg-c l_mn_seg_c"></div>
+        <div class="seg seg-d l_mn_seg_d"></div>
+        <div class="seg seg-e l_mn_seg_e"></div>
+        <div class="seg seg-f l_mn_seg_f"></div>
+        <div class="seg seg-g l_mn_seg_g"></div>
+      </div>
+      <div class="mn-digits" role="group" aria-label="lit digit indicator">
+        {digit_labels}
+      </div>
+      <div class="meter" role="img" aria-label="confidence"><div class="meter-fill"></div></div>
+    </div>
+  </div>
+  <div class="statusbar">guess: <span class="d_mnist_digit"></span> · margin: <span class="d_mnist_margin"></span> · {mnist_test_acc_pct} mnist</div>
 </div>
 
 <details class="hood">
@@ -580,7 +604,10 @@ fn main() {
 
 </details>
 
-<footer class="tag">htmlnet · network computed in pure CSS · drag shim is the only JS · <span class="kbd">make build</span> / <span class="kbd">make test</span></footer>
+<footer>
+<div class="sig">htmlnet/1.0 (HTML+CSS) Server at file:// Port 0</div>
+<div class="tag"><span class="kbd">make build</span> / <span class="kbd">make test</span></div>
+</footer>
 </main>
 <script>
 /* input shim: drag-to-paint. the network + display are pure CSS — delete

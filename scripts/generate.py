@@ -11,43 +11,50 @@ BASE_CSS = """
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
   body {
-    margin: 0; padding: 48px 24px; background: #0b0e14; color: #cfe3ff;
-    font: 15px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    margin: 0; padding: 48px 24px; background: #282828; color: #ebdbb2;
+    font-family: 'JetBrains Mono', Courier, monospace; font-size: 13px; line-height: 1.7;
   }
   .wrap { max-width: 680px; margin: 0 auto; }
-  h1 { font-size: 21px; margin: 0 0 6px; }
-  .sub { color: #7d8fa9; font-size: 13px; margin: 0 0 32px; max-width: 54ch; }
-  .stage { display: flex; gap: 56px; align-items: center; flex-wrap: wrap; margin-bottom: 44px; }
+  h1 { font-size: 16px; margin: 0 0 6px; color: #ebdbb2; font-weight: 700; }
+  .sub { color: #928374; font-size: 13px; margin: 0 0 24px; max-width: 58ch; }
+
+  /* the app window: MS Paint served from a terminal */
+  .app { max-width: 640px; border: 1px solid #504945; background: #1d2021;
+         border-radius: 4px; overflow: hidden; margin-bottom: 40px; }
+  .titlebar { display: flex; align-items: center; justify-content: space-between;
+              background: #3c3836; padding: 6px 10px; font-size: 12px;
+              border-bottom: 1px solid #504945; }
+  .titletext { color: #a89984; }
+  .statusbar { background: #3c3836; color: #928374; font-size: 11px;
+               padding: 5px 10px; border-top: 1px solid #504945; }
+  .stage { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; padding: 16px; }
 
   /* the drawing box: one canvas, not 49 widgets */
-  .pad { display: flex; flex-direction: column; gap: 14px; }
+  .pad { display: flex; flex-direction: column; gap: 10px; }
   .grid7 {
     display: grid; grid-template-columns: repeat(7, 42px); grid-auto-rows: 42px;
-    border: 1px solid #1e2a3d; border-radius: 12px; overflow: hidden;
-    background: #0d1320; cursor: crosshair; touch-action: none;
+    border: 1px solid #504945; border-radius: 4px; overflow: hidden;
+    background: #1d2021; cursor: crosshair; touch-action: none;
   }
-  .cell7 { position: relative; box-shadow: inset 0 0 0 1px #38ff8c0d;
-           transition: background .1s ease, box-shadow .1s ease; }
-  .cell7:hover { background: #38ff8c17; }
-  .cell7:active { background: #38ff8c2e; }
-  .cell7:has(input:checked) {
-    background: #38ff8cd9;
-    box-shadow: inset 0 0 0 1px #38ff8c59, inset 0 0 12px #38ff8c26;
-  }
+  .cell7 { position: relative; width: 100%; height: 100%; background: #282828;
+           box-shadow: inset 0 0 0 1px #3c3836; transition: background .1s ease; }
+  .cell7:hover { background: #fe801926; }
+  .cell7:active { background: #fe80194d; }
+  .cell7:has(input:checked) { background: #fe8019; box-shadow: none; }
   .cell7 input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: crosshair; }
-  .cell7:has(input:focus-visible) { outline: 2px solid #38ff8c; outline-offset: -2px; z-index: 1; }
+  .cell7:has(input:focus-visible) { outline: 2px solid #fe8019; outline-offset: -2px; z-index: 1; }
   input[type="reset"] {
-    align-self: flex-start; background: none; color: #7d8fa9; border: 1px solid #1e2a3d;
-    border-radius: 999px; padding: 5px 16px; cursor: pointer; font: inherit; font-size: 13px;
+    background: none; color: #a89984; border: none;
+    padding: 0; cursor: pointer; font: inherit; font-size: 12px;
   }
-  input[type="reset"]:hover { color: #cfe3ff; border-color: #38ff8c80; }
+  input[type="reset"]:hover { color: #fe8019; }
 
   /* the answer: wakes up when the box has ink */
-  .guess { display: flex; flex-direction: column; align-items: center; gap: 18px;
-           opacity: .3; transition: opacity .25s ease; }
+  .guess { display: flex; flex-direction: column; align-items: center; gap: 14px;
+           opacity: .3; transition: opacity .2s ease; }
   .stage:has(.grid7 input:checked) .guess { opacity: 1; }
   .digit7 { position: relative; width: 90px; height: 150px; }
-  .seg { position: absolute; background: #17202f; border-radius: 3px; transition: background .18s ease; }
+  .seg { position: absolute; background: #3c3836; border-radius: 3px; transition: background .18s ease; }
   .seg-a { top: 0; left: 12px; width: 66px; height: 12px; }
   .seg-b { top: 9px; right: 0; width: 12px; height: 66px; }
   .seg-c { bottom: 9px; right: 0; width: 12px; height: 66px; }
@@ -56,50 +63,76 @@ BASE_CSS = """
   .seg-f { top: 9px; left: 0; width: 12px; height: 66px; }
   .seg-g { top: 69px; left: 12px; width: 66px; height: 12px; }
   .mn-digits { display: flex; gap: 9px; font-size: 17px; }
-  .meter { width: 122px; height: 6px; border-radius: 3px; background: #17202f; overflow: hidden; }
-  .meter-fill { height: 100%; background: #38ff8c;
+  .meter { width: 122px; height: 6px; border-radius: 3px; background: #3c3836; overflow: hidden; }
+  .meter-fill { height: 100%; background: #fabd2f;
                 width: calc(min(100, var(--mnist_margin_dec) * 4) * 1%);
                 transition: width .18s ease; }
 
   /* under the hood: the whole composition ladder, opt-in */
-  details.hood { border-top: 1px solid #1e2a3d; padding-top: 18px; }
+  details.hood { border-top: 1px solid #504945; padding-top: 18px; }
   details.hood summary {
-    cursor: pointer; color: #5f7190; font-size: 13px; list-style: none;
+    cursor: pointer; color: #928374; font-size: 13px; list-style: none;
     display: inline-flex; align-items: center; gap: 8px; user-select: none;
   }
   details.hood summary::-webkit-details-marker { display: none; }
-  details.hood summary::before { content: "+"; color: #38ff8c; font-size: 15px; }
+  details.hood summary::before { content: "+"; color: #fe8019; font-size: 15px; }
   details.hood[open] summary::before { content: "−"; }
-  details.hood summary:hover { color: #cfe3ff; }
+  details.hood summary:hover { color: #ebdbb2; }
 
-  h2 { font-size: 16px; margin: 28px 0 8px; border-top: 1px solid #1e2a3d; padding-top: 14px; }
+  h2 { font-size: 14px; margin: 28px 0 8px; border-top: 1px solid #504945; padding-top: 14px; color: #ebdbb2; }
   .row { margin: 4px 0; }
   label { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; }
-  input[type="checkbox"] { accent-color: #38ff8c; width: 15px; height: 15px; }
+  input[type="checkbox"] { accent-color: #fe8019; width: 15px; height: 15px; }
   .led { display: inline-block; width: 11px; height: 11px; margin: 0 1px; border-radius: 2px;
-         background: #223; vertical-align: middle; }
+         background: #3c3836; vertical-align: middle; }
   .bits { display: inline-flex; gap: 2px; align-items: center; margin-right: 8px; }
-  .v { color: #7CFC9B; }
-  .tag { color: #5f7190; font-size: 12px; }
-  .kbd { color: #8fa8c8; }
-  .ladder { color: #38ff8c; font-size: 13px; letter-spacing: 1px; margin: 18px 0; }
-  .ladder .dim { color: #5f7190; }
-  input[type="checkbox"]:focus-visible { outline: 2px solid #38ff8c; outline-offset: 2px; }
-  section:focus-within h2 { color: #7CFC9B; }
-  .caption { color: #4c5f7a; font-size: 11px; }
-  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #1e2a3d; }
+  .v { color: #b8bb26; }
+  .tag { color: #928374; font-size: 12px; }
+  .kbd { color: #fabd2f; }
+  .ladder { color: #928374; font-size: 13px; letter-spacing: 1px; margin: 18px 0; }
+  .ladder .dim { color: #fe8019; }
+  input[type="checkbox"]:focus-visible { outline: 2px solid #fe8019; outline-offset: 2px; }
+  section:focus-within h2 { color: #fe8019; }
+  .caption { color: #7c6f64; font-size: 11px; }
+  footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid #504945; }
+  .sig { color: #7c6f64; font-size: 11px; font-style: italic; margin: 0 0 6px; }
   .grid { display: grid; grid-template-columns: repeat(3, 34px); gap: 6px; margin: 8px 0; }
-  .cell { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid #223; border-radius: 4px; cursor: pointer; }
-  .cell:has(input:checked) { border-color: #38ff8c; box-shadow: 0 0 6px #38ff8c55 inset; }
+  .cell { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid #504945; border-radius: 4px; cursor: pointer; }
+  .cell:has(input:checked) { border-color: #fe8019; }
   .cell input { position: absolute; opacity: 0; width: 0; height: 0; }
-  .cell:has(input:focus-visible) { outline: 2px solid #38ff8c; outline-offset: 2px; }
+  .cell:has(input:focus-visible) { outline: 2px solid #fe8019; outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 """
 
 
-def led_css(signal: str, cls: str) -> str:
+def font_css() -> str:
+    """@font-face rules embedding JetBrains Mono as base64 data URIs (single-
+    file constraint: no external font requests). Read at generation time from
+    assets/fonts/*.b64 -- same files the Rust generator reads, verbatim."""
+    assets = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "fonts")
+    reg = open(os.path.join(assets, "JetBrainsMono-Regular.b64")).read().strip()
+    bold = open(os.path.join(assets, "JetBrainsMono-Bold.b64")).read().strip()
+    return f"""
+@font-face {{
+  font-family: 'JetBrains Mono';
+  src: url(data:font/woff2;base64,{reg}) format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}}
+@font-face {{
+  font-family: 'JetBrains Mono';
+  src: url(data:font/woff2;base64,{bold}) format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}}
+"""
+
+
+def led_css(signal: str, cls: str, lit: str = "#fe8019") -> str:
     return (
-        f'.{cls} {{ background: color-mix(in srgb, #38ff8c, #101826 '
+        f'.{cls} {{ background: color-mix(in srgb, {lit}, #3c3836 '
         f'calc((1 - var(--{signal})) * 100%)); }}'
     )
 
@@ -108,7 +141,7 @@ def text_led_css(signal: str, cls: str) -> str:
     """Same LED color-mix technique as led_css, applied to text color instead
     of background -- used to highlight the predicted digit in the 0-9 strip."""
     return (
-        f'.{cls} {{ color: color-mix(in srgb, #38ff8c, #4c5f7a '
+        f'.{cls} {{ color: color-mix(in srgb, #fabd2f, #7c6f64 '
         f'calc((1 - var(--{signal})) * 100%)); }}'
     )
 
@@ -258,7 +291,7 @@ def main(path):
         led_css("nb_h1", "l_nb_h1"), led_css("nb_h2", "l_nb_h2"), led_css("nb_out", "l_nb_out"),
         led_css(cls_out, "l_cls_out"),
         *[led_css(b, f"l_clspre_{i}") for i, b in enumerate(cls_pre)],
-        *[led_css(b, f"l_mn_seg_{letter}") for letter, b in zip("abcdefg", mnist_segs)],
+        *[led_css(b, f"l_mn_seg_{letter}", lit="#fabd2f") for letter, b in zip("abcdefg", mnist_segs)],
         *[text_led_css(m, f"l_mn_digit_{k}") for k, m in enumerate(mnist_minterms)],
     ])
     # decimal view signals: native-calc conversions materialized as registered
@@ -308,7 +341,7 @@ def main(path):
         f"body.rt:has(#{name}:checked) {{ --{name}: 1; }}" for name in inputs
     )
 
-    extra = BASE_CSS + "\n" + input_css + "\n" + led_css_all + "\n" + dec_css_all
+    extra = font_css() + "\n" + BASE_CSS + "\n" + input_css + "\n" + led_css_all + "\n" + dec_css_all
 
     def leds(cls, nbits):
         return "".join(f'<span class="led {cls}_{i}"></span>' for i in range(nbits))
@@ -317,30 +350,36 @@ def main(path):
     body = f"""
 <main class="wrap">
 <h1>draw a digit</h1>
-<p class="sub">a neural network running entirely in HTML + CSS, zero JavaScript. trained on MNIST at build time, compiled into logic gates. paint cells in the box; the display reads the network's answer. drag to draw — a small pointer shim feeds the checkboxes; every computed bit is CSS, and the page still works with the script deleted (one click per cell).</p>
+<p class="sub">a neural network in html + css — the network computes in logic gates compiled from mnist weights at build time. drag to draw; the only javascript is a 20-line input shim, delete it and clicking still works.</p>
 
-<div class="stage">
-  <form class="pad">
-    <div class="grid7" role="group" aria-label="7 by 7 drawing box">
-      {"".join(f'<label class="cell7"><input type="checkbox" id="mn{i}" aria-label="cell {i // 7},{i % 7}"></label>' for i in range(49))}
-    </div>
-    <input type="reset" value="clear">
-  </form>
-  <div class="guess">
-    <div class="digit7" role="img" aria-label="predicted digit">
-      <div class="seg seg-a l_mn_seg_a"></div>
-      <div class="seg seg-b l_mn_seg_b"></div>
-      <div class="seg seg-c l_mn_seg_c"></div>
-      <div class="seg seg-d l_mn_seg_d"></div>
-      <div class="seg seg-e l_mn_seg_e"></div>
-      <div class="seg seg-f l_mn_seg_f"></div>
-      <div class="seg seg-g l_mn_seg_g"></div>
-    </div>
-    <div class="mn-digits" role="group" aria-label="lit digit indicator">
-      {"".join(f'<span class="l_mn_digit_{k}">{k}</span>' for k in range(10))}
-    </div>
-    <div class="meter" role="img" aria-label="confidence"><div class="meter-fill"></div></div>
+<div class="app">
+  <div class="titlebar">
+    <span class="titletext">untitled_digit.png — paint.css</span>
+    <input type="reset" form="draw" value="[ clear ]">
   </div>
+  <div class="stage">
+    <form class="pad" id="draw">
+      <div class="grid7" role="group" aria-label="7 by 7 drawing box">
+        {"".join(f'<label class="cell7"><input type="checkbox" id="mn{i}" aria-label="cell {i // 7},{i % 7}"></label>' for i in range(49))}
+      </div>
+    </form>
+    <div class="guess">
+      <div class="digit7" role="img" aria-label="predicted digit">
+        <div class="seg seg-a l_mn_seg_a"></div>
+        <div class="seg seg-b l_mn_seg_b"></div>
+        <div class="seg seg-c l_mn_seg_c"></div>
+        <div class="seg seg-d l_mn_seg_d"></div>
+        <div class="seg seg-e l_mn_seg_e"></div>
+        <div class="seg seg-f l_mn_seg_f"></div>
+        <div class="seg seg-g l_mn_seg_g"></div>
+      </div>
+      <div class="mn-digits" role="group" aria-label="lit digit indicator">
+        {"".join(f'<span class="l_mn_digit_{k}">{k}</span>' for k in range(10))}
+      </div>
+      <div class="meter" role="img" aria-label="confidence"><div class="meter-fill"></div></div>
+    </div>
+  </div>
+  <div class="statusbar">guess: <span class="d_mnist_digit"></span> · margin: <span class="d_mnist_margin"></span> · {mnist_test_acc:.0%} mnist</div>
 </div>
 
 <details class="hood">
@@ -505,7 +544,10 @@ def main(path):
 
 </details>
 
-<footer class="tag">htmlnet · network computed in pure CSS · drag shim is the only JS · <span class="kbd">make build</span> / <span class="kbd">make test</span></footer>
+<footer>
+<div class="sig">htmlnet/1.0 (HTML+CSS) Server at file:// Port 0</div>
+<div class="tag"><span class="kbd">make build</span> / <span class="kbd">make test</span></div>
+</footer>
 </main>
 <script>
 /* input shim: drag-to-paint. the network + display are pure CSS — delete
