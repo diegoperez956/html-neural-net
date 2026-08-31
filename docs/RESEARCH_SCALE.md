@@ -58,5 +58,4 @@ Tool: `scripts/benchmark_clf_scale.py` (+ `--selftest`), raw pages in
 
 Recommended build order: confidence meter → MLP H=16 @ 7×7 → (optional)
 12×12. Quantization-aware training (float train → prune → [-3,3] quantize →
-re-measure) is the accuracy-critical path; see docs/DESIGN_MLP.md in the
-features worktree.
+re-measure) is the accuracy-critical path; see docs/DESIGN_MLP.md.

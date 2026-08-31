@@ -1,7 +1,6 @@
 # Design: MLP hidden layer in the CSS circuit
 
-Status: design. Backed by measured numbers in
-`../scale-research/docs/RESEARCH_SCALE.md` (worktree `agent/scale-research`).
+Status: design. Backed by measured numbers in `RESEARCH_SCALE.md`.
 
 ## Goal
 
