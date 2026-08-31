@@ -5,6 +5,7 @@ build: train
 
 train:
 	python3 scripts/train.py
+	python3 scripts/train_mnist.py
 
 test: build
 	python3 -m unittest discover -s tests -v

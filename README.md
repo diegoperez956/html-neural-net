@@ -2,7 +2,7 @@
 
 **A neural network built from logic gates and arithmetic circuits using HTML + CSS. Zero JavaScript at runtime.**
 
-Open `dist/index.html` in any modern browser (offline, `file://` works) and toggle the switches. The page evaluates gates, adders, a multiplier, dot products, a matrix-vector product, a 2-2-1 XOR neural network, and a perceptron-trained 3×3 glyph classifier — with no script, no WASM, no network, no server.
+Open `dist/index.html` in any modern browser (offline, `file://` works) and toggle the switches. The page evaluates gates, adders, a multiplier, dot products, a matrix-vector product, a 2-2-1 XOR neural network, a perceptron-trained 3×3 glyph classifier, and a 10-class linear digit classifier — draw a digit on a 7×7 grid, its argmax winner is decoded through gates onto a seven-segment display — with no script, no WASM, no network, no server.
 
 ```
 HTML checkbox state → bits → logic gates → adders → multiplication
@@ -29,8 +29,9 @@ Two independent curiosities:
    `XOR=max−min`). Half adders, full adders, ripple carries, AND partial
    products, two's-complement negation, signed sums, and threshold
    activations are all composed from those gates at build time — 123 gate
-   signals for the XOR network alone, ~750 for the whole page including a
-   perceptron-trained 3×3 glyph classifier.
+   signals for the XOR network alone, 4,971 for the whole page including a
+   perceptron-trained 3×3 glyph classifier and a bit-plane-popcount 10-class
+   MNIST digit classifier with a gate argmax and seven-segment decode.
 2. **Native-CSS mode (the sane baseline).** The *same* XOR network
    computed with direct `calc()`/`min()`/`max()` expressions — ~8
    declarations. The demo shows both modes side by side, producing
@@ -87,7 +88,7 @@ flat and deterministic.
 ## Correctness
 
 ```bash
-make test    # builds, then 58 Playwright tests × Chromium + Firefox
+make test    # builds, then 65 Playwright tests × Chromium + Firefox
 ```
 
 * static: no `<script>`, handlers, `javascript:`, WASM, external resource;
@@ -98,14 +99,27 @@ make test    # builds, then 58 Playwright tests × Chromium + Firefox
 * XOR MLP: 4 states, hidden preactivations and hidden outputs included;
 * Mode B: same outputs from native arithmetic;
 * trained classifier: 9 training exemplars + 32 random states against an
-  independent reference computed from `scripts/weights.json`.
+  independent reference computed from `scripts/weights.json`;
+* drawn-digit classifier: gate argmax + seven-segment decode checked against
+  an independent reference computed from `scripts/weights_mnist.json`, plus
+  registered-view spot checks.
+
+M11's classifier is trained on real MNIST (`scripts/train_mnist.py`, pure
+stdlib, deterministic): pixels binarize, crop to the digit's bounding box,
+pad to a centered square, and area-resample to the same 7×7 grid the demo
+draws on. An 8-epoch perceptron quantized to weights in [-3,3] scores
+79.98% on the full 10k MNIST test set and gets 8/10 canonical drawn glyphs
+right (misses 6 and 9). That's a linear model over a lossy 7×7 binary
+grid, and the runtime page does no normalization — draw large and
+centered, matching the training preprocessing, or accuracy drops.
 
 ## Browser support
 
 Chromium 111+ / Firefox 128+ (needs `:has()`, `@property`, and
 `color-mix()` for LED styling). Safari 16.4+ should work but is **not
-tested in this repo** — only Chromium 149 and Firefox 151 run in CI. See
-`docs/LIMITS.md` for the measured scaling story.
+tested in this repo** — only Chromium 149 and Firefox 151 run in CI. The
+full demo is ~1.01 MB, 4,971 registered signals. See `docs/LIMITS.md` for
+the measured scaling story.
 
 ## Prior art (and what this adds)
 

@@ -111,6 +111,65 @@ products of weight × pixel are gate-masked magnitudes (wiring for ±1/±2),
 summed with the trained bias at 5-bit signed width; threshold = sign bit.
 Training happens at build time; inference happens in CSS.
 
+## Drawn-digit classifier (M11)
+
+A 10-class linear classifier over a 7×7 checkbox grid (49 inputs `mn0..mn48`,
+zero-JS `<input type="reset">` to clear). Trained at build time by
+`scripts/train_mnist.py` on real MNIST (see below); compiled by
+`scripts/circuit.py` (`weighted_score`, `popcount`, `argmax`,
+`digit_minterms`, `sevenseg`) and wired in `scripts/generate.py` §13. Four
+gate-composed stages, none of them a per-term neuron sum:
+
+* **Per-class weighted score** (`Net.weighted_score`, one per digit, 10
+  total). Weights are constrained to `[-3,3]` so each is pure wiring: a
+  weight's magnitude is decomposed into two bit-planes, P0 (`|w|` ∈ {1,3})
+  and P1 (`|w|` ∈ {2,3}) — separately for positive and negative weights.
+  `Circuit.popcount` (carry-save reduction: repeatedly fold 3 equal-weight
+  wires into a full adder, 2 into a half adder) counts each plane's lit
+  inputs directly; P1's count is doubled by a zero-wire shift-left, no gate
+  needed. `pos = popcount(P0pos) + 2·popcount(P1pos)`, `neg` likewise,
+  `score = pos − neg + bias` via one ripple add with carry-in 1 (NOT-and-add
+  subtraction) then a second ripple add for the bias constant. Width is
+  7-bit signed, asserted at build time from the actual weights/bias for
+  that class (not a hardcoded ceiling) — max observed `|score|` is 58.
+* **Argmax tournament** (`Circuit.argmax`). A left-fold over the 10 scores:
+  incumbent starts at class 0; each round subtracts the sign-extended
+  challenger from the incumbent (8-bit width, NOT gates + one ripple add
+  with carry-in 1), and the sign bit of that diff selects strict-greater.
+  A mux (`OR(AND(s,challenger), AND(NOT s,incumbent))`) updates both the
+  running score and the running 4-bit index; ties keep the incumbent, so
+  the lowest-index digit wins ties. 9 rounds for 10 classes.
+* **Digit minterms** (`Circuit.digit_minterms`). The winning 4-bit index is
+  decoded into 10 AND-tree minterm signals (one per digit 0-9), NOT gates
+  on the index bits emitted once and reused across all ten.
+* **Seven-segment decode** (`Circuit.sevenseg`). Each of the 7 segments is
+  an OR-tree over the minterms of the digits that light it (standard
+  seven-segment digit-to-segment map). Segment and lit-digit-strip signals
+  drive the visible display directly — gate signals, not views.
+
+Per-class score, argmax, and predicted-digit decimal readouts are
+native-calc **views** of the registered `*_dec`/`mnist_score{k}_dec`
+signals, same display-only convention as every other decimal readout on
+the page (`docs/COMPUTATION_MODEL.md` display path policy) — they read
+gate outputs, they do not feed back into them.
+
+### Training (build time, outside the runtime artifact)
+
+`scripts/train_mnist.py`: pure stdlib, deterministic, downloads and caches
+real MNIST in `data/mnist/` (gitignored). Preprocessing: binarize each
+28×28 image at >128, crop to the tight bounding box of lit pixels, pad to
+a centered square (aspect preserved), area-resample to 7×7 coverage
+fractions, threshold at `t=0.3` (grid-searched) into bits. An 8-epoch
+multiclass perceptron trains on the full 60k training set, then weights
+are quantized to `[-3,3]` (scale factor grid-searched) with bias in
+`[-7,10]`. Result: 79.98% accuracy on the full 10k MNIST test set, 8/10 on
+the canonical drawn-glyph fidelity set (misses: 6→5, 9→3). Fast path:
+`scripts/train_mnist.py` skips retraining and reuses
+`scripts/weights_mnist.json` if it already exists (`--force` to retrain).
+The runtime page does no input normalization, so the accuracy figure
+assumes drawings are large and roughly centered on the grid — the glyph
+set is a demo-fidelity proxy, not a claim about arbitrary user drawings.
+
 ## Mode B — native CSS arithmetic
 
 The same XOR and matrix rows computed with direct `calc()`/`min()`/`max()`
@@ -153,7 +212,10 @@ repaint. No script, no event handler, no network. Works from `file://`.
 * XOR MLP: all 4 states including hidden preactivations and hidden outputs;
 * Mode B: same XOR/matvec against the same reference;
 * trained classifier: 9 exemplars + 32 seeded-random states vs an
-  independent reference recomputed from `scripts/weights.json`.
+  independent reference recomputed from `scripts/weights.json`;
+* drawn-digit classifier (M11): argmax winner, minterms, and seven-segment
+  output vs an independent reference recomputed from
+  `scripts/weights_mnist.json`, plus registered-view spot checks.
 
 Every intermediate the tests read is the same named signal the next stage
 consumes — the "genuine composition" acceptance check from

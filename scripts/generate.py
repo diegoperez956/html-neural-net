@@ -11,13 +11,63 @@ BASE_CSS = """
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
   body {
-    margin: 0; padding: 24px; background: #0b0e14; color: #cfe3ff;
+    margin: 0; padding: 48px 24px; background: #0b0e14; color: #cfe3ff;
     font: 15px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
-  h1 { font-size: 20px; margin: 0 0 4px; }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 21px; margin: 0 0 6px; }
+  .sub { color: #7d8fa9; font-size: 13px; margin: 0 0 32px; max-width: 54ch; }
+  .stage { display: flex; gap: 56px; align-items: center; flex-wrap: wrap; margin-bottom: 44px; }
+
+  /* the drawing box: one canvas, not 49 widgets */
+  .pad { display: flex; flex-direction: column; gap: 14px; }
+  .grid7 {
+    display: grid; grid-template-columns: repeat(7, 42px); grid-auto-rows: 42px;
+    border: 1px solid #1e2a3d; border-radius: 12px; overflow: hidden;
+    background: #0d1320; cursor: crosshair; touch-action: manipulation;
+  }
+  .cell7 { position: relative; box-shadow: inset 0 0 0 1px #38ff8c0d;
+           transition: background .1s ease, box-shadow .1s ease; }
+  .cell7:hover { background: #38ff8c17; }
+  .cell7:has(input:checked) {
+    background: #38ff8cd9;
+    box-shadow: inset 0 0 0 1px #38ff8c59, inset 0 0 12px #38ff8c26;
+  }
+  .cell7 input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: crosshair; }
+  .cell7:has(input:focus-visible) { outline: 2px solid #38ff8c; outline-offset: -2px; z-index: 1; }
+  input[type="reset"] {
+    align-self: flex-start; background: none; color: #7d8fa9; border: 1px solid #1e2a3d;
+    border-radius: 999px; padding: 5px 16px; cursor: pointer; font: inherit; font-size: 13px;
+  }
+  input[type="reset"]:hover { color: #cfe3ff; border-color: #38ff8c80; }
+
+  /* the answer: wakes up when the box has ink */
+  .guess { display: flex; flex-direction: column; align-items: center; gap: 18px;
+           opacity: .3; transition: opacity .25s ease; }
+  .stage:has(.grid7 input:checked) .guess { opacity: 1; }
+  .digit7 { position: relative; width: 90px; height: 150px; }
+  .seg { position: absolute; background: #17202f; border-radius: 3px; transition: background .18s ease; }
+  .seg-a { top: 0; left: 12px; width: 66px; height: 12px; }
+  .seg-b { top: 9px; right: 0; width: 12px; height: 66px; }
+  .seg-c { bottom: 9px; right: 0; width: 12px; height: 66px; }
+  .seg-d { bottom: 0; left: 12px; width: 66px; height: 12px; }
+  .seg-e { bottom: 9px; left: 0; width: 12px; height: 66px; }
+  .seg-f { top: 9px; left: 0; width: 12px; height: 66px; }
+  .seg-g { top: 69px; left: 12px; width: 66px; height: 12px; }
+  .mn-digits { display: flex; gap: 9px; font-size: 17px; }
+
+  /* under the hood: the whole composition ladder, opt-in */
+  details.hood { border-top: 1px solid #1e2a3d; padding-top: 18px; }
+  details.hood summary {
+    cursor: pointer; color: #5f7190; font-size: 13px; list-style: none;
+    display: inline-flex; align-items: center; gap: 8px; user-select: none;
+  }
+  details.hood summary::-webkit-details-marker { display: none; }
+  details.hood summary::before { content: "+"; color: #38ff8c; font-size: 15px; }
+  details.hood[open] summary::before { content: "−"; }
+  details.hood summary:hover { color: #cfe3ff; }
+
   h2 { font-size: 16px; margin: 28px 0 8px; border-top: 1px solid #1e2a3d; padding-top: 14px; }
-  .sub { color: #7d8fa9; font-size: 13px; margin-bottom: 12px; }
-  section { max-width: 900px; }
   .row { margin: 4px 0; }
   label { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; }
   input[type="checkbox"] { accent-color: #38ff8c; width: 15px; height: 15px; }
@@ -27,7 +77,7 @@ BASE_CSS = """
   .v { color: #7CFC9B; }
   .tag { color: #5f7190; font-size: 12px; }
   .kbd { color: #8fa8c8; }
-  .ladder { color: #38ff8c; font-size: 13px; letter-spacing: 1px; margin-bottom: 18px; }
+  .ladder { color: #38ff8c; font-size: 13px; letter-spacing: 1px; margin: 18px 0; }
   .ladder .dim { color: #5f7190; }
   input[type="checkbox"]:focus-visible { outline: 2px solid #38ff8c; outline-offset: 2px; }
   section:focus-within h2 { color: #7CFC9B; }
@@ -49,6 +99,15 @@ def led_css(signal: str, cls: str) -> str:
     )
 
 
+def text_led_css(signal: str, cls: str) -> str:
+    """Same LED color-mix technique as led_css, applied to text color instead
+    of background -- used to highlight the predicted digit in the 0-9 strip."""
+    return (
+        f'.{cls} {{ color: color-mix(in srgb, #38ff8c, #4c5f7a '
+        f'calc((1 - var(--{signal})) * 100%)); }}'
+    )
+
+
 def dec_css(bits, cls: str, sig: str) -> str:
     """Native-calc decimal VIEW (labeled, display only). bits: bare signal names LSB first.
     The value is materialized as registered signal --{sig} (testable via computed style)
@@ -66,7 +125,8 @@ def main(path):
     inputs = ["x1", "x0", "a", "b", "cin",
               "a1", "a0", "b1", "b0",
               "c3", "c2", "c1", "c0", "d3", "d2", "d1", "d0",
-              "u1", "u0", "v1", "v0"] + [f"g{i}" for i in range(9)]
+              "u1", "u0", "v1", "v0"] + [f"g{i}" for i in range(9)] \
+             + [f"mn{i}" for i in range(49)]
     for name in inputs:
         c.emit(name, "0")  # placeholder; overridden by :has rules
 
@@ -134,6 +194,31 @@ def main(path):
     for i, b in enumerate(cls_pre):
         c.emit(f"cls_pre_b{i}", ref(b))
 
+    # ---------------- M11: drawn-digit MNIST classifier ---------------------
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "weights_mnist.json")) as f:
+        mnist = _json.load(f)
+    mnist_weights, mnist_bias = mnist["weights"], mnist["bias"]
+    mnist_test_acc = mnist["test_accuracy"]
+    mnist_inputs = [ref(f"mn{i}") for i in range(49)]
+
+    SCORE_W = 7
+    mnist_scores = []
+    for k in range(10):
+        raw = n.weighted_score(f"mnist_c{k}", mnist_weights[k], mnist_bias[k],
+                                mnist_inputs, width=SCORE_W)
+        bits = [c.emit(f"mnist_score{k}_b{i}", ref(b)) for i, b in enumerate(raw)]
+        mnist_scores.append(bits)
+
+    mnist_idx_raw, _mnist_maxscore = c.argmax("mnist_argmax", mnist_scores)
+    mnist_idx = [c.emit(f"mnist_idx_b{i}", ref(b)) for i, b in enumerate(mnist_idx_raw)]
+
+    mnist_minterms_raw = c.digit_minterms("mnist_mt", mnist_idx)
+    mnist_minterms = [c.emit(f"mnist_digit{k}", ref(m)) for k, m in enumerate(mnist_minterms_raw)]
+
+    mnist_segs_raw = c.sevenseg("mnist_seg", mnist_minterms)
+    mnist_segs = [c.emit(f"mnist_seg_{letter}", ref(b))
+                  for letter, b in zip("abcdefg", mnist_segs_raw)]
+
     # ---------------- Mode B: native CSS arithmetic (comparison baseline) ---
     # var() * var() is illegal in CSS, so native mode only works where weights
     # are literal constants — which is exactly the neural-inference case here.
@@ -167,19 +252,26 @@ def main(path):
         led_css("nb_h1", "l_nb_h1"), led_css("nb_h2", "l_nb_h2"), led_css("nb_out", "l_nb_out"),
         led_css(cls_out, "l_cls_out"),
         *[led_css(b, f"l_clspre_{i}") for i, b in enumerate(cls_pre)],
+        *[led_css(b, f"l_mn_seg_{letter}") for letter, b in zip("abcdefg", mnist_segs)],
+        *[text_led_css(m, f"l_mn_digit_{k}") for k, m in enumerate(mnist_minterms)],
     ])
     # decimal view signals: native-calc conversions materialized as registered
-    # properties (display-only; testable via computed style)
-    for sig, bits in {
-        "add2_dec": s2, "mul2_dec": p2, "add4_dec": s4, "dot_dec": dot_bits,
-        "mv0_dec": row0, "mv1_dec": row1, "npre_dec": n_pre, "xor_dec": [out],
-        "nb_h1pre_dec": ["nb_h1pre"], "nb_h2pre_dec": ["nb_h2pre"],
-        "nb_outpre_dec": ["nb_outpre"], "nb_out_dec": ["nb_out"],
-        "nb_mv0_dec": ["nb_mv0"], "nb_mv1_dec": ["nb_mv1"],
-        "clspre_dec": cls_pre,
-    }.items():
+    # properties (display-only; testable via computed style). (bits, signed)
+    # -- signed views put the -2**(width-1) sign-bit coefficient on the MSB.
+    dec_specs = {
+        "add2_dec": (s2, False), "mul2_dec": (p2, False), "add4_dec": (s4, False),
+        "dot_dec": (dot_bits, False), "mv0_dec": (row0, False), "mv1_dec": (row1, False),
+        "npre_dec": (n_pre, True), "xor_dec": ([out], False),
+        "nb_h1pre_dec": (["nb_h1pre"], False), "nb_h2pre_dec": (["nb_h2pre"], False),
+        "nb_outpre_dec": (["nb_outpre"], False), "nb_out_dec": (["nb_out"], False),
+        "nb_mv0_dec": (["nb_mv0"], False), "nb_mv1_dec": (["nb_mv1"], False),
+        "clspre_dec": (cls_pre, True),
+        **{f"mnist_score{k}_dec": (mnist_scores[k], True) for k in range(10)},
+        "mnist_digit_dec": (mnist_idx, False),
+    }
+    for sig, (bits, signed) in dec_specs.items():
         terms = " + ".join(
-            f"({(-(2 ** i) if (sig in ("npre_dec", "clspre_dec") and i == len(bits) - 1) else 2 ** i)} * var(--{b}))"
+            f"({(-(2 ** i) if (signed and i == len(bits) - 1) else 2 ** i)} * var(--{b}))"
             for i, b in enumerate(bits)
         )
         c.emit(sig, f"calc({terms})")
@@ -200,6 +292,8 @@ def main(path):
         dec_css(["nb_mv0"], "d_nb_mv0", "nb_mv0_dec"),
         dec_css(["nb_mv1"], "d_nb_mv1", "nb_mv1_dec"),
         dec_css([b for b in cls_pre], "d_clspre", "clspre_dec"),
+        *[dec_css(mnist_scores[k], f"d_mnist_score{k}", f"mnist_score{k}_dec") for k in range(10)],
+        dec_css(mnist_idx, "d_mnist_digit", "mnist_digit_dec"),
     ])
 
     input_css = "\n".join(
@@ -213,9 +307,35 @@ def main(path):
 
     n_signals = len(c.signals)
     body = f"""
-<h1>htmlnet — a neural network from HTML + CSS, zero JavaScript</h1>
-<div class="sub">checked form state → bits → gates → adders → multiplication → dot product → matrix×vector → neurons → XOR MLP. Composed at build time; evaluated by the browser's style engine at runtime. <span class="kbd">File → open → toggle.</span></div>
+<main class="wrap">
+<h1>draw a digit</h1>
+<p class="sub">a neural network running entirely in HTML + CSS, zero JavaScript. trained on MNIST at build time, compiled into logic gates. paint cells in the box; the display reads the network's answer.</p>
 
+<div class="stage">
+  <form class="pad">
+    <div class="grid7" role="group" aria-label="7 by 7 drawing box">
+      {"".join(f'<label class="cell7"><input type="checkbox" id="mn{i}" aria-label="cell {i // 7},{i % 7}"></label>' for i in range(49))}
+    </div>
+    <input type="reset" value="clear">
+  </form>
+  <div class="guess">
+    <div class="digit7" role="img" aria-label="predicted digit">
+      <div class="seg seg-a l_mn_seg_a"></div>
+      <div class="seg seg-b l_mn_seg_b"></div>
+      <div class="seg seg-c l_mn_seg_c"></div>
+      <div class="seg seg-d l_mn_seg_d"></div>
+      <div class="seg seg-e l_mn_seg_e"></div>
+      <div class="seg seg-f l_mn_seg_f"></div>
+      <div class="seg seg-g l_mn_seg_g"></div>
+    </div>
+    <div class="mn-digits" role="group" aria-label="lit digit indicator">
+      {"".join(f'<span class="l_mn_digit_{k}">{k}</span>' for k in range(10))}
+    </div>
+  </div>
+</div>
+
+<details class="hood">
+<summary>under the hood: checkbox state → bits → gates → adders → multipliers → neurons → this classifier</summary>
 <div class="ladder">checkbox state <span class="dim">→</span> bits <span class="dim">→</span> gates <span class="dim">→</span> adders <span class="dim">→</span> multiplication <span class="dim">→</span> dot product <span class="dim">→</span> matrix×vector <span class="dim">→</span> neurons <span class="dim">→</span> XOR MLP</div>
 
 <section>
@@ -347,18 +467,38 @@ def main(path):
 </section>
 
 <section>
+  <h2>13 · drawn-digit classifier, readouts</h2>
+  <div class="tag">the drawing box and display live on the main page; these readouts tap the same circuit's signals. linear classifier, weights trained on MNIST at build time (scripts/train_mnist.py), {mnist_test_acc:.0%} MNIST test accuracy.</div>
+  <div class="row"><span class="kbd">predicted digit (index bits, decimal view)</span> <span class="v d_mnist_digit"></span></div>
+  <div class="row"><span class="kbd">per-class scores (signed, decimal views)</span></div>
+  <div class="row">
+    {"".join(f'<span class="kbd">{k}:</span> <span class="v d_mnist_score{k}"></span> ' for k in range(10))}
+  </div>
+  <div class="tag">
+  argmax = tournament left-fold over the 10 class scores (ties keep the lowest digit); each score = popcount-decomposed
+  weighted sum (weights ∈ [−3,3] via bit-planes P0/P1) − bias, all gate-composed at build time. Seven-segment display and
+  digit strip read the argmax/minterm gate signals directly (LEDs); the numeric readouts above are native-calc views,
+  outside the gate circuit, exactly like every other decimal readout on this page.
+  </div>
+</section>
+
+<section>
   <h2>honesty label</h2>
   <div class="tag">
   Runtime: HTML + CSS only (no script, no WASM, no network, works from file://).<br>
   Gates are named bit identities over native CSS min()/max()/calc() — the browser's arithmetic is the substrate; we compose circuits on top.<br>
   Decimal numbers in green are native-calc display views, outside the gate circuit. LEDs read gate signals directly.<br>
+  The MNIST classifier (§13) follows the same split: argmax/minterm/segment signals are gates, the score and digit numbers are views. No exception.<br>
   Generated by scripts/generate.py at build time; rebuilds are deterministic.
   </div>
 </section>
 
+</details>
+
 <footer class="tag">htmlnet · zero runtime JavaScript · <span class="kbd">make build</span> / <span class="kbd">make test</span></footer>
+</main>
 """
-    html = render(c, extra, body, "htmlnet — neural network in HTML + CSS, zero JS")
+    html = render(c, extra, body, "htmlnet — draw a digit, zero JavaScript")
     open(path, "w").write(html)
     print(f"wrote {path}: {n_signals} signals, {len(html)} bytes")
 

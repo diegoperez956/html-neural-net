@@ -290,6 +290,63 @@ class ClassifierTests(Base):
             self.check([rng.randint(0, 1) for _ in range(9)])
 
 
+class MnistClassifierTests(Base):
+    """M11: 7x7 drawn-digit linear classifier, argmax'd and 7-seg decoded."""
+
+    SEG_MAP = {
+        "a": {0, 2, 3, 5, 6, 7, 8, 9}, "b": {0, 1, 2, 3, 4, 7, 8, 9},
+        "c": {0, 1, 3, 4, 5, 6, 7, 8, 9}, "d": {0, 2, 3, 5, 6, 8, 9},
+        "e": {0, 2, 6, 8}, "f": {0, 4, 5, 6, 8, 9}, "g": {2, 3, 4, 5, 6, 8, 9},
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        import json
+        with open(os.path.join(ROOT, "scripts", "weights_mnist.json")) as f:
+            w = json.load(f)
+        cls.weights = w["weights"]
+        cls.bias = w["bias"]
+        cls.exemplars = w["exemplars"]
+
+    def ref(self, bits49):
+        """Independent reference model: score = bias + w.x per class,
+        argmax with ties -> lowest digit."""
+        scores = [self.bias[k] + sum(self.weights[k][i] * bits49[i] for i in range(49))
+                  for k in range(10)]
+        best = 0
+        for k in range(1, 10):
+            if scores[k] > scores[best]:
+                best = k
+        return scores, best
+
+    def check(self, bits49, label=""):
+        scores, best = self.ref(bits49)
+        self.set_bits(**{f"mn{i}": bits49[i] for i in range(49)})
+        idx = self.read_dec([f"mnist_idx_b{i}" for i in range(4)])
+        self.assertEqual(idx, best, f"{label} predicted index")
+        got_scores = [s2c(self.read_dec([f"mnist_score{k}_b{i}" for i in range(7)]), 7)
+                      for k in range(10)]
+        self.assertEqual(got_scores, scores, f"{label} per-class scores")
+        for k in range(10):
+            self.assertEqual(self.read(f"mnist_digit{k}")[0], 1 if k == best else 0,
+                              f"{label} minterm {k}")
+        for seg, digits in self.SEG_MAP.items():
+            expect = 1 if best in digits else 0
+            self.assertEqual(self.read(f"mnist_seg_{seg}")[0], expect, f"{label} segment {seg}")
+
+    def test_training_exemplars(self):
+        for k in range(10):
+            self.check(self.exemplars[str(k)], f"exemplar {k}")
+
+    def test_random_grids(self):
+        import random
+        rng = random.Random(0)
+        for t in range(20):
+            bits = [1 if rng.random() < 0.35 else 0 for _ in range(49)]
+            self.check(bits, f"random {t}")
+
+
 class DisplayTests(Base):
     """The rendered decimal views must actually resolve (adversarial BLOCK-1)."""
 
@@ -345,6 +402,35 @@ class DisplayTests(Base):
         self.assertIn("5", snap)
         self.assertIn("6", snap)
 
+    def test_mnist_views(self):
+        import json
+        with open(os.path.join(ROOT, "scripts", "weights_mnist.json")) as f:
+            w = json.load(f)
+        bits49 = w["exemplars"]["7"]                  # scores: [.. class6=-12, class7=18 ..]
+        self.set_bits(**{f"mn{i}": bits49[i] for i in range(49)})
+        self.assert_view("d_mnist_digit", 7)
+        self.assert_view("d_mnist_score7", 18)
+        self.assert_view("d_mnist_score6", -12)        # negative score case
+
+    def test_digit_strip_highlight(self):
+        rows = ["..###..", ".#...#.", ".....#.", "...##..",
+                ".....#.", ".#...#.", "..###.."]           # canonical "3"
+        bits49 = [1 if ch == "#" else 0 for row in rows for ch in row]
+        self.set_bits(**{f"mn{i}": bits49[i] for i in range(49)})
+        # engines serialize color-mix results differently (firefox: rgb(...),
+        # chromium: color(srgb ...)); normalize to an 8-bit rgb tuple here
+        import re as _re
+
+        def rgb(cls):
+            s = self.page.evaluate(
+                "(cls) => getComputedStyle(document.querySelector(cls)).color", cls)
+            nums = [float(v) for v in _re.findall(r"[\d.]+", s)[:3]]
+            scale = 255 if s.startswith("color(") else 1
+            return tuple(round(v * scale) for v in nums)
+
+        self.assertEqual(rgb(".l_mn_digit_3"), (56, 255, 140), ".l_mn_digit_3 lit")
+        self.assertEqual(rgb(".l_mn_digit_5"), (76, 95, 122), ".l_mn_digit_5 unlit")
+
 
 class XorTests(Base):
     def test_all_4_states_with_intermediates(self):
@@ -372,7 +458,7 @@ for engine in ENGINES:
     for base in (StaticChecks, GateTests, HalfAdderTests, FullAdderTests,
                  Add2Tests, Mul2Tests, Add4Tests, DotTests, MatVecTests,
                  NeuronTests, XorTests, NativeModeTests, ClassifierTests,
-                 DisplayTests):
+                 MnistClassifierTests, DisplayTests):
         cls = type(f"{base.__name__}_{engine}", (base,), {"engine": engine})
         cls.__module__ = __name__
         globals()[cls.__name__] = cls

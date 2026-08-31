@@ -1,20 +1,26 @@
 # Limits
 
-Measured, not asserted. All numbers from `scripts/benchmark.py` and the
-generated artifacts, Chromium 149 / Firefox 151 via Playwright.
+Measured, not asserted. All numbers from `scripts/benchmark.py`,
+`scripts/benchmark_scale.py`, and the generated artifacts, Chromium 149 /
+Firefox 151 via Playwright.
 
 ## Sizes (dist/index.html, the full demo)
 
 | metric | value |
 |---|---|
-| file size | ~153 KB |
-| signal declarations (custom properties) | 768 |
+| file size | ~1.01 MB |
+| signal declarations (custom properties) | 4 971 |
 | of which XOR MLP | 123 |
-| of which trained 3×3 classifier | ~260 |
+| of which trained 3×3 classifier (M10) | ~260 |
 | of which Mode B (native comparison) | 8 + 15 decimal-view signals |
-| `@property` registrations | 768 |
-| CSS rules | 1 659 |
-| DOM elements | 264 |
+| of which drawn-digit MNIST classifier (M11) | 4 192 |
+| `@property` registrations | 4 971 |
+| CSS rules | 10 165 |
+| DOM elements | 417 |
+
+M11 breakdown: 10 per-class weighted scores (bit-plane popcount) ~328
+signals each (3 284 total), argmax tournament 742, digit minterms 68,
+seven-segment decode 49.
 
 ## Scaling: N-bit ripple adder (generated in isolation)
 
@@ -31,6 +37,30 @@ figure is the automation floor (Playwright round-trip + forced synchronous
 style read); real interactive latency is imperceptible — one toggle
 recomputes a few hundred custom properties, and the browser does not do
 that synchronously per paint.
+
+## Scaling: whole-page signal count (`scripts/benchmark_scale.py`,
+`benchmarks/signal_scaling.csv`)
+
+Generated pages at increasing signal count, measured load time (navigate →
+DOMContentLoaded) and toggle→computed-style recalc latency, two engines:
+
+| signals | engine | page bytes | load (ms) | recalc median (ms) | recalc p95 (ms) |
+|---|---|---|---|---|---|
+| 1 002 | Chromium | 163 KB | 45 | 31 | 43 |
+| 1 002 | Firefox | 163 KB | 525 | 48 | 64 |
+| 3 002 | Chromium | 497 KB | 68 | 30 | 36 |
+| 3 002 | Firefox | 497 KB | 471 | 59 | 70 |
+| 6 002 | Chromium | 998 KB | 98 | 31 | 52 |
+| 6 002 | Firefox | 998 KB | 551 | 60 | 73 |
+| 10 002 | Chromium | 1.67 MB | 111 | 29 | 53 |
+| 10 002 | Firefox | 1.67 MB | 566 | 60 | 73 |
+
+Recalc p95 flattens at ~52 ms (Chromium) / ~73 ms (Firefox) by 6k signals
+and stays flat through 10k — recalc cost does not keep growing with
+signal count past that point. Load time scales with page bytes: Firefox
+one-time load reaches ~566 ms at 10k signals (1.67 MB); Chromium load
+stays ~111 ms at the same size. M11 alone (4 192 signals) sits well inside
+this measured, flat-recalc range.
 
 ## Structural cost floor
 
@@ -59,12 +89,33 @@ that synchronously per paint.
 
 Gate-built arithmetic stays tractable through 8–12 bit adders (≈ 60–90
 signals, ≈ 10–15 KB) and 4×4 multipliers. The XOR MLP at 123 signals and
-the 3×3 classifier at ~260 signals are far below the pain point. A larger
-learned classifier (say 16 inputs × 8 hidden × 2 outputs at 3-bit signed
-weights) would cost on the order of a few thousand signals and a few
-hundred KB — possible, but the demo gets worse, not better, past this
-point. That is why XOR plus one trained classifier is the shippable demo
-and the README says so.
+the 3×3 classifier at ~260 signals are far below the pain point. The M11
+drawn-digit classifier (4 192 signals: 10 popcount-decomposed scores,
+argmax tournament, minterms, seven-segment decode) is the first M-series
+piece large enough to need the scaling question answered rather than
+assumed — `benchmarks/signal_scaling.csv` answers it: recalc p95 is flat
+from 6k through 10k signals, and the whole page at 4 971 signals sits
+comfortably below that flat region. A per-term neuron-sum encoding of the
+same 10-class classifier (no bit-plane popcount) was estimated at ~25k
+signals — the popcount decomposition is what kept M11 inside the
+benchmarked range instead of past it (see `docs/DECISIONS.md` D-006).
+
+## Classifier accuracy limits (honest, not asserted)
+
+* M10 (3×3 glyph, two classes): trained on 9 hand-built exemplars, no held-out
+  test set — a toy proof that gate-composed weighted sums work, not an
+  accuracy claim.
+* M11 (7×7 drawn digit, ten classes): 79.98% on the full 10k MNIST test set;
+  a single-layer linear classifier over a 7×7 binary grid, so this is the
+  ceiling for that model class, not a bug to chase. On the canonical
+  drawn-glyph fidelity set it gets 8/10, with known misses at 6 (predicted
+  5) and 9 (predicted 3) — both digits whose 7×7 binary silhouette is close
+  to a neighboring digit's. The runtime page performs no input
+  normalization; the accuracy figures assume a drawing that is large and
+  roughly centered on the grid, matching the training preprocessing
+  (bounding-box crop + centered-square pad before the 7×7 resample). A
+  small, off-center, or corner-drawn digit is out of distribution for the
+  trained weights and not covered by either accuracy number.
 
 ## Browser support
 
@@ -88,7 +139,9 @@ comparison-operator gap found in experiments; see ARCHITECTURE).
    engine limits are unpublished and browser-specific.
 4. **Test time:** exhaustive in-browser verification stops being pleasant
    past 2^12 states.
-5. **Update cost:** one toggle invalidates the whole DAG. Browsers do
-   fine at ~450 signals; thousands would need per-section isolation
-   (containment), which the architecture supports but the demo doesn't
-   need.
+5. **Update cost:** one toggle invalidates the whole DAG. Measured flat
+   through 10 000 signals (recalc p95 ~52 ms Chromium / ~73 ms Firefox,
+   `benchmarks/signal_scaling.csv`); the 4 971-signal page is well inside
+   that range. Past whatever point recalc stops being flat, per-section
+   isolation (containment) is the fix — the architecture supports it, the
+   demo hasn't needed it yet.

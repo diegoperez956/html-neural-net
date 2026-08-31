@@ -5,3 +5,4 @@ __pycache__/
 benchmarks/raw/
 .worktrees/
 benchmarks/raw/
+data/

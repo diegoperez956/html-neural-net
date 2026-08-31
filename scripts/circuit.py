@@ -148,6 +148,126 @@ class Circuit:
         zero = ["0"] * len(bits)
         return self.ripple_add(f"{name}_neg", nb, zero, "1")
 
+    # --- popcount (carry-save reduction) ----------------------------------
+
+    def popcount(self, name: str, bits):
+        """Count the set bits among `bits` (LSB-first list of signal names,
+        refs, or literals) via carry-save reduction: repeatedly fold 3 wires
+        of equal weight into a full adder (sum stays at that weight, carry
+        moves to weight+1); 2 wires -> half adder; 1 wire passes through.
+        Weights are only ever fed by lower weights, so a single pass over
+        weights 0,1,2,... in order — fully reducing each column before
+        moving on — terminates with <=1 wire per weight. Returns the count
+        as an LSB-first bit list, width = ceil(log2(n+1))."""
+        assert len(bits) >= 1, f"{name}: popcount needs at least one input"
+        cols = {0: [_op(b) for b in bits]}
+        max_w = 0
+        result = []
+        k = 0
+        w = 0
+        while w <= max_w:
+            col = cols.get(w, [])
+            while len(col) >= 3:
+                s, cy = self.full_adder(f"{name}_pc{w}_{k}", col[0], col[1], col[2])
+                k += 1
+                col = col[3:] + [ref(s)]
+                cols.setdefault(w + 1, []).append(ref(cy))
+                max_w = max(max_w, w + 1)
+            if len(col) == 2:
+                s, cy = self.half_adder(f"{name}_pc{w}_{k}", col[0], col[1])
+                k += 1
+                col = [ref(s)]
+                cols.setdefault(w + 1, []).append(ref(cy))
+                max_w = max(max_w, w + 1)
+            result.append(col[0] if col else "0")
+            w += 1
+        return result
+
+    # --- argmax tournament --------------------------------------------------
+
+    def argmax(self, name: str, scores):
+        """Tournament left-fold argmax over equal-width signed scores (list of
+        LSB-first bit-name lists). Incumbent starts at class 0; each round
+        compares the incumbent against the next class (the challenger).
+        diff = incumbent - challenger via NOT gates on the sign-extended
+        challenger + one ripple add with carry-in 1 (two's-complement
+        subtraction folded into a single adder). sign bit s=1 means the
+        challenger is strictly greater (ties keep the incumbent, so the
+        lowest-index class wins ties). Mux: out_i = OR(AND(s,chal_i),
+        AND(NOT(s),inc_i)) — NOT(s) computed once per round and reused.
+        Returns (index_bits_lsb, winning_score_bits_lsb)."""
+        n = len(scores)
+        assert n >= 1
+        width = len(scores[0])
+        assert all(len(s) == width for s in scores)
+        idx_width = max(1, (n - 1).bit_length())
+        ext_w = width + 1
+
+        def sext(bits):
+            return bits + [bits[-1]] * (ext_w - len(bits))
+
+        def bits_of(v, w):
+            return [str((v >> i) & 1) for i in range(w)]
+
+        inc_score = scores[0]
+        inc_idx = bits_of(0, idx_width)
+        for r in range(1, n):
+            chal_score = scores[r]
+            chal_idx = bits_of(r, idx_width)
+            not_chal = [self.gate("NOT", b, name=f"{name}_r{r}_nc{i}")
+                        for i, b in enumerate(sext(chal_score))]
+            diff = self.ripple_add(f"{name}_r{r}_diff", sext(inc_score), not_chal, "1")
+            s = diff[-1]
+            ns = self.gate("NOT", ref(s), name=f"{name}_r{r}_ns")
+
+            def mux(inc_bit, chal_bit, tag):
+                hit = self.gate("AND", ref(s), _op(chal_bit), name=f"{name}_r{r}_{tag}_hit")
+                keep = self.gate("AND", ref(ns), _op(inc_bit), name=f"{name}_r{r}_{tag}_keep")
+                return self.gate("OR", ref(hit), ref(keep), name=f"{name}_r{r}_{tag}_out")
+
+            inc_score = [mux(inc_score[i], chal_score[i], f"s{i}") for i in range(width)]
+            inc_idx = [mux(inc_idx[i], chal_idx[i], f"i{i}") for i in range(idx_width)]
+        return inc_idx, inc_score
+
+    # --- digit minterms + seven-segment decoder -----------------------------
+
+    def digit_minterms(self, name: str, idx_bits):
+        """idx_bits: LSB-first index bit-name list. Returns one AND-tree
+        minterm signal per value 0..2**len(idx_bits)-1 (NOT gates emitted
+        once per bit and reused across all minterms)."""
+        nots = [self.gate("NOT", b, name=f"{name}_not{i}") for i, b in enumerate(idx_bits)]
+        minterms = []
+        for val in range(1 << len(idx_bits)):
+            terms = [ref(idx_bits[i]) if (val >> i) & 1 else ref(nots[i])
+                      for i in range(len(idx_bits))]
+            acc = terms[0]
+            acc_name = None
+            for i in range(1, len(terms)):
+                acc_name = self.gate("AND", acc, terms[i], name=f"{name}_m{val}_and{i}")
+                acc = ref(acc_name)
+            minterms.append(acc_name)
+        return minterms
+
+    SEVENSEG_MAP = {
+        "a": {0, 2, 3, 5, 6, 7, 8, 9}, "b": {0, 1, 2, 3, 4, 7, 8, 9},
+        "c": {0, 1, 3, 4, 5, 6, 7, 8, 9}, "d": {0, 2, 3, 5, 6, 8, 9},
+        "e": {0, 2, 6, 8}, "f": {0, 4, 5, 6, 8, 9}, "g": {2, 3, 4, 5, 6, 8, 9},
+    }
+
+    def sevenseg(self, name: str, minterms):
+        """minterms: 10 digit-minterm bit names. Returns 7 segment bit names
+        (a,b,c,d,e,f,g), each an OR-tree of its lit digits' minterms."""
+        segs = []
+        for seg in "abcdefg":
+            digits = sorted(self.SEVENSEG_MAP[seg])
+            acc = ref(minterms[digits[0]])
+            acc_name = minterms[digits[0]]
+            for d in digits[1:]:
+                acc_name = self.gate("OR", acc, ref(minterms[d]), name=f"{name}_{seg}_or{d}")
+                acc = ref(acc_name)
+            segs.append(acc_name)
+        return segs
+
 
 # --------------------------------------------------------------- network math
 
@@ -196,6 +316,69 @@ class Net:
         sign_bit = acc[-1]
         out = c.gate("NOT", ref(sign_bit), name=f"{name}_out")
         return out, acc
+
+    def weighted_score(self, name, weights, bias, inputs, width=7):
+        """Per-class weighted sum for integer weights w_i in [-3,3] over bit
+        signals, plus integer bias, as width-bit signed two's complement.
+
+        Weight magnitude is decomposed into two bit-planes: P0 = inputs with
+        |w| in {1,3} (weight bit 0 set), P1 = inputs with |w| in {2,3}
+        (weight bit 1 set) -- separately for positive and negative w. The
+        popcount of each plane, restricted to lit (x_i=1) inputs, gives the
+        plane's contribution directly (weight 3 inputs sit in both planes,
+        contributing 1+2); P1's count is doubled by a pure-wiring "0" prefix
+        (shift-left-1). pos = popcount(P0pos) + (popcount(P1pos)<<1); neg the
+        same. score = pos - neg + bias, via NOT gates on neg's bits + one
+        ripple add with carry-in 1 (subtraction folded into a single adder),
+        then a second ripple add for the bias constant.
+
+        Asserts (from the actual weights/bias, never a hardcoded ceiling)
+        that popcount planes and the final score fit signed `width` bits.
+        Returns the score bits, LSB-first."""
+        c = self.c
+        assert len(weights) == len(inputs)
+        assert all(-3 <= w <= 3 for w in weights), f"{name}: weight magnitude > 3"
+
+        def plane(pred):
+            return [x for w, x in zip(weights, inputs) if pred(w)]
+
+        p0pos = plane(lambda w: w > 0 and abs(w) in (1, 3))
+        p1pos = plane(lambda w: w > 0 and abs(w) in (2, 3))
+        p0neg = plane(lambda w: w < 0 and abs(w) in (1, 3))
+        p1neg = plane(lambda w: w < 0 and abs(w) in (2, 3))
+
+        # build-time width-sufficiency assertion, computed from this class's
+        # actual weights/bias -- not a hardcoded magic number.
+        pos_max = len(p0pos) + 2 * len(p1pos)
+        neg_max = len(p0neg) + 2 * len(p1neg)
+        lo, hi = -(1 << (width - 1)), (1 << (width - 1)) - 1
+        assert pos_max <= hi and neg_max <= hi, (
+            f"{name}: popcount plane too large for width {width} "
+            f"(pos_max={pos_max}, neg_max={neg_max})")
+        score_max, score_min = bias + pos_max, bias - neg_max
+        assert lo <= score_min and score_max <= hi, (
+            f"{name}: score range [{score_min},{score_max}] does not fit "
+            f"signed width {width} [{lo},{hi}]")
+
+        def zext(bits):
+            pad = width - len(bits)
+            assert pad >= 0, f"{name}: popcount output wider than width {width}"
+            return bits + ["0"] * pad
+
+        def plane_count(tag, pl):
+            return c.popcount(f"{name}_{tag}", pl) if pl else ["0"]
+
+        pos = c.ripple_add(f"{name}_pos",
+                            zext(plane_count("p0pos", p0pos)),
+                            zext(["0"] + plane_count("p1pos", p1pos)), "0")
+        neg = c.ripple_add(f"{name}_neg",
+                            zext(plane_count("p0neg", p0neg)),
+                            zext(["0"] + plane_count("p1neg", p1neg)), "0")
+        not_neg = [c.gate("NOT", b, name=f"{name}_notneg{i}") for i, b in enumerate(neg)]
+        diff = c.ripple_add(f"{name}_diff", pos, not_neg, "1")
+        bias_bits = self.const_bits(bias, width)
+        score = c.ripple_add(f"{name}_score", diff, bias_bits, "0")
+        return score
 
     def mlp_xor(self, prefix="xor"):
         """2-2-1 XOR MLP. h1 = step(+2x1 -2x0 -1), h2 = step(-2x1 +2x0 -1),

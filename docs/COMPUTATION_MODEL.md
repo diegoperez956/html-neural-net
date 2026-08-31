@@ -129,6 +129,16 @@ Stage widths (two's complement where signed):
 - 2×2 matrix × 1-bit vector: each entry is a gate-masked constant weight; row sums fit 4 bits;
 - XOR MLP neuron: weight ±2 needs 3-bit signed product words (−4..7); neuron preactivation is sum of two 3-bit products plus bias (−1): width 4 signed (−8..7); threshold = sign bit;
 - trained 3×3 classifier: nine weights in {−1,0,1,2}, bias −2; preactivation is the sum of nine bit products plus bias: width 5 signed (−16..15); threshold = sign bit;
+- trained 7×7 drawn-digit classifier (M11), per-class score: weights in
+  [−3,3] decomposed into two popcount bit-planes per sign; each plane's
+  popcount is width 5-6 unsigned (ceil(log2(n+1)) for up to 49 lit
+  inputs); `pos`/`neg` (plane-count sum, one plane pre-shifted) and the
+  final signed score are all width 7 (build-time-asserted per class from
+  its actual weights/bias, not a hardcoded ceiling; max observed
+  `|score|` = 58);
+- M11 argmax tournament: 8-bit signed comparator diff per round
+  (sign-extended 7-bit scores, one extra bit for the subtraction), 4-bit
+  index;
 - overflow is impossible for these maxima by construction, and exhaustive tests assert it.
 
 ## Display path policy
