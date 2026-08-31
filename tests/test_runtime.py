@@ -328,6 +328,9 @@ class MnistClassifierTests(Base):
         got_scores = [s2c(self.read_dec([f"mnist_score{k}_b{i}" for i in range(7)]), 7)
                       for k in range(10)]
         self.assertEqual(got_scores, scores, f"{label} per-class scores")
+        srt = sorted(scores)
+        got_margin = self.read_dec([f"mnist_margin_b{i}" for i in range(8)])
+        self.assertEqual(got_margin, srt[-1] - srt[-2], f"{label} margin")
         for k in range(10):
             self.assertEqual(self.read(f"mnist_digit{k}")[0], 1 if k == best else 0,
                               f"{label} minterm {k}")
@@ -411,6 +414,10 @@ class DisplayTests(Base):
         self.assert_view("d_mnist_digit", 7)
         self.assert_view("d_mnist_score7", 18)
         self.assert_view("d_mnist_score6", -12)        # negative score case
+        sc = [w["bias"][k] + sum(w["weights"][k][i] * bits49[i] for i in range(49))
+              for k in range(10)]
+        srt = sorted(sc)
+        self.assert_view("d_mnist_margin", srt[-1] - srt[-2])
 
     def test_digit_strip_highlight(self):
         rows = ["..###..", ".#...#.", ".....#.", "...##..",

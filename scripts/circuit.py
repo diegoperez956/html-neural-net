@@ -195,7 +195,19 @@ class Circuit:
         challenger is strictly greater (ties keep the incumbent, so the
         lowest-index class wins ties). Mux: out_i = OR(AND(s,chal_i),
         AND(NOT(s),inc_i)) — NOT(s) computed once per round and reused.
-        Returns (index_bits_lsb, winning_score_bits_lsb)."""
+
+        Also tracks the runner-up score (streaming top-2): when the
+        challenger wins, the old incumbent becomes the runner-up; otherwise
+        the runner-up rises to max(runner-up, challenger) via a second
+        folded subtraction (runner-up - challenger, reusing the
+        challenger's NOT gates) whose sign bit s2=1 means challenger is
+        strictly greater than the runner-up. The runner-up starts at the
+        most negative representable score, so the invariant
+        best >= runner-up >= every losing score seen holds.
+
+        Returns (index_bits_lsb, winning_score_bits_lsb, margin_bits_lsb)
+        where margin = best - runner-up via one more folded subtraction
+        (best + NOT(runner-up) + 1); margin >= 0, fits the extended width."""
         n = len(scores)
         assert n >= 1
         width = len(scores[0])
@@ -211,6 +223,7 @@ class Circuit:
 
         inc_score = scores[0]
         inc_idx = bits_of(0, idx_width)
+        run_score = bits_of(-(1 << (width - 1)), width)  # min signed value
         for r in range(1, n):
             chal_score = scores[r]
             chal_idx = bits_of(r, idx_width)
@@ -219,15 +232,33 @@ class Circuit:
             diff = self.ripple_add(f"{name}_r{r}_diff", sext(inc_score), not_chal, "1")
             s = diff[-1]
             ns = self.gate("NOT", ref(s), name=f"{name}_r{r}_ns")
+            diff2 = self.ripple_add(f"{name}_r{r}_d2", sext(run_score), not_chal, "1")
+            s2 = diff2[-1]
+            ns2 = self.gate("NOT", ref(s2), name=f"{name}_r{r}_ns2")
 
             def mux(inc_bit, chal_bit, tag):
                 hit = self.gate("AND", ref(s), _op(chal_bit), name=f"{name}_r{r}_{tag}_hit")
                 keep = self.gate("AND", ref(ns), _op(inc_bit), name=f"{name}_r{r}_{tag}_keep")
                 return self.gate("OR", ref(hit), ref(keep), name=f"{name}_r{r}_{tag}_out")
 
+            def mux_if(cond, ncond, keep_bit, hit_bit, tag):
+                hit = self.gate("AND", ref(cond), _op(hit_bit), name=f"{name}_r{r}_{tag}_hit")
+                keep = self.gate("AND", ref(ncond), _op(keep_bit), name=f"{name}_r{r}_{tag}_keep")
+                return self.gate("OR", ref(hit), ref(keep), name=f"{name}_r{r}_{tag}_out")
+
+            # runner-up candidate: rises to the challenger iff chal > runner-up
+            run_up = [mux_if(s2, ns2, run_score[i], chal_score[i], f"u{i}")
+                      for i in range(width)]
+            # if the challenger wins, the old incumbent is the new runner-up
+            new_run = [mux_if(s, ns, run_up[i], inc_score[i], f"n{i}")
+                       for i in range(width)]
             inc_score = [mux(inc_score[i], chal_score[i], f"s{i}") for i in range(width)]
             inc_idx = [mux(inc_idx[i], chal_idx[i], f"i{i}") for i in range(idx_width)]
-        return inc_idx, inc_score
+            run_score = new_run
+        not_run = [self.gate("NOT", b, name=f"{name}_mnr{i}")
+                   for i, b in enumerate(sext(run_score))]
+        margin = self.ripple_add(f"{name}_margin", sext(inc_score), not_run, "1")
+        return inc_idx, inc_score, margin
 
     # --- digit minterms + seven-segment decoder -----------------------------
 
