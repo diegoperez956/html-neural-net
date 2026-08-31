@@ -91,7 +91,7 @@ flat and deterministic.
 ## Correctness
 
 ```bash
-make test    # builds, then 65 Playwright tests × Chromium + Firefox
+make test    # builds, then 32 Playwright tests × Chromium + Firefox
 ```
 
 * static: exactly one `<script>` (the input shim, checked for size and for

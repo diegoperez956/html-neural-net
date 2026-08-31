@@ -449,8 +449,8 @@ class DisplayTests(Base):
             scale = 255 if s.startswith("color(") else 1
             return tuple(round(v * scale) for v in nums)
 
-        self.assertEqual(rgb(".l_mn_digit_3"), (56, 255, 140), ".l_mn_digit_3 lit")
-        self.assertEqual(rgb(".l_mn_digit_5"), (76, 95, 122), ".l_mn_digit_5 unlit")
+        self.assertEqual(rgb(".l_mn_digit_3"), (250, 189, 47), ".l_mn_digit_3 lit")
+        self.assertEqual(rgb(".l_mn_digit_5"), (124, 111, 100), ".l_mn_digit_5 unlit")
 
 
 class DragShimTests(Base):
