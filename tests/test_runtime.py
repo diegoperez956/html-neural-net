@@ -81,7 +81,9 @@ class StaticChecks(Base):
     def test_no_javascript(self):
         html = open(DIST).read()
         lower = html.lower()
-        self.assertNotIn("<script", lower)
+        # exactly one <script>: the input shim. Everything else on the page
+        # (network computation, display, readouts) stays JS-free.
+        self.assertEqual(lower.count("<script"), 1)
         self.assertNotIn("javascript:", lower)
         self.assertNotIn("onclick", lower)
         self.assertNotIn("onchange", lower)
@@ -95,6 +97,16 @@ class StaticChecks(Base):
         self.assertNotIn("src=", lower)
         self.assertNotIn("<link", lower)
         self.assertNotIn("<img", lower)
+
+        i = html.index("<script>")
+        j = html.index("</script>")
+        script_body = html[i + len("<script>"):j]
+        low_body = script_body.lower()
+        self.assertLess(len(script_body.encode("utf-8")), 2500, "input shim too large")
+        for forbidden in ("fetch", "xmlhttprequest", "websocket", "eval(",
+                           "import", "localstorage", "document.cookie", "src="):
+            self.assertNotIn(forbidden, low_body, f"shim contains {forbidden!r}")
+        self.assertNotIn("Function(", script_body, "shim uses the Function constructor")
 
     def test_no_operand_pair_lookup_selectors(self):
         """Composition, not enumeration: :has() rules may only map single
@@ -441,6 +453,63 @@ class DisplayTests(Base):
         self.assertEqual(rgb(".l_mn_digit_5"), (76, 95, 122), ".l_mn_digit_5 unlit")
 
 
+class DragShimTests(Base):
+    """Rendered behavior of the input shim's <script> tag: pointer drags
+    must paint checkboxes the same way clicks do. The network + display
+    stay pure CSS -- this only exercises the shim's event wiring."""
+
+    def fire(self, elem_id, event_type, pointer_id=1):
+        self.page.evaluate(
+            "(a) => { document.getElementById(a.id).dispatchEvent("
+            "new PointerEvent(a.type, {bubbles: true, cancelable: true, "
+            "pointerId: a.pid, button: 0})); }",
+            {"id": elem_id, "type": event_type, "pid": pointer_id},
+        )
+
+    def click_event(self, elem_id):
+        self.page.evaluate(
+            "(id) => document.getElementById(id).dispatchEvent("
+            "new MouseEvent('click', {bubbles: true, cancelable: true}))",
+            elem_id,
+        )
+
+    def checked(self, *ids):
+        return self.page.evaluate(
+            "(ids) => ids.map((i) => document.getElementById(i).checked)", list(ids)
+        )
+
+    def drag(self, down_id, *over_ids):
+        self.fire(down_id, "pointerdown")
+        for i in over_ids:
+            self.fire(i, "pointerover")
+        self.page.evaluate(
+            "() => window.dispatchEvent(new PointerEvent('pointerup', {pointerId: 1}))"
+        )
+        # the pointerdown cell also receives a click after release, as a real
+        # drag would -- the shim must suppress its default (no double-toggle)
+        self.click_event(down_id)
+
+    def test_drag_paints_three_cells(self):
+        self.drag("mn0", "mn1", "mn2")
+        self.assertEqual(self.checked("mn0", "mn1", "mn2"), [True, True, True])
+        self.assertEqual(self.read("mn0", "mn1", "mn2"), [1, 1, 1])
+
+    def test_second_pointerdown_erases(self):
+        self.drag("mn0", "mn1", "mn2")
+        # cell is now checked; a fresh pointerdown on it must erase, not paint
+        self.fire("mn0", "pointerdown")
+        self.assertEqual(self.checked("mn0"), [False])
+        self.assertEqual(self.checked("mn1", "mn2"), [True, True])
+
+    def test_plain_click_still_toggles_untouched_cell(self):
+        # no-shim / keyboard path parity: a bare .click() (no pointer events
+        # at all) still toggles a cell the drag never touched.
+        self.assertEqual(self.checked("mn20"), [False])
+        self.page.evaluate("() => document.getElementById('mn20').click()")
+        self.assertEqual(self.checked("mn20"), [True])
+        self.assertEqual(self.read("mn20"), [1])
+
+
 class XorTests(Base):
     def test_all_4_states_with_intermediates(self):
         for x1 in (0, 1):
@@ -467,7 +536,7 @@ for engine in ENGINES:
     for base in (StaticChecks, GateTests, HalfAdderTests, FullAdderTests,
                  Add2Tests, Mul2Tests, Add4Tests, DotTests, MatVecTests,
                  NeuronTests, XorTests, NativeModeTests, ClassifierTests,
-                 MnistClassifierTests, DisplayTests):
+                 MnistClassifierTests, DisplayTests, DragShimTests):
         cls = type(f"{base.__name__}_{engine}", (base,), {"engine": engine})
         cls.__module__ = __name__
         globals()[cls.__name__] = cls
