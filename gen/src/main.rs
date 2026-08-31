@@ -392,7 +392,7 @@ fn main() {
         r####"
 <main class="wrap">
 <h1>draw a digit</h1>
-<p class="sub">a neural network running entirely in HTML + CSS, zero JavaScript. trained on MNIST at build time, compiled into logic gates. paint cells in the box; the display reads the network's answer.</p>
+<p class="sub">a neural network running entirely in HTML + CSS, zero JavaScript. trained on MNIST at build time, compiled into logic gates. paint cells in the box; the display reads the network's answer. drag to draw — a small pointer shim feeds the checkboxes; every computed bit is CSS, and the page still works with the script deleted (one click per cell).</p>
 
 <div class="stage">
   <form class="pad">
@@ -570,7 +570,7 @@ fn main() {
 <section>
   <h2>honesty label</h2>
   <div class="tag">
-  Runtime: HTML + CSS only (no script, no WASM, no network, works from file://).<br>
+  Runtime: the network, displays and readouts are HTML + CSS only (no WASM, no network requests, works from file://). The single &lt;script&gt; on the page is an input shim that translates pointer drags into checkbox toggles — zero computation; delete it and everything still works, one click per cell.<br>
   Gates are named bit identities over native CSS min()/max()/calc() — the browser's arithmetic is the substrate; we compose circuits on top.<br>
   Decimal numbers in green are native-calc display views, outside the gate circuit. LEDs read gate signals directly.<br>
   The MNIST classifier (§13) follows the same split: argmax/minterm/segment signals are gates, the score, digit and margin numbers and the confidence meter are native-calc views. No exception.<br>
@@ -580,12 +580,37 @@ fn main() {
 
 </details>
 
-<footer class="tag">htmlnet · zero runtime JavaScript · <span class="kbd">make build</span> / <span class="kbd">make test</span></footer>
+<footer class="tag">htmlnet · network computed in pure CSS · drag shim is the only JS · <span class="kbd">make build</span> / <span class="kbd">make test</span></footer>
 </main>
+<script>
+/* input shim: drag-to-paint. the network + display are pure CSS — delete
+   this block and the page still works, one click per cell. */
+(() => {{
+  const grid = document.querySelector('.grid7');
+  if (!grid) return;
+  let mode = null, downBox = null;
+  const boxOf = e => {{ const c = e.target.closest('.cell7'); return c && c.querySelector('input'); }};
+  grid.addEventListener('pointerdown', e => {{
+    const box = boxOf(e); if (!box || e.button !== 0) return;
+    e.target.releasePointerCapture && e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId) && e.target.releasePointerCapture(e.pointerId);
+    mode = !box.checked; box.checked = mode; downBox = box;
+  }});
+  grid.addEventListener('pointerover', e => {{
+    if (mode === null) return;
+    const box = boxOf(e); if (box) box.checked = mode;
+  }});
+  grid.addEventListener('click', e => {{
+    const box = boxOf(e);
+    if (box && box === downBox) e.preventDefault(); /* already painted on pointerdown */
+    downBox = null; /* one-shot: keyboard toggles must not be suppressed */
+  }});
+  addEventListener('pointerup', () => {{ mode = null; }});
+}})();
+</script>
 "####
     );
 
-    let html = render(c, &extra, &body, "htmlnet — draw a digit, zero JavaScript");
+    let html = render(c, &extra, &body, "htmlnet — draw a digit, the network is pure CSS");
     if let Some(parent) = Path::new(&out_path).parent() {
         if !parent.as_os_str().is_empty() {
             fs::create_dir_all(parent).unwrap();

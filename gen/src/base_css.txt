@@ -15,7 +15,7 @@
   .grid7 {
     display: grid; grid-template-columns: repeat(7, 42px); grid-auto-rows: 42px;
     border: 1px solid #1e2a3d; border-radius: 12px; overflow: hidden;
-    background: #0d1320; cursor: crosshair; touch-action: manipulation;
+    background: #0d1320; cursor: crosshair; touch-action: none;
   }
   .cell7 { position: relative; box-shadow: inset 0 0 0 1px #38ff8c0d;
            transition: background .1s ease, box-shadow .1s ease; }
