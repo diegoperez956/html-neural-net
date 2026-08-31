@@ -175,17 +175,6 @@ impl Circuit {
 }
 
 impl Circuit {
-    /// Two's complement negation: bitwise NOT (gates) + 1 via ripple add.
-    /// (Dead code in generate.py too — ported for a faithful 1:1 mapping.)
-    #[allow(dead_code)]
-    pub fn negate(&mut self, name: &str, bits: &[String]) -> Vec<String> {
-        let nb: Vec<String> = bits.iter().enumerate()
-            .map(|(i, b)| self.gate(Gate::Not, b, &format!("{name}_n{i}")))
-            .collect();
-        let zero = vec!["0".to_string(); bits.len()];
-        self.ripple_add(&format!("{name}_neg"), &nb, &zero, "1")
-    }
-
     /// Carry-save popcount (python popcount): fold 3 wires of equal weight
     /// into a full adder, 2 into a half adder, single ordered pass.
     pub fn popcount(&mut self, name: &str, bits: &[String]) -> Vec<String> {
@@ -501,18 +490,6 @@ impl<'a> Net<'a> {
         self.c.ripple_add(&format!("{name}_score"), &diff, &bias_bits, "0")
     }
 
-    /// 2-2-1 XOR MLP. h1 = step(+2x1 -2x0 -1), h2 = step(-2x1 +2x0 -1),
-    /// out = step(+2h1 +2h2 -1). Dead code in generate.py too — ported for a
-    /// faithful 1:1 mapping.
-    #[allow(dead_code)]
-    pub fn mlp_xor(&mut self, prefix: &str) -> (String, String, String) {
-        let x1 = r#ref("x1");
-        let x0 = r#ref("x0");
-        let (h1, _) = self.neuron(&format!("{prefix}_h1"), &[2, -2], &[-1], &[x1.clone(), x0.clone()], 3, 4);
-        let (h2, _) = self.neuron(&format!("{prefix}_h2"), &[-2, 2], &[-1], &[x1, x0], 3, 4);
-        let (out, _) = self.neuron(&format!("{prefix}_out"), &[2, 2], &[-1], &[r#ref(&h1), r#ref(&h2)], 3, 4);
-        (h1, h2, out)
-    }
 }
 
 // ------------------------------------------------------------------ rendering

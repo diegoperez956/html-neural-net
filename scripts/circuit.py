@@ -403,15 +403,6 @@ class Net:
         score = c.ripple_add(f"{name}_score", diff, bias_bits, "0")
         return score
 
-    def mlp_xor(self, prefix="xor"):
-        """2-2-1 XOR MLP. h1 = step(+2x1 -2x0 -1), h2 = step(-2x1 +2x0 -1),
-        out = step(+2h1 +2h2 -1)."""
-        c = self.c
-        h1, _ = self.neuron(f"{prefix}_h1", [+2, -2], [-1], [ref("x1"), ref("x0")])
-        h2, _ = self.neuron(f"{prefix}_h2", [-2, +2], [-1], [ref("x1"), ref("x0")])
-        out, _ = self.neuron(f"{prefix}_out", [+2, +2], [-1], [ref(h1), ref(h2)])
-        return h1, h2, out
-
 
 # ------------------------------------------------------------------ rendering
 
