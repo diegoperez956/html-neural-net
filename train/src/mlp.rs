@@ -1,9 +1,13 @@
 //! M12 part 1: 49 -> H=16 -> 10 MLP trainer, per docs/DESIGN_MLP.md.
 //!
-//! Replaces the linear trainer as the shipped `mnist` command (mnist.rs's
-//! `run()` stays in the tree as the honest linear baseline -- see
-//! train/README.md -- reachable via the `linear` CLI verb, and reused here
-//! for its preprocessing pipeline and the val/test split).
+//! Cleared its MNIST accuracy bar but not glyph fidelity, and the circuit
+//! wasn't built (see D-010 in docs/DECISIONS.md) -- page bytes are the
+//! binding constraint and this doubled them for no drawn-digit win. Kept in
+//! the tree as a recorded negative result, reachable via the `mlp` CLI verb;
+//! it writes its own experimental `scripts/weights_mlp.json` and is not part
+//! of `make build`. `scripts/weights_mnist.json` (the shipped file) is
+//! mnist.rs's linear trainer again. Reuses mnist.rs's preprocessing pipeline
+//! and val/test split.
 //!
 //! Hard constraints from the CSS circuit (docs/DESIGN_MLP.md), not
 //! negotiable:
@@ -373,7 +377,11 @@ fn nonzero_per_hidden_neuron(m: &IntMlp) -> Vec<usize> {
 
 pub fn run(repo_root: &Path) {
     let data_dir = repo_root.join("data").join("mnist");
-    let out_path = repo_root.join("scripts").join("weights_mnist.json");
+    // Experimental only -- not part of `make build` (see D-010 in
+    // docs/DECISIONS.md). `scripts/weights_mnist.json` is the linear
+    // trainer's (mnist.rs) output; the MLP writes its own separate file so
+    // it doesn't clobber the shipped artifact's schema.
+    let out_path = repo_root.join("scripts").join("weights_mlp.json");
 
     println!("loading MNIST (cached in data/mnist/, downloading if missing)...");
     let (train_fracs, train_ys) = mnist::load_split(&data_dir, mnist::FILES[0], mnist::FILES[1]);
@@ -488,7 +496,7 @@ pub fn run(repo_root: &Path) {
         "post_prune_test_accuracy": post_prune_test_acc,
         "linear_baseline_test_accuracy": LINEAR_BASELINE_TEST_ACC,
     });
-    fs::write(&out_path, serde_json::to_string_pretty(&out).unwrap()).expect("write weights_mnist.json");
+    fs::write(&out_path, serde_json::to_string_pretty(&out).unwrap()).expect("write weights_mlp.json");
     println!("wrote {}", out_path.display());
 }
 

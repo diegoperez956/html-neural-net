@@ -1,6 +1,10 @@
 # Design: MLP hidden layer in the CSS circuit
 
-Status: design. Backed by measured numbers in `RESEARCH_SCALE.md`.
+Status: built and evaluated (`train/src/mlp.rs`), not shipped. It cleared
+its MNIST accuracy bar but not glyph fidelity, and roughly doubled the
+classifier's page bytes for that; the circuit described below was never
+generated. Kept as a recorded negative result — see D-010 in
+`docs/DECISIONS.md`. Backed by measured numbers in `RESEARCH_SCALE.md`.
 
 ## Goal
 

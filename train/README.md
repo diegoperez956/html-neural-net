@@ -3,16 +3,19 @@
 Originally a Rust port of `scripts/train.py` and `scripts/train_mnist.py`;
 those Python trainers were deleted once this port was validated (D-008 in
 `docs/DECISIONS.md`), and `train/` is now the only trainer. Build-time
-only — writes `scripts/weights.json` and `scripts/weights_mnist.json`, same
-schema as the Python originals. `gen/` and `tests/` don't know or care
-which trainer produced the JSON.
+only — `glyph` and `mnist` write `scripts/weights.json` and
+`scripts/weights_mnist.json`, the files `gen/` and `tests/` actually
+consume. `mlp` (M12's hidden-layer experiment, not shipped — see D-010 in
+`docs/DECISIONS.md`) writes its own `scripts/weights_mlp.json` and is not
+part of `make build`.
 
 ## Usage
 
 ```
 cd train
 cargo run --release -- glyph   # -> ../scripts/weights.json
-cargo run --release -- mnist   # -> ../scripts/weights_mnist.json
+cargo run --release -- mnist   # -> ../scripts/weights_mnist.json (shipped, linear)
+cargo run --release -- mlp     # -> ../scripts/weights_mlp.json (experimental, not shipped)
 ```
 
 Paths are resolved from `CARGO_MANIFEST_DIR` (compile-time), so it doesn't
@@ -22,11 +25,17 @@ IDX files); if missing, it tries to download them the same way
 
 ## Schema contract
 
-Unchanged from Python. `glyph` writes `{"bias": int, "weights": [int; 9]}`.
-`mnist` writes `{"weights": [[int;49];10], "bias": [int;10], "test_accuracy":
-float, "glyph_accuracy": float, "threshold": float, "exemplars": {"0".."9":
-[int;49]}}`. Weights are clipped to `[-3, 3]` (circuit.py's `weighted_score`
-asserts this).
+`glyph` writes `{"bias": int, "weights": [int; 9]}` (unchanged from
+Python). `mnist` writes `{"weights": [[int;49];10], "bias": [int;10],
+"test_accuracy": float, "val_accuracy": float, "drawn_val_accuracy": float,
+"glyph_accuracy": float, "threshold": float, "seed": int, "exemplars":
+{"0".."9": [int;49]}}` — the same linear schema as the Python original plus
+a few transparency fields D-009/D-010 added (`gen/` only reads `weights`,
+`bias`, and `test_accuracy`, so the extra fields are additive). Weights are
+clipped to `[-3, 3]` (`gen/src/circuit.rs`'s `weighted_score` assumes this).
+`mlp` writes its own separate schema (`hidden_weights`/`hidden_biases`/
+`output_weights`/`output_biases`, see `docs/DESIGN_MLP.md`) to
+`scripts/weights_mlp.json` — `gen/` never reads this file.
 
 ## RNG: divergence from CPython
 
@@ -50,7 +59,7 @@ to-even exactly (not naive round-half-away-from-zero) — that one is cheap to
 get exactly right and it affects which quantization scale wins the accuracy
 comparison in `pick_best_quantization`.
 
-## Seed choice (fixed: D-007 -> D-009 honest re-selection)
+## Seed choice (D-007 -> D-009 honest re-selection -> D-010 drawn-style retarget)
 
 The perceptron is shuffle-order-sensitive: final accuracy (after
 quantization, and after glyph-triggered augmentation if it fires) swings by
@@ -59,23 +68,50 @@ inherent to averaged-perceptron training, not a bug.
 
 D-007 originally picked `SHUFFLE_SEED = 8` by scanning ~20 seeds against
 **test-set** accuracy — a max-of-20 draw against the number that's supposed
-to be the honest, unbiased estimate. That's a real integrity problem, not
-just a style nit: it reports the best of a distribution, not a draw from it.
+to be the honest, unbiased estimate. D-009 fixed that: the last 10k of the
+60k training images are held out as a validation split (never trained on),
+and `t`/seed/scale were grid-searched against it, with the 10k test set
+read exactly once at the end.
 
-Fixed: the last 10k of the 60k training images are held out as a
-validation split (never trained on). Cell threshold `t`, shuffle seed, and
-quantization scale are all grid-searched and selected purely against this
-validation split — `SEED_GRID` in `src/mnist.rs` (0..20, kept at the same
-size as before for continuity). The 10k official test set is read exactly
-once, after every hyperparameter is already locked in, purely to report the
-final number. Glyph-triggered augmentation (see below) is likewise accepted
-only if it improves validation accuracy — otherwise it's discarded and
-logged.
+D-010 went one step further: downsampled MNIST validation accuracy is
+itself a poor proxy for what a visitor draws on the 7×7 grid (thin
+anti-aliased pen strokes with real bbox margin vs. thick, canvas-filling,
+blockily-filled cells). Selection now runs against a **drawn-style
+validation proxy** instead — the same held-out validation images, with
+their raw pixels transformed to look more like grid-drawn input before the
+usual bbox+crop pipeline:
 
-Current result: `t=0.2`, `seed=10`, val accuracy 0.8301, **test accuracy
-0.8189**. This is lower than the old 0.8246 — expected, since 0.8246 was a
-seed-optimized test-set figure, not an apples-to-apples number. 0.8189 is
-the honest baseline the MLP (`docs/DESIGN_MLP.md`) must clear.
+1. **Stroke dilation** (one round of 4-neighbor binary dilation) — thickens
+   the binarized digit before cropping.
+2. The existing **bbox + centered-square-pad crop** (D-006) — reused as-is.
+3. **Full-canvas zoom** (`DRAWN_ZOOM = 0.82`) — shrinks that square crop
+   toward its center, since a grid-filled digit fills more of its bounding
+   square than a MNIST digit does.
+4. **Coverage-threshold variation** — the 28×28 binarization threshold
+   (`DRAWN_PIXEL_THRESHOLDS = [90, 128, 166]`, cycled by image index) varies
+   how much of MNIST's anti-aliased stroke edge counts as ink before
+   dilation, standing in for different drawing "pressure."
+
+`t`, shuffle seed, quantization scale, and the glyph-augmentation
+accept/reject gate are all now selected against this proxy
+(`build_drawn_style_val` in `src/mnist.rs`); plain MNIST validation
+accuracy is still computed and reported as a secondary number. The 10
+canonical glyphs are never touched during selection — only afterward, as a
+sanity check that the proxy isn't off in the weeds (see the accuracy table
+below: proxy 0.7756 vs. glyph accuracy 0.8000, a 0.024 gap, which is close
+enough to trust the proxy).
+
+`THRESHOLD_GRID` was widened from the original `0.10..0.35` to `0.10..0.70`
+for this search — the old range's max (`0.35`) was where drawn-style
+accuracy peaked, i.e. the old grid's edge, not an interior optimum. The
+wider grid finds a real peak at `t=0.45` instead.
+
+Current result: `t=0.45`, `seed=19`, drawn-style val accuracy 0.7756, MNIST
+val accuracy 0.7876, **test accuracy 0.7854**. This trades ~3.4 points of
+MNIST test accuracy (down from D-009's honest 0.8189) for canonical
+drawn-glyph fidelity: 8/10, up from 7/10. See D-010 in
+`docs/DECISIONS.md` for the full evaluation, including the MLP's negative
+result that motivated this retarget.
 
 No `TRAIN_SEED` env override anymore — seed is chosen by the grid search on
 every run, not read from an env var, so the result is deterministic without
@@ -116,21 +152,24 @@ or `reqwest` as a dependency for a code path that doesn't run.
 - **Schema**: keys, nesting, and value types checked against the Python
   output (same key set, `weights` is `[[int;49];10]`, `bias` is `[int;10]`,
   `exemplars` has all 10 string keys each mapping to `[int;49]`).
-- **End-to-end**: `python3 scripts/generate.py dist/index.html` then
-  `python3 -m unittest discover -s tests` — 68 tests, all pass (16 skipped,
-  pre-existing webkit-engine skips unrelated to this change).
+- **End-to-end**: `make build` then `python3 -m unittest discover -s tests`
+  — 67 tests, all pass (17 skipped, pre-existing abstract-base/webkit
+  skips unrelated to this change).
 
 ## Accuracy result
 
-| | Python baseline | Rust, seed-scanned vs test (D-007, retired) | Rust, honest val-selected (current) |
-|---|---|---|---|
-| test_accuracy | 0.7998 | 0.8246 | **0.8189** |
-| val_accuracy (selection) | n/a | n/a | 0.8301 |
-| glyph_accuracy | 0.8 | 0.8 | 0.7 |
-| threshold | 0.3 | 0.3 | 0.2 |
-| seed | n/a (42, unselected) | 8 (test-scanned) | 10 (val-selected) |
+| | Python baseline | Rust, seed-scanned vs test (D-007, retired) | Rust, honest MNIST-val-selected (D-009, retired) | Rust, drawn-style-val-selected (current, D-010) |
+|---|---|---|---|---|
+| test_accuracy | 0.7998 | 0.8246 | 0.8189 | **0.7854** |
+| val_accuracy (MNIST) | n/a | n/a | 0.8301 | 0.7876 |
+| drawn_val_accuracy (proxy) | n/a | n/a | n/a | 0.7756 |
+| glyph_accuracy | 0.8 | 0.8 | 0.7 | **0.8** |
+| threshold | 0.3 | 0.3 | 0.2 | 0.45 |
+| seed | n/a (42, unselected) | 8 (test-scanned) | 10 (val-selected) | 19 (drawn-val-selected) |
 
-The middle column is what shipped under D-007's flawed methodology; it's
-kept here for the record, not as a target. 0.8189 is the number this
-codebase now stands behind, and the bar `docs/DESIGN_MLP.md`'s MLP must
-clear.
+D-007's and D-009's columns are kept here for the record, not as targets.
+0.7854 test accuracy / 8/10 glyph fidelity is what this codebase ships
+now: a deliberate trade of MNIST accuracy for the metric that reflects
+what a visitor actually draws (D-010 in `docs/DECISIONS.md`). The MLP
+(`docs/DESIGN_MLP.md`) cleared 0.8189 on MNIST but not glyph fidelity
+(also 7/10, unmoved) and was not shipped for it.

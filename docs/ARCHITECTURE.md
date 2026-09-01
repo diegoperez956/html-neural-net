@@ -162,13 +162,21 @@ gate outputs, they do not feed back into them.
 `data/mnist/` (gitignored). Preprocessing: binarize each 28×28 image at
 >128, crop to the tight bounding box of lit pixels, pad to a centered
 square (aspect preserved), area-resample to 7×7 coverage fractions,
-threshold at `t=0.3` (grid-searched) into bits. An 8-epoch multiclass
+threshold at `t=0.45` (grid-searched) into bits. An 8-epoch multiclass
 perceptron trains on the full 60k training set, then weights are quantized
-to `[-3,3]` (scale factor grid-searched) with bias in `[-6,8]`. Result:
-82.46% accuracy on the full 10k MNIST test set, 8/10 on the canonical
-drawn-glyph fidelity set (misses: 6→5, 9→3). Unlike the retired Python
-trainer, `train/src/mnist.rs` has no fast path — `make train` always
-retrains and overwrites `scripts/weights_mnist.json`.
+to `[-3,3]` (scale factor grid-searched) with bias in `[-2,3]`.
+Hyperparameter selection (threshold, shuffle seed, quantization scale, and
+the glyph-augmentation accept/reject gate) runs against a drawn-style
+validation proxy built from the held-out validation split — thickened
+strokes, a tighter canvas-filling crop, and varied binarization threshold,
+approximating how a person fills the 7×7 grid rather than downsampled
+MNIST's distribution (D-010 in `docs/DECISIONS.md`). Result: 78.54%
+accuracy on the full 10k MNIST test set (down from 81.89% under
+MNIST-selected hyperparameters — the traded-off cost of selecting for
+drawn-digit fidelity), 8/10 on the canonical drawn-glyph fidelity set
+(misses: 2→3, 8→0), up from 7/10. Unlike the retired Python trainer,
+`train/src/mnist.rs` has no fast path — `make train` always retrains and
+overwrites `scripts/weights_mnist.json`.
 The runtime page does no input normalization, so the accuracy figure
 assumes drawings are large and roughly centered on the grid — the glyph
 set is a demo-fidelity proxy, not a claim about arbitrary user drawings.

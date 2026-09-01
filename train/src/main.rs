@@ -14,13 +14,17 @@ fn main() {
     let root = repo_root();
     match cmd.as_deref() {
         Some("glyph") => glyph::run(&root),
-        // Shipped trainer: 49 -> 16 -> 10 MLP, per docs/DESIGN_MLP.md.
-        Some("mnist") => mlp::run(&root),
-        // Honest linear baseline (train/README.md) -- kept runnable for
-        // reproducibility/regression checks, not part of the shipped output.
-        Some("linear") => mnist::run(&root),
+        // Shipped trainer: honest val-selected linear classifier, selected
+        // against a drawn-style validation proxy (see D-010 in
+        // docs/DECISIONS.md and train/README.md). Writes
+        // scripts/weights_mnist.json, the linear schema gen/ expects.
+        Some("mnist") => mnist::run(&root),
+        // M12 MLP (docs/DESIGN_MLP.md): recorded negative result, not
+        // shipped. Writes its own scripts/weights_mlp.json, not part of
+        // `make build`.
+        Some("mlp") => mlp::run(&root),
         _ => {
-            eprintln!("usage: train <glyph|mnist|linear>");
+            eprintln!("usage: train <glyph|mnist|mlp>");
             std::process::exit(1);
         }
     }

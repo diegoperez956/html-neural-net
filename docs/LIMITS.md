@@ -106,12 +106,16 @@ benchmarked range instead of past it (see `docs/DECISIONS.md` D-006).
 * M10 (3×3 glyph, two classes): trained on 9 hand-built exemplars, no held-out
   test set — a toy proof that gate-composed weighted sums work, not an
   accuracy claim.
-* M11 (7×7 drawn digit, ten classes): 82.46% on the full 10k MNIST test set;
+* M11 (7×7 drawn digit, ten classes): 78.54% on the full 10k MNIST test set;
   a single-layer linear classifier over a 7×7 binary grid, so this is the
-  ceiling for that model class, not a bug to chase. On the canonical
-  drawn-glyph fidelity set it gets 8/10, with known misses at 6 (predicted
-  5) and 9 (predicted 3) — both digits whose 7×7 binary silhouette is close
-  to a neighboring digit's. The runtime page performs no input
+  ceiling for that model class, not a bug to chase. Hyperparameters are
+  selected against a drawn-style validation proxy (thickened strokes,
+  tighter canvas-filling crop) rather than plain MNIST validation accuracy,
+  since that's the metric that tracks what a visitor actually draws (D-010
+  in `docs/DECISIONS.md`) — MNIST accuracy dropped ~3.4 points from the
+  honest MNIST-selected baseline (81.89%) in exchange. On the canonical
+  drawn-glyph fidelity set it gets 8/10, with known misses at 2 (predicted
+  3) and 8 (predicted 0). The runtime page performs no input
   normalization; the accuracy figures assume a drawing that is large and
   roughly centered on the grid, matching the training preprocessing
   (bounding-box crop + centered-square pad before the 7×7 resample). A

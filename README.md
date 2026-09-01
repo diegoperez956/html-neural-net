@@ -112,11 +112,17 @@ make test    # builds, then 32 Playwright tests × Chromium + Firefox
 M11's classifier is trained on real MNIST (`train/src/mnist.rs`,
 deterministic): pixels binarize, crop to the digit's bounding box,
 pad to a centered square, and area-resample to the same 7×7 grid the demo
-draws on. An 8-epoch perceptron quantized to weights in [-3,3] scores
-82.46% on the full 10k MNIST test set and gets 8/10 canonical drawn glyphs
-right (misses 6 and 9). That's a linear model over a lossy 7×7 binary
-grid, and the runtime page does no normalization — draw large and
-centered, matching the training preprocessing, or accuracy drops.
+draws on. Hyperparameters (cell threshold, shuffle seed, quantization
+scale, glyph-augmentation accept/reject) are selected against a
+drawn-style validation proxy — held-out MNIST images with thickened
+strokes and a tighter, canvas-filling crop, standing in for how a person
+actually fills the grid — not against downsampled-MNIST accuracy directly
+(see D-010 in `docs/DECISIONS.md`). An 8-epoch perceptron quantized to
+weights in [-3,3] scores 78.54% on the full 10k MNIST test set and gets
+8/10 canonical drawn glyphs right (misses 2 and 8). That's a linear model
+over a lossy 7×7 binary grid selected for drawn-digit fidelity rather than
+MNIST accuracy, and the runtime page does no normalization — draw large
+and centered, matching the training preprocessing, or accuracy drops.
 
 ## Browser support
 

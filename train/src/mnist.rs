@@ -40,7 +40,8 @@ const GRID: usize = 7;
 pub(crate) const NPIX: usize = GRID * GRID; // 49
 
 pub(crate) const SCALE_GRID: &[i64] = &[1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 75, 100, 150, 200];
-const THRESHOLD_GRID: &[f64] = &[0.10, 0.15, 0.20, 0.25, 0.30, 0.35];
+const THRESHOLD_GRID: &[f64] =
+    &[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70];
 
 pub(crate) const AUG_VARIANTS_PER_DIGIT: usize = 300;
 const AUG_FLIP_PROB: f64 = 0.05;
@@ -223,15 +224,104 @@ fn preprocess_image(img: &[u8]) -> Vec<f64> {
     area_resample(&bin_img, t, b, l, r, GRID)
 }
 
-pub(crate) fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) -> (Vec<Vec<f64>>, Vec<u8>) {
+fn load_raw_split(data_dir: &Path, images_name: &str, labels_name: &str) -> (Vec<Vec<u8>>, Vec<u8>) {
     let img_path = download(data_dir, images_name);
     let lbl_path = download(data_dir, labels_name);
     let (imgs, rows, cols) = read_idx_images(&img_path);
     let labels = read_idx_labels(&lbl_path);
     assert!(rows == 28 && cols == 28, "pipeline assumes 28x28 MNIST input");
     assert_eq!(imgs.len(), labels.len(), "image/label count mismatch");
+    (imgs, labels)
+}
+
+pub(crate) fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) -> (Vec<Vec<f64>>, Vec<u8>) {
+    let (imgs, labels) = load_raw_split(data_dir, images_name, labels_name);
     let fracs = imgs.iter().map(|im| preprocess_image(im)).collect();
     (fracs, labels)
+}
+
+// ---------- drawn-style validation proxy (D-010, Job 2) ----------
+//
+// Downsampled MNIST doesn't look like what a person draws on the 7x7 grid:
+// MNIST strokes are thin, anti-aliased, and get a bbox+pad crop that leaves
+// real margin, while a person filling checkboxes draws thick, blocky
+// strokes that cover most of the canvas. Selecting hyperparameters (and the
+// glyph-augmentation fallback) against plain MNIST validation accuracy
+// rewards fidelity to that mismatch instead of to what a visitor draws.
+//
+// Transforms applied to held-out validation images only (never test, never
+// the 10 canonical glyphs):
+//   1. Stroke dilation -- thickens the binarized digit before cropping,
+//      approximating a thicker pen/mouse stroke than MNIST's.
+//   2. The existing bbox + centered-square-pad crop (D-006) -- reused as-is,
+//      since it already matches how a user fills the grid.
+//   3. Full-canvas zoom -- shrinks that square crop toward its center, since
+//      a grid-filled digit occupies more of its bounding square than a
+//      MNIST digit does (MNIST's bbox already has some slack baked in).
+//   4. Coverage-threshold variation -- the 28x28 binarization threshold
+//      (how dark a pixel must be to count as ink, before dilation) is
+//      varied over a small fixed set instead of one constant, standing in
+//      for how firmly different people fill a cell.
+const DRAWN_DILATE_ITERS: usize = 1;
+const DRAWN_ZOOM: f64 = 0.82;
+const DRAWN_PIXEL_THRESHOLDS: [u8; 3] = [90, 128, 166];
+
+fn binarize_28_at(img: &[u8], threshold: u8) -> Vec<Vec<u8>> {
+    (0..28).map(|r| (0..28).map(|c| if img[r * 28 + c] > threshold { 1 } else { 0 }).collect()).collect()
+}
+
+/// One round of 4-neighbor binary dilation (out-of-bounds reads as 0).
+fn dilate(bin_img: &[Vec<u8>]) -> Vec<Vec<u8>> {
+    let n = bin_img.len() as i64;
+    let m = bin_img[0].len() as i64;
+    let get = |r: i64, c: i64| -> u8 {
+        if r < 0 || c < 0 || r >= n || c >= m { 0 } else { bin_img[r as usize][c as usize] }
+    };
+    (0..n)
+        .map(|r| {
+            (0..m)
+                .map(|c| {
+                    let hit = get(r, c) == 1
+                        || get(r - 1, c) == 1
+                        || get(r + 1, c) == 1
+                        || get(r, c - 1) == 1
+                        || get(r, c + 1) == 1;
+                    if hit { 1 } else { 0 }
+                })
+                .collect()
+        })
+        .collect()
+}
+
+/// Shrinks `[lo, hi]` toward its center by `factor` (< 1.0 zooms in),
+/// clamped to `[0, limit-1]`.
+fn zoom_crop(lo: i64, hi: i64, factor: f64, limit: i64) -> (i64, i64) {
+    let width = (hi - lo + 1) as f64;
+    let new_width = (width * factor).max(1.0);
+    let center = lo as f64 + width / 2.0;
+    let new_lo = ((center - new_width / 2.0).round() as i64).max(0);
+    let new_hi = (((center + new_width / 2.0).round() as i64) - 1).min(limit - 1).max(new_lo);
+    (new_lo, new_hi)
+}
+
+fn preprocess_image_drawn(img: &[u8], pixel_threshold: u8) -> Vec<f64> {
+    let mut bin_img = binarize_28_at(img, pixel_threshold);
+    for _ in 0..DRAWN_DILATE_ITERS {
+        bin_img = dilate(&bin_img);
+    }
+    let (t, b, l, r) = bbox_of(&bin_img);
+    let (t, b, l, r) = square_bbox(t, b, l, r);
+    let (t, b) = zoom_crop(t, b, DRAWN_ZOOM, 28);
+    let (l, r) = zoom_crop(l, r, DRAWN_ZOOM, 28);
+    area_resample(&bin_img, t, b, l, r, GRID)
+}
+
+/// Builds the drawn-style proxy set from raw 28x28 validation images.
+pub(crate) fn build_drawn_style_val(imgs: &[Vec<u8>]) -> Vec<Vec<f64>> {
+    imgs.iter()
+        .enumerate()
+        .map(|(i, im)| preprocess_image_drawn(im, DRAWN_PIXEL_THRESHOLDS[i % DRAWN_PIXEL_THRESHOLDS.len()]))
+        .collect()
 }
 
 pub(crate) fn binarize_fracs(fracs_list: &[Vec<f64>], t: f64) -> Vec<Vec<u8>> {
@@ -416,7 +506,8 @@ pub fn run(repo_root: &Path) {
     selftest_area_resample();
 
     println!("loading MNIST (cached in data/mnist/, downloading if missing)...");
-    let (train_fracs, train_ys) = load_split(&data_dir, FILES[0], FILES[1]);
+    let (train_imgs_raw, train_ys) = load_raw_split(&data_dir, FILES[0], FILES[1]);
+    let train_fracs: Vec<Vec<f64>> = train_imgs_raw.iter().map(|im| preprocess_image(im)).collect();
     let (test_fracs, test_ys) = load_split(&data_dir, FILES[2], FILES[3]);
     println!("train: {} images, test: {} images", train_fracs.len(), test_fracs.len());
 
@@ -433,9 +524,19 @@ pub fn run(repo_root: &Path) {
     let val_ys = train_ys[core_end..].to_vec();
     println!("core (train) images: {}, held-out validation images: {}", core_fracs.len(), val_fracs.len());
 
-    println!("joint grid search over cell threshold t, shuffle seed, and quantization scale (validation only)...");
+    // D-010, Job 2: drawn-style validation proxy, built only from the same
+    // held-out validation slice's raw pixels (never test, never the 10
+    // canonical glyphs). This is now the PRIMARY selection criterion; plain
+    // MNIST validation accuracy is kept as a reported secondary. See
+    // build_drawn_style_val's doc comment for the transform choices.
+    let drawn_val_fracs = build_drawn_style_val(&train_imgs_raw[core_end..]);
+    let drawn_val_ys = val_ys.clone();
+    println!("drawn-style validation proxy: {} images (held-out slice, transformed)", drawn_val_fracs.len());
+
+    println!("joint grid search over cell threshold t, shuffle seed, and quantization scale (drawn-style validation only)...");
     struct Best {
-        val_acc: f64,
+        drawn_val_acc: f64,
+        mnist_val_acc: f64,
         t: f64,
         seed: u64,
         weights: Vec<Vec<i64>>,
@@ -445,28 +546,34 @@ pub fn run(repo_root: &Path) {
     for &t in THRESHOLD_GRID {
         let core_bits = binarize_fracs(core_fracs, t);
         let val_bits = binarize_fracs(val_fracs, t);
+        let drawn_val_bits = binarize_fracs(&drawn_val_fracs, t);
         let mut best_seed_acc = -1.0;
         for &seed in SEED_GRID {
             let (weights, bias) = train_perceptron(&core_bits, &core_ys, seed);
-            let (scale, val_acc, _qw, _qb) = pick_best_quantization(&weights, &bias, &val_bits, &val_ys, 3, 200);
-            if val_acc > best_seed_acc {
-                best_seed_acc = val_acc;
+            let (scale, drawn_acc, qw, qb) =
+                pick_best_quantization(&weights, &bias, &drawn_val_bits, &drawn_val_ys, 3, 200);
+            if drawn_acc > best_seed_acc {
+                best_seed_acc = drawn_acc;
             }
-            if best.as_ref().map(|b| val_acc > b.val_acc).unwrap_or(true) {
-                best = Some(Best { val_acc, t, seed, weights, bias });
+            if best.as_ref().map(|b| drawn_acc > b.drawn_val_acc).unwrap_or(true) {
+                let mnist_val_acc = accuracy(&qw, &qb, &val_bits, &val_ys);
+                best = Some(Best { drawn_val_acc: drawn_acc, mnist_val_acc, t, seed, weights, bias });
             }
             let _ = scale;
         }
-        println!("  t={t}: best val acc over {} seeds = {best_seed_acc:.4}", SEED_GRID.len());
+        println!("  t={t}: best drawn-style val acc over {} seeds = {best_seed_acc:.4}", SEED_GRID.len());
     }
     let best = best.unwrap();
     let (t, seed, mut weights, mut bias) = (best.t, best.seed, best.weights, best.bias);
-    let val_acc_selected = best.val_acc;
-    println!("chosen: t={t}, seed={seed} (val acc {val_acc_selected:.4})");
+    let (drawn_val_acc_selected, mnist_val_acc_selected) = (best.drawn_val_acc, best.mnist_val_acc);
+    println!(
+        "chosen: t={t}, seed={seed} (drawn-style val acc {drawn_val_acc_selected:.4}, MNIST val acc {mnist_val_acc_selected:.4})"
+    );
 
     let test_bits = binarize_fracs(&test_fracs, t);
     let core_bits = binarize_fracs(core_fracs, t);
     let val_bits = binarize_fracs(val_fracs, t);
+    let drawn_val_bits = binarize_fracs(&drawn_val_fracs, t);
 
     let w_min = weights.iter().flatten().min().copied().unwrap();
     let w_max = weights.iter().flatten().max().copied().unwrap();
@@ -476,18 +583,24 @@ pub fn run(repo_root: &Path) {
         bias.iter().max().unwrap()
     );
 
-    let (_scale, val_acc, mut qweights, mut qbias) = pick_best_quantization(&weights, &bias, &val_bits, &val_ys, 3, 200);
+    let (_scale, drawn_val_acc, mut qweights, mut qbias) =
+        pick_best_quantization(&weights, &bias, &drawn_val_bits, &drawn_val_ys, 3, 200);
     let train_acc = accuracy(&qweights, &qbias, &core_bits, &core_ys);
+    let mnist_val_acc = accuracy(&qweights, &qbias, &val_bits, &val_ys);
     // The ONLY test-set read before the final reported number: a threshold
     // sanity check on whether to try the [-7,7] fallback range below. It is
     // not used to pick among alternatives (there's exactly one quantization
     // already locked in by validation), so it isn't a second "selection".
     let mut test_acc = accuracy(&qweights, &qbias, &test_bits, &test_ys);
-    let mut val_acc_final = val_acc;
-    println!("[-3,3] quantization: train acc {train_acc:.4}, val acc {val_acc:.4}, test acc {test_acc:.4}");
+    let mut drawn_val_acc_final = drawn_val_acc;
+    let mut mnist_val_acc_final = mnist_val_acc;
+    println!(
+        "[-3,3] quantization: train acc {train_acc:.4}, drawn-style val acc {drawn_val_acc:.4}, MNIST val acc {mnist_val_acc:.4}, test acc {test_acc:.4}"
+    );
 
     if test_acc < 0.70 {
-        let (scale7, _val_acc7, qw7, qb7) = pick_best_quantization(&weights, &bias, &val_bits, &val_ys, 7, 200);
+        let (scale7, _drawn_acc7, qw7, qb7) =
+            pick_best_quantization(&weights, &bias, &drawn_val_bits, &drawn_val_ys, 7, 200);
         let test_acc7 = accuracy(&qw7, &qb7, &test_bits, &test_ys);
         println!("[-7,7] fallback quantization: scale={scale7}, test acc {test_acc7:.4} (reported only, not written)");
     }
@@ -496,6 +609,15 @@ pub fn run(repo_root: &Path) {
 
     let mut glyph_acc = glyph_accuracy(&qweights, &qbias);
     println!("glyph accuracy (pre-augmentation): {:.1}% ({}/10)", glyph_acc * 100.0, (glyph_acc * 10.0).round());
+    println!(
+        "proxy sanity check: drawn-style val acc {drawn_val_acc_final:.4} vs glyph accuracy {glyph_acc:.4} (diff {:.4}){}",
+        (drawn_val_acc_final - glyph_acc).abs(),
+        if (drawn_val_acc_final - glyph_acc).abs() > 0.30 {
+            " -- WARNING: proxy and glyph set disagree wildly, treat the proxy with suspicion"
+        } else {
+            ""
+        }
+    );
 
     if glyph_acc < 0.8 {
         println!("glyph accuracy below 8/10 -- augmenting with {AUG_VARIANTS_PER_DIGIT}/digit jittered synthetic glyphs...");
@@ -522,29 +644,37 @@ pub fn run(repo_root: &Path) {
             100.0 * aug_xs.len() as f64 / mixed_xs.len() as f64
         );
         let (w2, b2) = train_perceptron(&mixed_xs, &mixed_ys, seed);
-        let (scale, val_acc2, qw2, qb2) = pick_best_quantization(&w2, &b2, &val_bits, &val_ys, 3, 200);
+        // Primary gate is drawn-style validation accuracy (D-010, Job 2) --
+        // this is exactly the fallback the old MNIST-only gate discarded
+        // even though it helps drawn digits, because it also hurts MNIST.
+        let (scale, drawn_acc2, qw2, qb2) =
+            pick_best_quantization(&w2, &b2, &drawn_val_bits, &drawn_val_ys, 3, 200);
         let train_acc2 = accuracy(&qw2, &qb2, &core_bits, &core_ys);
+        let mnist_acc2 = accuracy(&qw2, &qb2, &val_bits, &val_ys);
         let test_acc2 = accuracy(&qw2, &qb2, &test_bits, &test_ys);
         let glyph_acc2 = glyph_accuracy(&qw2, &qb2);
         println!(
-            "post-augmentation: scale={scale}, train acc {train_acc2:.4}, val acc {val_acc2:.4}, test acc {test_acc2:.4}, glyph accuracy {:.1}% ({}/10)",
+            "post-augmentation: scale={scale}, train acc {train_acc2:.4}, drawn-style val acc {drawn_acc2:.4}, MNIST val acc {mnist_acc2:.4}, test acc {test_acc2:.4}, glyph accuracy {:.1}% ({}/10)",
             glyph_acc2 * 100.0,
             (glyph_acc2 * 10.0).round()
         );
         assert!(test_acc2 >= 0.60, "test accuracy {test_acc2:.4} below 0.60 floor after augmentation");
-        // Keep the augmented model only if it actually improved on validation
-        // -- augmentation is a hyperparameter choice like any other, so it's
-        // gated on val accuracy too, never on whether it helps the test number.
-        if val_acc2 > val_acc_final {
+        // Keep the augmented model only if it actually improved the PRIMARY
+        // (drawn-style) validation accuracy -- augmentation is a
+        // hyperparameter choice like any other, gated the same way.
+        if drawn_acc2 > drawn_val_acc_final {
             weights = w2;
             bias = b2;
             qweights = qw2;
             qbias = qb2;
             test_acc = test_acc2;
             glyph_acc = glyph_acc2;
-            val_acc_final = val_acc2;
+            drawn_val_acc_final = drawn_acc2;
+            mnist_val_acc_final = mnist_acc2;
         } else {
-            println!("  augmentation did not improve validation accuracy ({val_acc2:.4} <= {val_acc_final:.4}) -- discarded");
+            println!(
+                "  augmentation did not improve drawn-style validation accuracy ({drawn_acc2:.4} <= {drawn_val_acc_final:.4}) -- discarded"
+            );
         }
     }
 
@@ -571,7 +701,8 @@ pub fn run(repo_root: &Path) {
         "weights": qweights,
         "bias": qbias,
         "test_accuracy": test_acc,
-        "val_accuracy": val_acc_final,
+        "val_accuracy": mnist_val_acc_final,
+        "drawn_val_accuracy": drawn_val_acc_final,
         "glyph_accuracy": glyph_acc,
         "threshold": t,
         "seed": seed,
@@ -584,6 +715,42 @@ pub fn run(repo_root: &Path) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn dilate_grows_single_pixel_to_a_plus() {
+        let mut img = vec![vec![0u8; 5]; 5];
+        img[2][2] = 1;
+        let d = dilate(&img);
+        for r in 0..5 {
+            for c in 0..5 {
+                let expect = matches!((r, c), (2, 2) | (1, 2) | (3, 2) | (2, 1) | (2, 3));
+                assert_eq!(d[r][c] == 1, expect, "({r},{c})");
+            }
+        }
+    }
+
+    #[test]
+    fn dilate_respects_borders() {
+        let mut img = vec![vec![0u8; 3]; 3];
+        img[0][0] = 1;
+        let d = dilate(&img);
+        // corner pixel dilates only into its two in-bounds neighbors + itself
+        assert_eq!(d[0][0], 1);
+        assert_eq!(d[0][1], 1);
+        assert_eq!(d[1][0], 1);
+        assert_eq!(d[2][2], 0);
+    }
+
+    #[test]
+    fn zoom_crop_shrinks_toward_center_and_clamps() {
+        // width 10 (0..=9), factor 0.8 -> new width 8, centered
+        assert_eq!(zoom_crop(0, 9, 0.8, 28), (1, 8));
+        // factor 1.0 is a no-op
+        assert_eq!(zoom_crop(3, 12, 1.0, 28), (3, 12));
+        // clamps to [0, limit-1] and never inverts (lo <= hi)
+        let (lo, hi) = zoom_crop(0, 0, 0.5, 28);
+        assert!(lo <= hi);
+    }
 
     #[test]
     fn pad_to_square_centers_and_clamps() {
