@@ -50,22 +50,36 @@ to-even exactly (not naive round-half-away-from-zero) — that one is cheap to
 get exactly right and it affects which quantization scale wins the accuracy
 comparison in `pick_best_quantization`.
 
-## Seed choice
+## Seed choice (fixed: D-007 -> D-009 honest re-selection)
 
-The perceptron is shuffle-order-sensitive: final test accuracy (after
+The perceptron is shuffle-order-sensitive: final accuracy (after
 quantization, and after glyph-triggered augmentation if it fires) swings by
 several points across seeds even with the *same* algorithm — this is
-inherent to averaged-perceptron training, not a bug. `SHUFFLE_SEED = 42`
-(matching Python's constant) under our RNG landed at 0.7815 test accuracy,
-*below* the 0.7998 Python baseline this port must not regress.
+inherent to averaged-perceptron training, not a bug.
 
-Scanned ~20 seeds (reading the actual `test_accuracy` written to the JSON,
-not the pre-augmentation console line, since augmentation can lower it).
-Seed **8** gave the best result: 0.8246 test accuracy, 0.8 glyph accuracy
-(matches Python's 0.8). That's the fixed default now. Override for
-experimentation with `TRAIN_SEED=<n> cargo run --release -- mnist`; the
-shipped weights always come from the default (deterministic, no env var
-needed).
+D-007 originally picked `SHUFFLE_SEED = 8` by scanning ~20 seeds against
+**test-set** accuracy — a max-of-20 draw against the number that's supposed
+to be the honest, unbiased estimate. That's a real integrity problem, not
+just a style nit: it reports the best of a distribution, not a draw from it.
+
+Fixed: the last 10k of the 60k training images are held out as a
+validation split (never trained on). Cell threshold `t`, shuffle seed, and
+quantization scale are all grid-searched and selected purely against this
+validation split — `SEED_GRID` in `src/mnist.rs` (0..20, kept at the same
+size as before for continuity). The 10k official test set is read exactly
+once, after every hyperparameter is already locked in, purely to report the
+final number. Glyph-triggered augmentation (see below) is likewise accepted
+only if it improves validation accuracy — otherwise it's discarded and
+logged.
+
+Current result: `t=0.2`, `seed=10`, val accuracy 0.8301, **test accuracy
+0.8189**. This is lower than the old 0.8246 — expected, since 0.8246 was a
+seed-optimized test-set figure, not an apples-to-apples number. 0.8189 is
+the honest baseline the MLP (`docs/DESIGN_MLP.md`) must clear.
+
+No `TRAIN_SEED` env override anymore — seed is chosen by the grid search on
+every run, not read from an env var, so the result is deterministic without
+extra configuration.
 
 ## Download: curl subprocess, not an HTTP client crate
 
@@ -108,10 +122,15 @@ or `reqwest` as a dependency for a code path that doesn't run.
 
 ## Accuracy result
 
-| | Python baseline | Rust (this port) |
-|---|---|---|
-| test_accuracy | 0.7998 | 0.8246 |
-| glyph_accuracy | 0.8 | 0.8 |
-| threshold | 0.3 | 0.3 |
+| | Python baseline | Rust, seed-scanned vs test (D-007, retired) | Rust, honest val-selected (current) |
+|---|---|---|---|
+| test_accuracy | 0.7998 | 0.8246 | **0.8189** |
+| val_accuracy (selection) | n/a | n/a | 0.8301 |
+| glyph_accuracy | 0.8 | 0.8 | 0.7 |
+| threshold | 0.3 | 0.3 | 0.2 |
+| seed | n/a (42, unselected) | 8 (test-scanned) | 10 (val-selected) |
 
-Rust beats the floor the task set (must be `>=` 0.7998).
+The middle column is what shipped under D-007's flawed methodology; it's
+kept here for the record, not as a target. 0.8189 is the number this
+codebase now stands behind, and the bar `docs/DESIGN_MLP.md`'s MLP must
+clear.

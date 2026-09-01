@@ -14,7 +14,7 @@ const MIRRORS: &[&str] = &[
     "https://storage.googleapis.com/cvdf-datasets/mnist/",
     "https://ossci-datasets.s3.amazonaws.com/mnist/",
 ];
-const FILES: [&str; 4] = [
+pub(crate) const FILES: [&str; 4] = [
     "train-images-idx3-ubyte.gz",
     "train-labels-idx1-ubyte.gz",
     "t10k-images-idx3-ubyte.gz",
@@ -23,26 +23,26 @@ const FILES: [&str; 4] = [
 
 const PIXEL_THRESHOLD: u8 = 128;
 const EPOCHS: usize = 8;
-// ponytail: the perceptron is shuffle-order-sensitive, so accuracy varies a
-// few points by seed. TRAIN_SEED env var lets `run()` be seed-scanned from
-// the shell without a CLI flag; unset falls back to the fixed default below.
-fn shuffle_seed() -> u64 {
-    // Perceptron training is shuffle-order-sensitive, so final test accuracy
-    // (post quantization, post glyph-triggered augmentation) swings by several
-    // points across seeds even with the same algorithm. Scanned ~20 seeds
-    // reading the actual written test_accuracy (not the pre-augmentation log
-    // line); seed 8 gave the best final accuracy (0.8246, vs the 0.7998
-    // Python baseline). See train/README.md.
-    std::env::var("TRAIN_SEED").ok().and_then(|v| v.parse().ok()).unwrap_or(8)
-}
+// D-007/D-009: the old fixed SHUFFLE_SEED=8 was chosen by scanning ~20 seeds
+// against *test-set* accuracy -- a max-of-20 draw against the set that's
+// supposed to be the honest final number. Fixed by selecting seed (and
+// threshold/scale) against a held-out validation slice carved out of the
+// training data instead; the 10k test set is now touched exactly once, at
+// the very end, for the reported number. See train/README.md.
+const SEED_GRID: &[u64] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+// Held out from the 60k training images (never trained on, never used until
+// hyperparameter selection is done); the 60k are already shuffled ahead of
+// time by the dataset authors, so a simple tail slice is a fair, defensible
+// split.
+pub(crate) const VAL_SIZE: usize = 10_000;
 const NUM_CLASSES: usize = 10;
 const GRID: usize = 7;
-const NPIX: usize = GRID * GRID; // 49
+pub(crate) const NPIX: usize = GRID * GRID; // 49
 
-const SCALE_GRID: &[i64] = &[1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 75, 100, 150, 200];
+pub(crate) const SCALE_GRID: &[i64] = &[1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 75, 100, 150, 200];
 const THRESHOLD_GRID: &[f64] = &[0.10, 0.15, 0.20, 0.25, 0.30, 0.35];
 
-const AUG_VARIANTS_PER_DIGIT: usize = 300;
+pub(crate) const AUG_VARIANTS_PER_DIGIT: usize = 300;
 const AUG_FLIP_PROB: f64 = 0.05;
 
 // Canonical thin-stroke 7x7 glyphs, copied verbatim from train_mnist.py.
@@ -59,7 +59,7 @@ const GLYPHS: [(u8, [&str; 7]); 10] = [
     (9, ["..###..", ".#...#.", ".#...#.", "..####.", ".....#.", ".....#.", "..###.."]),
 ];
 
-fn glyph_bits() -> BTreeMap<u8, Vec<u8>> {
+pub(crate) fn glyph_bits() -> BTreeMap<u8, Vec<u8>> {
     GLYPHS
         .iter()
         .map(|(d, rows)| {
@@ -223,7 +223,7 @@ fn preprocess_image(img: &[u8]) -> Vec<f64> {
     area_resample(&bin_img, t, b, l, r, GRID)
 }
 
-fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) -> (Vec<Vec<f64>>, Vec<u8>) {
+pub(crate) fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) -> (Vec<Vec<f64>>, Vec<u8>) {
     let img_path = download(data_dir, images_name);
     let lbl_path = download(data_dir, labels_name);
     let (imgs, rows, cols) = read_idx_images(&img_path);
@@ -234,13 +234,13 @@ fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) -> (Vec<Vec
     (fracs, labels)
 }
 
-fn binarize_fracs(fracs_list: &[Vec<f64>], t: f64) -> Vec<Vec<u8>> {
+pub(crate) fn binarize_fracs(fracs_list: &[Vec<f64>], t: f64) -> Vec<Vec<u8>> {
     fracs_list.iter().map(|fracs| fracs.iter().map(|&f| if f > t { 1 } else { 0 }).collect()).collect()
 }
 
 // ---------- augmentation ----------
 
-fn shift_grid(bits: &[u8], dy: i64, dx: i64, grid: usize) -> Option<Vec<u8>> {
+pub(crate) fn shift_grid(bits: &[u8], dy: i64, dx: i64, grid: usize) -> Option<Vec<u8>> {
     if dy == 0 && dx == 0 {
         return Some(bits.to_vec());
     }
@@ -260,7 +260,7 @@ fn shift_grid(bits: &[u8], dy: i64, dx: i64, grid: usize) -> Option<Vec<u8>> {
     Some(new)
 }
 
-fn jitter_variants(bits: &[u8], n: usize, seed: u64) -> Vec<Vec<u8>> {
+pub(crate) fn jitter_variants(bits: &[u8], n: usize, seed: u64) -> Vec<Vec<u8>> {
     let mut rng = Rng::new(seed);
     let shifts: [i64; 5] = [-1, 0, 0, 0, 1];
     let mut variants = Vec::with_capacity(n);
@@ -297,11 +297,11 @@ fn accuracy(weights: &[Vec<i64>], bias: &[i64], xs: &[Vec<u8>], ys: &[u8]) -> f6
     correct as f64 / xs.len() as f64
 }
 
-fn train_perceptron(xs: &[Vec<u8>], ys: &[u8]) -> (Vec<Vec<i64>>, Vec<i64>) {
+fn train_perceptron(xs: &[Vec<u8>], ys: &[u8], seed: u64) -> (Vec<Vec<i64>>, Vec<i64>) {
     let mut weights = vec![vec![0i64; NPIX]; NUM_CLASSES];
     let mut bias = vec![0i64; NUM_CLASSES];
     let mut order: Vec<usize> = (0..xs.len()).collect();
-    let mut rng = Rng::new(shuffle_seed());
+    let mut rng = Rng::new(seed);
     for epoch in 0..EPOCHS {
         rng.shuffle(&mut order);
         let mut errors = 0;
@@ -346,7 +346,7 @@ fn quantize(weights: &[Vec<i64>], bias: &[i64], scale: i64, wclip: i64, bmax: i6
 /// Python 3's `round()`: round-half-to-even ("banker's rounding"), not
 /// round-half-away-from-zero. Matters here because it affects which scale
 /// wins the accuracy race during quantization.
-fn python_round(v: f64) -> i64 {
+pub(crate) fn python_round(v: f64) -> i64 {
     let floor = v.floor();
     let diff = v - floor;
     let f = floor as i64;
@@ -420,32 +420,53 @@ pub fn run(repo_root: &Path) {
     let (test_fracs, test_ys) = load_split(&data_dir, FILES[2], FILES[3]);
     println!("train: {} images, test: {} images", train_fracs.len(), test_fracs.len());
 
-    let val_ys = train_ys[..5000].to_vec();
+    // D-007/D-009 fix: carve the validation set out of the 60k TRAINING
+    // images (last 10k) -- never trained on, never touched by the test set.
+    // Threshold, shuffle seed, and quantization scale are all selected
+    // against this split. The 10k official test set is touched exactly
+    // once, below, after every hyperparameter is already locked in.
+    let n_train = train_fracs.len();
+    let core_end = n_train - VAL_SIZE;
+    let core_fracs = &train_fracs[..core_end];
+    let core_ys = train_ys[..core_end].to_vec();
+    let val_fracs = &train_fracs[core_end..];
+    let val_ys = train_ys[core_end..].to_vec();
+    println!("core (train) images: {}, held-out validation images: {}", core_fracs.len(), val_fracs.len());
 
-    println!("joint grid search over cell threshold t and quantization scale...");
+    println!("joint grid search over cell threshold t, shuffle seed, and quantization scale (validation only)...");
     struct Best {
         val_acc: f64,
         t: f64,
+        seed: u64,
         weights: Vec<Vec<i64>>,
         bias: Vec<i64>,
     }
     let mut best: Option<Best> = None;
     for &t in THRESHOLD_GRID {
-        let train_bits = binarize_fracs(&train_fracs, t);
-        let val_bits = train_bits[..5000].to_vec();
-        let (weights, bias) = train_perceptron(&train_bits, &train_ys);
-        let (scale, val_acc, _qw, _qb) = pick_best_quantization(&weights, &bias, &val_bits, &val_ys, 3, 200);
-        println!("  t={t}: scale={scale}, val acc {val_acc:.4}");
-        if best.as_ref().map(|b| val_acc > b.val_acc).unwrap_or(true) {
-            best = Some(Best { val_acc, t, weights, bias });
+        let core_bits = binarize_fracs(core_fracs, t);
+        let val_bits = binarize_fracs(val_fracs, t);
+        let mut best_seed_acc = -1.0;
+        for &seed in SEED_GRID {
+            let (weights, bias) = train_perceptron(&core_bits, &core_ys, seed);
+            let (scale, val_acc, _qw, _qb) = pick_best_quantization(&weights, &bias, &val_bits, &val_ys, 3, 200);
+            if val_acc > best_seed_acc {
+                best_seed_acc = val_acc;
+            }
+            if best.as_ref().map(|b| val_acc > b.val_acc).unwrap_or(true) {
+                best = Some(Best { val_acc, t, seed, weights, bias });
+            }
+            let _ = scale;
         }
+        println!("  t={t}: best val acc over {} seeds = {best_seed_acc:.4}", SEED_GRID.len());
     }
     let best = best.unwrap();
-    let (t, mut weights, mut bias) = (best.t, best.weights, best.bias);
-    println!("chosen: t={t} (val acc {:.4})", best.val_acc);
+    let (t, seed, mut weights, mut bias) = (best.t, best.seed, best.weights, best.bias);
+    let val_acc_selected = best.val_acc;
+    println!("chosen: t={t}, seed={seed} (val acc {val_acc_selected:.4})");
 
     let test_bits = binarize_fracs(&test_fracs, t);
-    let train_bits = binarize_fracs(&train_fracs, t);
+    let core_bits = binarize_fracs(core_fracs, t);
+    let val_bits = binarize_fracs(val_fracs, t);
 
     let w_min = weights.iter().flatten().min().copied().unwrap();
     let w_max = weights.iter().flatten().max().copied().unwrap();
@@ -455,13 +476,18 @@ pub fn run(repo_root: &Path) {
         bias.iter().max().unwrap()
     );
 
-    let (_scale, _val_acc, mut qweights, mut qbias) = pick_best_quantization(&weights, &bias, &train_bits[..5000], &val_ys, 3, 200);
-    let train_acc = accuracy(&qweights, &qbias, &train_bits, &train_ys);
+    let (_scale, val_acc, mut qweights, mut qbias) = pick_best_quantization(&weights, &bias, &val_bits, &val_ys, 3, 200);
+    let train_acc = accuracy(&qweights, &qbias, &core_bits, &core_ys);
+    // The ONLY test-set read before the final reported number: a threshold
+    // sanity check on whether to try the [-7,7] fallback range below. It is
+    // not used to pick among alternatives (there's exactly one quantization
+    // already locked in by validation), so it isn't a second "selection".
     let mut test_acc = accuracy(&qweights, &qbias, &test_bits, &test_ys);
-    println!("[-3,3] quantization: train acc {train_acc:.4}, test acc {test_acc:.4}");
+    let mut val_acc_final = val_acc;
+    println!("[-3,3] quantization: train acc {train_acc:.4}, val acc {val_acc:.4}, test acc {test_acc:.4}");
 
     if test_acc < 0.70 {
-        let (scale7, _val_acc7, qw7, qb7) = pick_best_quantization(&weights, &bias, &train_bits[..5000], &val_ys, 7, 200);
+        let (scale7, _val_acc7, qw7, qb7) = pick_best_quantization(&weights, &bias, &val_bits, &val_ys, 7, 200);
         let test_acc7 = accuracy(&qw7, &qb7, &test_bits, &test_ys);
         println!("[-7,7] fallback quantization: scale={scale7}, test acc {test_acc7:.4} (reported only, not written)");
     }
@@ -482,34 +508,44 @@ pub fn run(repo_root: &Path) {
                 aug_ys.push(d);
             }
         }
-        let mut mixed_xs = train_bits.clone();
+        // Augmented with synthetic glyphs mixed into the CORE training set
+        // only -- validation and test stay untouched by augmentation too.
+        let mut mixed_xs = core_bits.clone();
         mixed_xs.extend(aug_xs.iter().cloned());
-        let mut mixed_ys = train_ys.clone();
+        let mut mixed_ys = core_ys.clone();
         mixed_ys.extend(aug_ys.iter().cloned());
         println!(
             "  augmented train set: {} MNIST + {} synthetic = {} ({:.1}% synthetic)",
-            train_bits.len(),
+            core_bits.len(),
             aug_xs.len(),
             mixed_xs.len(),
             100.0 * aug_xs.len() as f64 / mixed_xs.len() as f64
         );
-        let (w2, b2) = train_perceptron(&mixed_xs, &mixed_ys);
-        let (scale, _val_acc, qw2, qb2) = pick_best_quantization(&w2, &b2, &train_bits[..5000], &val_ys, 3, 200);
-        let train_acc2 = accuracy(&qw2, &qb2, &train_bits, &train_ys);
+        let (w2, b2) = train_perceptron(&mixed_xs, &mixed_ys, seed);
+        let (scale, val_acc2, qw2, qb2) = pick_best_quantization(&w2, &b2, &val_bits, &val_ys, 3, 200);
+        let train_acc2 = accuracy(&qw2, &qb2, &core_bits, &core_ys);
         let test_acc2 = accuracy(&qw2, &qb2, &test_bits, &test_ys);
         let glyph_acc2 = glyph_accuracy(&qw2, &qb2);
         println!(
-            "post-augmentation: scale={scale}, train acc {train_acc2:.4}, test acc {test_acc2:.4}, glyph accuracy {:.1}% ({}/10)",
+            "post-augmentation: scale={scale}, train acc {train_acc2:.4}, val acc {val_acc2:.4}, test acc {test_acc2:.4}, glyph accuracy {:.1}% ({}/10)",
             glyph_acc2 * 100.0,
             (glyph_acc2 * 10.0).round()
         );
         assert!(test_acc2 >= 0.60, "test accuracy {test_acc2:.4} below 0.60 floor after augmentation");
-        weights = w2;
-        bias = b2;
-        qweights = qw2;
-        qbias = qb2;
-        test_acc = test_acc2;
-        glyph_acc = glyph_acc2;
+        // Keep the augmented model only if it actually improved on validation
+        // -- augmentation is a hyperparameter choice like any other, so it's
+        // gated on val accuracy too, never on whether it helps the test number.
+        if val_acc2 > val_acc_final {
+            weights = w2;
+            bias = b2;
+            qweights = qw2;
+            qbias = qb2;
+            test_acc = test_acc2;
+            glyph_acc = glyph_acc2;
+            val_acc_final = val_acc2;
+        } else {
+            println!("  augmentation did not improve validation accuracy ({val_acc2:.4} <= {val_acc_final:.4}) -- discarded");
+        }
     }
 
     let w_min_final = weights.iter().flatten().min().copied().unwrap();
@@ -535,8 +571,10 @@ pub fn run(repo_root: &Path) {
         "weights": qweights,
         "bias": qbias,
         "test_accuracy": test_acc,
+        "val_accuracy": val_acc_final,
         "glyph_accuracy": glyph_acc,
         "threshold": t,
+        "seed": seed,
         "exemplars": exemplars_json,
     });
     fs::write(&out_path, serde_json::to_string_pretty(&out).unwrap()).expect("write weights_mnist.json");

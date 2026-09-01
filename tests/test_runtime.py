@@ -308,7 +308,9 @@ class ClassifierTests(Base):
 
 
 class MnistClassifierTests(Base):
-    """M11: 7x7 drawn-digit linear classifier, argmax'd and 7-seg decoded."""
+    """M12: 49 -> 16 -> 10 MLP drawn-digit classifier, argmax'd and 7-seg
+    decoded. Every expectation below is derived from weights_mnist.json --
+    never hardcoded -- so it stays valid across retrains (see DisplayTests)."""
 
     SEG_MAP = {
         "a": {0, 2, 3, 5, 6, 7, 8, 9}, "b": {0, 1, 2, 3, 4, 7, 8, 9},
@@ -322,14 +324,23 @@ class MnistClassifierTests(Base):
         import json
         with open(os.path.join(ROOT, "scripts", "weights_mnist.json")) as f:
             w = json.load(f)
-        cls.weights = w["weights"]
-        cls.bias = w["bias"]
+        cls.hidden_weights = w["hidden_weights"]
+        cls.hidden_biases = w["hidden_biases"]
+        cls.output_weights = w["output_weights"]
+        cls.output_biases = w["output_biases"]
         cls.exemplars = w["exemplars"]
 
     def ref(self, bits49):
-        """Independent reference model: score = bias + w.x per class,
-        argmax with ties -> lowest digit."""
-        scores = [self.bias[k] + sum(self.weights[k][i] * bits49[i] for i in range(49))
+        """Independent reference model: hidden_score = hidden_bias + w.x per
+        hidden neuron, hidden_out = sign bit (1 if score >= 0 else 0);
+        output_score = output_bias + v.hidden_out per class; argmax with
+        ties -> lowest digit."""
+        h = len(self.hidden_biases)
+        hidden_out = []
+        for j in range(h):
+            s = self.hidden_biases[j] + sum(self.hidden_weights[j][i] * bits49[i] for i in range(49))
+            hidden_out.append(1 if s >= 0 else 0)
+        scores = [self.output_biases[k] + sum(self.output_weights[k][j] * hidden_out[j] for j in range(h))
                   for k in range(10)]
         best = 0
         for k in range(1, 10):
@@ -431,7 +442,12 @@ class DisplayTests(Base):
         self.assert_view("d_mnist_digit", 7)
         # Per-class scores derived from the JSON (not hardcoded) -- this test
         # is meant to stay valid across retrains, same as MnistClassifierTests.
-        sc = [w["bias"][k] + sum(w["weights"][k][i] * bits49[i] for i in range(49))
+        h = len(w["hidden_biases"])
+        hidden_out = [
+            1 if w["hidden_biases"][j] + sum(w["hidden_weights"][j][i] * bits49[i] for i in range(49)) >= 0 else 0
+            for j in range(h)
+        ]
+        sc = [w["output_biases"][k] + sum(w["output_weights"][k][j] * hidden_out[j] for j in range(h))
               for k in range(10)]
         for k in range(10):
             self.assert_view(f"d_mnist_score{k}", sc[k])
