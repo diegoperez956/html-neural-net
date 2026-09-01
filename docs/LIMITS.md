@@ -8,20 +8,24 @@ Firefox 151 via Playwright.
 
 | metric | value |
 |---|---|
-| file size | ~1.18 MB (1 182 392 bytes) |
-| signal declarations (custom properties) | 5 669 |
+| file size | ~1.62 MB (1 620 884 bytes) |
+| signal declarations (custom properties) | 6 834 |
 | of which XOR MLP | 123 |
 | of which trained 3×3 classifier (M10) | ~260 |
 | of which Mode B (native comparison) | 8 + 15 decimal-view signals |
-| of which drawn-digit MNIST classifier (M11) | 4 852 |
-| `@property` registrations | 5 669 |
-| CSS rules | 11 577 |
-| DOM elements | 424 |
+| of which drawn-digit classifier (M11/M13) | 6 066 |
+| `@property` registrations | 6 834 |
+| CSS rules | 14 111 |
+| DOM elements | 781 |
 
-M11 breakdown: 10 per-class weighted scores (bit-plane popcount) ~318
-signals each (3 178 total), argmax tournament (streaming top-2 + margin)
-1 545, digit minterms 68, seven-segment decode 49, confidence-meter
-decimal-view readouts (score/digit/margin displays) 12.
+M11/M13 breakdown: canvas pipeline (M13) 1 071 — 196 `mc` primary-input
+placeholders, 728 dilation OR gates (`dl`/`dlo`), 147 downsample OR gates
+(`mn`/`mno`); classifier proper 4 995 — 10 per-class weighted scores
+(bit-plane popcount) ~345 signals each (retrain-dependent), argmax
+tournament (streaming top-2 + margin) 1 545, digit minterms 68,
+seven-segment decode 49, decimal-view readouts (score/digit/margin) 12.
+The ~280-signal delta vs M11's 4 852-classifier figure is the retrained
+weights' popcount-plane sizes, not new structure.
 
 ## Scaling: N-bit ripple adder (generated in isolation)
 
@@ -95,7 +99,7 @@ drawn-digit classifier (4 192 signals: 10 popcount-decomposed scores,
 argmax tournament, minterms, seven-segment decode) is the first M-series
 piece large enough to need the scaling question answered rather than
 assumed — `benchmarks/signal_scaling.csv` answers it: recalc p95 is flat
-from 6k through 10k signals, and the whole page at 5 669 signals sits
+from 6k through 10k signals, and the whole page at 6 834 signals sits
 comfortably below that flat region. A per-term neuron-sum encoding of the
 same 10-class classifier (no bit-plane popcount) was estimated at ~25k
 signals — the popcount decomposition is what kept M11 inside the
@@ -106,21 +110,25 @@ benchmarked range instead of past it (see `docs/DECISIONS.md` D-006).
 * M10 (3×3 glyph, two classes): trained on 9 hand-built exemplars, no held-out
   test set — a toy proof that gate-composed weighted sums work, not an
   accuracy claim.
-* M11 (7×7 drawn digit, ten classes): 78.54% on the full 10k MNIST test set;
-  a single-layer linear classifier over a 7×7 binary grid, so this is the
-  ceiling for that model class, not a bug to chase. Hyperparameters are
-  selected against a drawn-style validation proxy (thickened strokes,
-  tighter canvas-filling crop) rather than plain MNIST validation accuracy,
-  since that's the metric that tracks what a visitor actually draws (D-010
-  in `docs/DECISIONS.md`) — MNIST accuracy dropped ~3.4 points from the
-  honest MNIST-selected baseline (81.89%) in exchange. On the canonical
-  drawn-glyph fidelity set it gets 8/10, with known misses at 2 (predicted
-  3) and 8 (predicted 0). The runtime page performs no input
-  normalization; the accuracy figures assume a drawing that is large and
-  roughly centered on the grid, matching the training preprocessing
-  (bounding-box crop + centered-square pad before the 7×7 resample). A
-  small, off-center, or corner-drawn digit is out of distribution for the
-  trained weights and not covered by either accuracy number.
+* M11/M13 (14×14 paint canvas → 7×7 grid, ten classes): 75.42% on the full
+  10k MNIST test set; a single-layer linear classifier over a 7×7 binary
+  grid, so this is the ceiling for that model class, not a bug to chase.
+  Hyperparameters are selected against a drawn-style validation proxy
+  (thickened strokes, tighter canvas-filling crop) rather than plain MNIST
+  validation accuracy, since that's the metric that tracks what a visitor
+  actually draws (D-010, D-011 in `docs/DECISIONS.md`) — MNIST accuracy
+  dropped ~3.1 points from the 7×7-canvas baseline (78.54%) in exchange,
+  and the fixed-architecture OR-downsample (T=1) costs another ~4pp vs the
+  best popcount threshold. On the 2×-upscaled canonical drawn-glyph set it
+  gets 8/10 (misses: 6→5, 9→3); on the thin-stroke 14×14 set (what a
+  1-cell-wide drag actually looks like) 6/10 (misses: 1→4, 2→7, 6→5,
+  9→8). The runtime page performs no input normalization; the accuracy
+  figures assume a drawing that is large and roughly centered on the
+  canvas, matching the training preprocessing (bounding-box crop +
+  centered-square pad before the 14×14 resample, then dilation + OR
+  downsample in gates). A small, off-center, or corner-drawn digit is out
+  of distribution for the trained weights and not covered by either
+  accuracy number.
 
 ## Browser support
 
@@ -146,7 +154,7 @@ comparison-operator gap found in experiments; see ARCHITECTURE).
    past 2^12 states.
 5. **Update cost:** one toggle invalidates the whole DAG. Measured flat
    through 10 000 signals (recalc p95 ~52 ms Chromium / ~73 ms Firefox,
-   `benchmarks/signal_scaling.csv`); the 5 669-signal page is well inside
+   `benchmarks/signal_scaling.csv`); the 6 834-signal page is well inside
    that range. Past whatever point recalc stops being flat, per-section
    isolation (containment) is the fix — the architecture supports it, the
    demo hasn't needed it yet.

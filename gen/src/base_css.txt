@@ -19,33 +19,36 @@
   .statusbar { background: #3c3836; color: #928374; font-size: 11px;
                padding: 5px 10px; border-top: 1px solid #504945; }
   .idle { color: #7c6f64; }
-  .app:has(.grid7 input:checked) .idle { display: none; }
+  .app:has(.grid14 input:checked) .idle { display: none; }
   .stage { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 16px; }
 
-  /* the drawing box: one canvas, not 49 widgets */
+  /* the paint surface: blank canvas, invisible gap-free hit-target cells,
+     and one oversized rounded ink blob per checked cell -- a dragged path
+     reads as a continuous marker stroke, never stair-stepped squares */
   .pad { display: flex; flex-direction: column; gap: 10px; }
-  .grid7 {
-    display: grid; grid-template-columns: repeat(7, 42px); grid-auto-rows: 42px;
+  .grid14 {
+    display: grid; grid-template-columns: repeat(14, 24px); grid-auto-rows: 24px;
     border: 1px solid #504945; border-radius: 0; overflow: hidden;
     background: #1d2021; cursor: crosshair; touch-action: none;
   }
-  .cell7 { position: relative; width: 100%; height: 100%; background: #282828;
-           box-shadow: inset 0 0 0 1px #3c3836; transition: background .1s ease; }
-  .cell7:hover { background: #fe801926; }
-  .cell7:active { background: #fe80194d; }
-  .cell7:has(input:checked) { background: #fe8019; box-shadow: inset 0 0 0 1px #282828; }
-  .cell7 input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: crosshair; }
-  .cell7:has(input:focus-visible) { outline: 2px solid #fe8019; outline-offset: -2px; z-index: 1; }
+  .cell14 { position: relative; width: 100%; height: 100%; }
+  .cell14 input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: crosshair; }
+  .cell14:has(input:checked)::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 40px; height: 40px; transform: translate(-50%, -50%);
+    border-radius: 50%; background: #fe8019; pointer-events: none;
+  }
+  .cell14:has(input:focus-visible) { outline: 2px solid #fe8019; outline-offset: -2px; z-index: 1; }
   input[type="reset"] {
     background: none; color: #a89984; border: none;
     padding: 0; cursor: pointer; font: inherit; font-size: 12px;
   }
   input[type="reset"]:hover { color: #fe8019; }
 
-  /* the answer: wakes up when the box has ink */
+  /* the answer: wakes up when the canvas has ink */
   .guess { display: flex; flex-direction: column; align-items: center; gap: 14px;
            opacity: .55; transition: opacity .2s ease; }
-  .stage:has(.grid7 input:checked) .guess { opacity: 1; }
+  .stage:has(.grid14 input:checked) .guess { opacity: 1; }
   .digit7 { position: relative; width: 90px; height: 150px; }
   .seg { position: absolute; background: #3c3836; border-radius: 3px; transition: background .18s ease; }
   .seg-a { top: 0; left: 12px; width: 66px; height: 12px; }
@@ -56,6 +59,13 @@
   .seg-f { top: 9px; left: 0; width: 12px; height: 64px; }
   .seg-g { top: 69px; left: 12px; width: 66px; height: 12px; }
   .mn-digits { display: flex; gap: 9px; font-size: 17px; }
+
+  /* "network sees": deliberately pixelated 7x7 mirror of the post-downsample
+     49 gate bits -- the canvas shows ink, this shows the abstraction */
+  .seenwrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .seen { display: grid; grid-template-columns: repeat(7, 13px); grid-auto-rows: 13px; gap: 2px;
+          padding: 6px; background: #1d2021; border: 1px solid #504945; }
+  .seencap { color: #7c6f64; font-size: 11px; }
 
   /* under the hood: the whole composition ladder, opt-in */
   details.hood { border-top: 1px solid #504945; padding-top: 18px; }

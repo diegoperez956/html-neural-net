@@ -1,6 +1,7 @@
-//! 1:1 port of scripts/generate.py (build-time page generator; the artifact
-//! stays pure HTML+CSS). Byte-identical output vs Python is the acceptance
-//! bar. Do not "improve" anything here without updating generate.py to match.
+//! Build-time page generator (originally a 1:1 port of scripts/generate.py,
+//! deleted after the D-008 Rust migration; Rust is now the sole build path).
+//! The artifact stays pure HTML+CSS: this program only elaborates circuits,
+//! emits repetitive markup/CSS, and wires the demo sections.
 
 mod circuit;
 
@@ -56,6 +57,12 @@ struct MnistWeights {
     weights: Vec<Vec<i64>>,
     bias: Vec<i64>,
     test_accuracy: f64,
+    /// M13 pipeline fields: the runtime canvas is canvas×canvas checkboxes,
+    /// dilated dilate_iters times (4-neighbor OR), then 2×2 blocks reduce to
+    /// the 49 classifier bits via popcount >= block_threshold.
+    block_threshold: usize,
+    canvas: usize,
+    dilate_iters: usize,
 }
 
 /// Python `{value:.0%}` — multiply by 100, round to 0 decimals, append '%'.
@@ -94,7 +101,10 @@ fn main() {
     .map(String::from)
     .collect();
     inputs.extend((0..9).map(|i| format!("g{i}")));
-    inputs.extend((0..49).map(|i| format!("mn{i}")));
+    // M13: the 49 classifier inputs are no longer primary checkbox bits --
+    // they are gate outputs (OR downsample of dilated canvas cells). The
+    // primary inputs are the 14x14 paint-canvas cells mc0..mc195.
+    inputs.extend((0..196).map(|i| format!("mc{i}")));
     for name in &inputs {
         c.emit(name, "0"); // placeholder; overridden by :has rules
     }
@@ -184,7 +194,10 @@ fn main() {
         n.c.emit(&format!("cls_pre_b{i}"), &r#ref(b));
     }
 
-    // ---------------- M11: drawn-digit MNIST classifier ---------------------
+    // ---------------- M13: 14x14 paint canvas -> dilation -> OR4 downsample --
+    // Placed before the classifier so mn0..mn48 exist as named signals the
+    // weighted scores consume. Mirrors train/src/mnist.rs's dilate14_all +
+    // block_downsample exactly (the trainer simulates THIS circuit).
     let mnist: MnistWeights = serde_json::from_str(
         &fs::read_to_string(scripts_dir.join("weights_mnist.json")).unwrap(),
     )
@@ -192,7 +205,69 @@ fn main() {
     let mnist_weights = mnist.weights;
     let mnist_bias = mnist.bias;
     let mnist_test_acc = mnist.test_accuracy;
-    let mnist_inputs: Vec<String> = (0..49).map(|i| r#ref(&format!("mn{i}"))).collect();
+    assert_eq!(
+        mnist.canvas, 14,
+        "weights_mnist.json canvas is {} -- this generator only knows the 14x14 grid",
+        mnist.canvas
+    );
+    assert_eq!(
+        mnist.dilate_iters, 1,
+        "weights_mnist.json dilate_iters is {} -- the runtime circuit emits exactly one dilation stage",
+        mnist.dilate_iters
+    );
+    assert_eq!(
+        mnist.block_threshold, 1,
+        "weights_mnist.json block_threshold is {} -- refusing to emit an OR tree for a popcount spec. \
+         D-011 fixes T=1 as architecture: the 2x2 block downsample is a pure OR (any ink lights the bit); \
+         T>1 would need popcount comparators that are not built here",
+        mnist.block_threshold
+    );
+
+    // Dilation: dl{i} = OR(self, 4-neighbors); edge cells OR fewer.
+    // 196 named signals consumed by the downsample below.
+    let mut dl: Vec<String> = Vec::with_capacity(196);
+    for r in 0..14usize {
+        for col in 0..14usize {
+            let i = r * 14 + col;
+            let mut terms = vec![format!("mc{i}")];
+            if r > 0 {
+                terms.push(format!("mc{}", (r - 1) * 14 + col));
+            }
+            if r < 13 {
+                terms.push(format!("mc{}", (r + 1) * 14 + col));
+            }
+            if col > 0 {
+                terms.push(format!("mc{}", i - 1));
+            }
+            if col < 13 {
+                terms.push(format!("mc{}", i + 1));
+            }
+            let mut acc = terms[0].clone();
+            for (j, t) in terms.iter().enumerate().skip(1) {
+                let last = j == terms.len() - 1;
+                let name = if last { format!("dl{i}") } else { format!("dlo{i}_{j}") };
+                acc = n.c.gate2(Gate::Or, &acc, Some(t), Some(&name));
+            }
+            dl.push(acc);
+        }
+    }
+    // Block downsample: mn{b} = OR over the 2x2 dilated block -- the same
+    // 49 named signals the classifier weighted scores have always consumed.
+    let mnist_inputs: Vec<String> = (0..49)
+        .map(|b| {
+            let br = b / 7;
+            let bc = b % 7;
+            let (r0, c0) = (2 * br, 2 * bc);
+            let cells = [dl[r0 * 14 + c0].clone(), dl[r0 * 14 + c0 + 1].clone(), dl[(r0 + 1) * 14 + c0].clone(), dl[(r0 + 1) * 14 + c0 + 1].clone()];
+            let mut acc = cells[0].clone();
+            for (j, t) in cells.iter().enumerate().skip(1) {
+                let last = j == cells.len() - 1;
+                let name = if last { format!("mn{b}") } else { format!("mno{b}_{j}") };
+                acc = n.c.gate2(Gate::Or, &acc, Some(t), Some(&name));
+            }
+            acc
+        })
+        .collect();
 
     const SCORE_W: usize = 7;
     let mut mnist_scores: Vec<Vec<String>> = Vec::new();
@@ -367,20 +442,37 @@ fn main() {
         .collect::<Vec<_>>()
         .join("\n");
 
-    let extra = format!("{}\n{BASE_CSS}\n{input_css}\n{led_css_all}\n{dec_css_all}", font_css(manifest_dir));
+    // "network sees" preview cells: one per post-downsample mn{i} gate bit,
+    // lit orange when the bit is 1 (same color-mix readout technique as the
+    // LEDs; deliberately pixelated -- it shows the abstraction).
+    let seen_css_all: String = (0..49)
+        .map(|i| {
+            format!(
+                ".px_{} {{ background: color-mix(in srgb, #fe8019, #1d2021 calc((1 - var(--mn{})) * 100%)); }}",
+                i, i
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let extra = format!(
+        "{}\n{BASE_CSS}\n{input_css}\n{led_css_all}\n{dec_css_all}\n{seen_css_all}",
+        font_css(manifest_dir)
+    );
 
     let n_signals = c.signals.len();
 
     // ---------------- body ----------------------------------------------------
-    let mn_cells: String = (0..49)
+    let canvas_cells: String = (0..196)
         .map(|i| {
             format!(
-                r#"<label class="cell7"><input type="checkbox" id="mn{i}" aria-label="cell {},{}"></label>"#,
-                i / 7,
-                i % 7
+                r#"<label class="cell14"><input type="checkbox" id="mc{i}" aria-label="cell {},{}"></label>"#,
+                i / 14,
+                i % 14
             )
         })
         .collect();
+    let seen_cells: String = (0..49).map(|i| format!(r#"<div class="px px_{i}"></div>"#)).collect();
     let digit_labels: String =
         (0..10).map(|k| format!(r#"<span class="l_mn_digit_{k}">{k}</span>"#)).collect();
     let g_cells: String = (0..9)
@@ -410,7 +502,7 @@ fn main() {
         r####"
 <main class="wrap">
 <h1>draw a digit</h1>
-<p class="sub">a neural network in html + css. drag to draw — it guesses through logic gates compiled from mnist weights. the only javascript is a 20-line input shim; delete it and clicking still works.</p>
+<p class="sub">a neural network in html + css. drag to paint — no grid, just ink; it guesses through dilation and downsample gates feeding a classifier compiled from mnist weights. the only javascript is a 20-line input shim; delete it and clicking still works.</p>
 
 <div class="app">
   <div class="titlebar">
@@ -419,8 +511,8 @@ fn main() {
   </div>
   <div class="stage">
     <form class="pad" id="draw">
-      <div class="grid7" role="group" aria-label="7 by 7 drawing box">
-        {mn_cells}
+      <div class="grid14" role="group" aria-label="14 by 14 paint canvas">
+        {canvas_cells}
       </div>
     </form>
     <div class="guess">
@@ -436,6 +528,12 @@ fn main() {
       <div class="mn-digits" role="group" aria-label="lit digit indicator">
         {digit_labels}
       </div>
+      <div class="seenwrap">
+        <div class="seen" role="img" aria-label="what the network sees, 7 by 7">
+          {seen_cells}
+        </div>
+        <div class="seencap">network sees</div>
+      </div>
     </div>
   </div>
   <div class="statusbar"><span class="idle">no ink · bias output</span> guess: <span class="d_mnist_digit"></span> · margin: <span class="d_mnist_margin"></span> · {mnist_test_acc_pct} mnist</div>
@@ -443,7 +541,7 @@ fn main() {
 
 <details class="hood">
 <summary>under the hood: checkbox state → bits → gates → adders → multipliers → neurons → this classifier</summary>
-<div class="ladder">checkbox state <span class="dim">→</span> bits <span class="dim">→</span> gates <span class="dim">→</span> adders <span class="dim">→</span> multiplication <span class="dim">→</span> dot product <span class="dim">→</span> matrix×vector <span class="dim">→</span> neurons <span class="dim">→</span> XOR MLP</div>
+<div class="ladder">checkbox state <span class="dim">→</span> bits <span class="dim">→</span> gates <span class="dim">→</span> adders <span class="dim">→</span> multiplication <span class="dim">→</span> dot product <span class="dim">→</span> matrix×vector <span class="dim">→</span> neurons <span class="dim">→</span> XOR MLP <span class="dim">→</span> dilate <span class="dim">→</span> OR-downsample <span class="dim">→</span> drawn-digit classifier</div>
 
 <section>
   <h2>1 · input bits</h2>
@@ -564,7 +662,7 @@ fn main() {
 
 <section>
   <h2>12 · trained classifier — 3×3 glyph → “top bar” vs “left bar”</h2>
-  <div class="tag">trained at build time by a plain perceptron (scripts/train.py) on 9 exemplars; weights compiled into the gate netlist. bias = {cls_bias}, w = {cls_weights_str}. This is the only learned part of the demo.</div>
+  <div class="tag">trained at build time by a plain perceptron (train/src/glyph.rs) on 9 exemplars; weights compiled into the gate netlist. bias = {cls_bias}, w = {cls_weights_str}. This is the only learned part of the demo.</div>
   <div class="grid" role="group" aria-label="3 by 3 glyph grid">
     {g_cells}
   </div>
@@ -575,7 +673,7 @@ fn main() {
 
 <section>
   <h2>13 · drawn-digit classifier, readouts</h2>
-  <div class="tag">the drawing box and display live on the main page; these readouts tap the same circuit's signals. linear classifier, weights trained on MNIST at build time (scripts/train_mnist.py), {mnist_test_acc_pct} MNIST test accuracy.</div>
+  <div class="tag">the paint canvas and display live on the main page; these readouts tap the same circuit's signals. 14×14 invisible canvas cells → one round of 4-neighbor dilation (dl gates) → 2×2 block OR-downsample (mn bits) → the 49-input linear classifier, weights trained on MNIST at build time (train/src/mnist.rs), {mnist_test_acc_pct} MNIST test accuracy.</div>
   <div class="row"><span class="kbd">margin, top1 - top2 (decimal view)</span> <span class="v d_mnist_margin"></span></div>
   <div class="row"><span class="kbd">predicted digit (index bits, decimal view)</span> <span class="v d_mnist_digit"></span></div>
   <div class="row"><span class="kbd">per-class scores (signed, decimal views)</span></div>
@@ -596,8 +694,8 @@ fn main() {
   Runtime: the network, displays and readouts are HTML + CSS only (no WASM, no network requests, works from file://). The single &lt;script&gt; on the page is an input shim that translates pointer drags into checkbox toggles — zero computation; delete it and everything still works, one click per cell.<br>
   Gates are named bit identities over native CSS min()/max()/calc() — the browser's arithmetic is the substrate; we compose circuits on top.<br>
   Decimal numbers in green are native-calc display views, outside the gate circuit. LEDs read gate signals directly.<br>
-  The MNIST classifier (§13) follows the same split: argmax/minterm/segment signals are gates, the score, digit and margin numbers are native-calc views. No exception.<br>
-  Generated by scripts/generate.py at build time; rebuilds are deterministic.
+  The MNIST classifier (§13) follows the same split: the canvas's dilation and OR-downsample stages, argmax/minterm/segment signals are gates, the score, digit and margin numbers are native-calc views. No exception.<br>
+  Generated by gen/ (Rust) at build time; rebuilds are deterministic.
   </div>
 </section>
 
@@ -612,10 +710,10 @@ fn main() {
 /* input shim: drag-to-paint. the network + display are pure CSS — delete
    this block and the page still works, one click per cell. */
 (() => {{
-  const grid = document.querySelector('.grid7');
+  const grid = document.querySelector('.grid14');
   if (!grid) return;
   let mode = null, downBox = null;
-  const boxOf = e => {{ const c = e.target.closest('.cell7'); return c && c.querySelector('input'); }};
+  const boxOf = e => {{ const c = e.target.closest('.cell14'); return c && c.querySelector('input'); }};
   grid.addEventListener('pointerdown', e => {{
     const box = boxOf(e); if (!box || e.button !== 0) return;
     e.target.releasePointerCapture && e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId) && e.target.releasePointerCapture(e.pointerId);

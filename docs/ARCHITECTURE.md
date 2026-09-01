@@ -79,8 +79,9 @@ says this explicitly.
   width. Threshold = sign bit.
 * `gen/src/main.rs` (originally `scripts/generate.py`) — wires the demo:
   gates, half/full adder, 2-bit adder, 2×2 multiplier, 4-bit adder, dot
-  product, matrix-vector, neuron, 2-2-1 XOR MLP, and Mode B (native CSS
-  arithmetic comparison).
+  product, matrix-vector, neuron, 2-2-1 XOR MLP, Mode B (native CSS
+  arithmetic comparison), and the M13 canvas pipeline (14×14 dilation +
+  OR-downsample gates feeding the drawn-digit classifier).
 
 The generated `dist/index.html` contains, in order: base CSS, `@property`
 registrations, primary-input `:has()` mappings, then the netlist as flat
@@ -114,14 +115,35 @@ products of weight × pixel are gate-masked magnitudes (wiring for ±1/±2),
 summed with the trained bias at 5-bit signed width; threshold = sign bit.
 Training happens at build time; inference happens in CSS.
 
-## Drawn-digit classifier (M11)
+## Drawn-digit classifier (M11, resurfaced as M13's paint canvas)
 
-A 10-class linear classifier over a 7×7 checkbox grid (49 inputs `mn0..mn48`,
-zero-JS `<input type="reset">` to clear). Trained at build time by
-`train/src/mnist.rs` on real MNIST (see below); compiled by
-`gen/src/circuit.rs` (`weighted_score`, `popcount`, `argmax`,
-`digit_minterms`, `sevenseg`) and wired in `gen/src/main.rs` §13. Four
-gate-composed stages, none of them a per-term neuron sum:
+A 10-class linear classifier over what a visitor *draws*: a 14×14
+paint-feel canvas of invisible checkbox cells (196 inputs `mc0..mc195`,)
+zero-JS `<input type="reset">` to clear), reduced to the 49 bits the
+classifier trains on entirely inside the CSS gates:
+
+1. **Dilation** — each cell's effective bit is the OR of itself and its
+   4-neighbors (edge cells OR fewer): 196 named signals `dl0..dl195`,
+   built as nested `max()` OR gates. A 1-cell-wide human stroke lights a
+   3-cell-wide band, which is what the downsample and the classifier
+   expect.
+2. **Block downsample** — a pure OR over each 2×2 block of dilated bits
+   (`mn0..mn48`): any ink in the block lights the bit. T=1 is fixed
+   architecture (D-011), not a hyperparameter; the generator refuses to
+   build anything else.
+3. The EXISTING 49-input linear classifier — per-class bit-plane popcount
+   weighted scores, argmax tournament, digit minterms, seven-segment decode
+   — unchanged from M11.
+
+The surface shows ink, not abstraction: cells are invisible gap-free
+hit-targets; each checked cell renders an oversized rounded orange blob
+(`border-radius:50%`, ~1.7× the cell pitch, `pointer-events:none`) so a
+dragged path reads as one continuous marker stroke. The "network sees"
+7×7 preview reads the post-downsample `mn` gate bits — deliberately
+pixelated, because it shows the abstraction the classifier actually
+receives. Trained at build time by `train/src/mnist.rs` on real MNIST
+(see below); compiled by `gen/src/circuit.rs` and wired in
+`gen/src/main.rs` §13.
 
 * **Per-class weighted score** (`Net.weighted_score`, one per digit, 10
   total). Weights are constrained to `[-3,3]` so each is pure wiring: a
@@ -161,25 +183,31 @@ gate outputs, they do not feed back into them.
 `train/src/mnist.rs`: deterministic, downloads and caches real MNIST in
 `data/mnist/` (gitignored). Preprocessing: binarize each 28×28 image at
 >128, crop to the tight bounding box of lit pixels, pad to a centered
-square (aspect preserved), area-resample to 7×7 coverage fractions,
-threshold at `t=0.45` (grid-searched) into bits. An 8-epoch multiclass
-perceptron trains on the full 60k training set, then weights are quantized
-to `[-3,3]` (scale factor grid-searched) with bias in `[-2,3]`.
-Hyperparameter selection (threshold, shuffle seed, quantization scale, and
-the glyph-augmentation accept/reject gate) runs against a drawn-style
-validation proxy built from the held-out validation split — thickened
-strokes, a tighter canvas-filling crop, and varied binarization threshold,
-approximating how a person fills the 7×7 grid rather than downsampled
-MNIST's distribution (D-010 in `docs/DECISIONS.md`). Result: 78.54%
-accuracy on the full 10k MNIST test set (down from 81.89% under
-MNIST-selected hyperparameters — the traded-off cost of selecting for
-drawn-digit fidelity), 8/10 on the canonical drawn-glyph fidelity set
-(misses: 2→3, 8→0), up from 7/10. Unlike the retired Python trainer,
-`train/src/mnist.rs` has no fast path — `make train` always retrains and
-overwrites `scripts/weights_mnist.json`.
+square (aspect preserved), area-resample to **14×14** coverage fractions
+(the runtime canvas resolution), threshold at `t=0.65` (grid-searched)
+into bits, apply one round of 4-neighbor dilation, then reduce each 2×2
+block by pure OR (`block_threshold: 1`, fixed architecture — D-011) to
+the 49 classifier bits. That simulation is gate-for-gate identical to the
+runtime CSS circuit (dilation `dl` gates, OR downsample `mn` gates) —
+matching them exactly is the whole point of D-011. An 8-epoch multiclass
+perceptron trains on the full 60k training set, then weights are
+quantized to `[-3,3]` (scale factor grid-searched) with bias in
+`[-13,19]`. Hyperparameter selection (threshold, shuffle seed,
+quantization scale, and the glyph-augmentation accept/reject gate) runs
+against a drawn-style validation proxy built from the held-out validation
+split — thickened strokes, a tighter canvas-filling crop, and varied
+binarization threshold, approximating how a person drags a thin stroke on
+the 14×14 canvas rather than downsampled MNIST's distribution (D-010,
+D-011 in `docs/DECISIONS.md`). Result: 75.42% accuracy on the full 10k
+MNIST test set (down from 78.54% under the 7×7 canvas — the cost of the
+OR-downsample's forgiving mapping plus the redrawn-proxy selection), 8/10
+on the 2×-upscaled canonical drawn-glyph set (misses: 6→5, 9→3), and 6/10
+on the thin-stroke 14×14 set (misses: 1→4, 2→7, 6→5, 9→8). Unlike the
+retired Python trainer, `train/src/mnist.rs` has no fast path — `make
+train` always retrains and overwrites `scripts/weights_mnist.json`.
 The runtime page does no input normalization, so the accuracy figure
-assumes drawings are large and roughly centered on the grid — the glyph
-set is a demo-fidelity proxy, not a claim about arbitrary user drawings.
+assumes drawings are large and roughly centered on the canvas — the glyph
+sets are demo-fidelity proxies, not claims about arbitrary user drawings.
 
 ## Mode B — native CSS arithmetic
 
@@ -225,9 +253,13 @@ repaint. No script, no event handler, no network. Works from `file://`.
 * Mode B: same XOR/matvec against the same reference;
 * trained classifier: 9 exemplars + 32 seeded-random states vs an
   independent reference recomputed from `scripts/weights.json`;
-* drawn-digit classifier (M11): argmax winner, minterms, and seven-segment
-  output vs an independent reference recomputed from
-  `scripts/weights_mnist.json`, plus registered-view spot checks.
+* drawn-digit classifier (M11/M13): dilation and OR-downsample gate
+  signals vs a Python reference for hand-picked 14×14 patterns; argmax
+  winner, minterms, and seven-segment output vs an independent reference
+  recomputed from `scripts/weights_mnist.json` through the same pipeline
+  reference; registered-view spot checks; rendered-output checks for the
+  "network sees" preview and the paint canvas (no idle border/grid, blob
+  rendering); drag-shim behavior on the 196-cell canvas.
 
 Every intermediate the tests read is the same named signal the next stage
 consumes — the "genuine composition" acceptance check from

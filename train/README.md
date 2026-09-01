@@ -27,12 +27,17 @@ IDX files); if missing, it tries to download them the same way
 
 `glyph` writes `{"bias": int, "weights": [int; 9]}` (unchanged from
 Python). `mnist` writes `{"weights": [[int;49];10], "bias": [int;10],
-"test_accuracy": float, "val_accuracy": float, "drawn_val_accuracy": float,
-"glyph_accuracy": float, "threshold": float, "seed": int, "exemplars":
-{"0".."9": [int;49]}}` — the same linear schema as the Python original plus
-a few transparency fields D-009/D-010 added (`gen/` only reads `weights`,
-`bias`, and `test_accuracy`, so the extra fields are additive). Weights are
-clipped to `[-3, 3]` (`gen/src/circuit.rs`'s `weighted_score` assumes this).
+"test_accuracy": float, "val_accuracy": float, "drawn_val_accuracy":
+float, "glyph_accuracy": float, "thin_glyph_accuracy": float,
+"threshold": float, "block_threshold": int, "canvas": int,
+"dilate_iters": int, "seed": int, "exemplars": {"0".."9": [int;49]}}` —
+the same linear schema as the Python original plus a few transparency
+fields D-009/D-010 added and the M13 pipeline fields (`gen/` reads
+`weights`, `bias`, `test_accuracy`, `block_threshold`, `canvas`, and
+`dilate_iters`; it asserts `block_threshold == 1` — the runtime downsample
+is a pure OR, fixed architecture per D-011 — and refuses to build
+otherwise). Weights are clipped to `[-3, 3]` (`gen/src/circuit.rs`'s
+`weighted_score` assumes this).
 `mlp` writes its own separate schema (`hidden_weights`/`hidden_biases`/
 `output_weights`/`output_biases`, see `docs/DESIGN_MLP.md`) to
 `scripts/weights_mlp.json` — `gen/` never reads this file.

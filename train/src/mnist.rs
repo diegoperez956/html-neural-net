@@ -1,6 +1,9 @@
-//! Port of scripts/train_mnist.py: 10-class linear digit classifier on real
-//! MNIST, downsampled to a 7x7 binary grid, quantized to small integer
-//! weights. See train/README.md for the RNG divergence from CPython.
+//! 10-class linear digit classifier on real MNIST for the 14×14 paint
+//! canvas (M13): images are resampled to 14×14 (the canvas resolution),
+//! dilated, and OR-downsampled to the 49 bits the classifier trains on --
+//! gate-for-gate the pipeline the browser runs at runtime. Originally a
+//! port of scripts/train_mnist.py (deleted in the D-008 Rust migration).
+//! See train/README.md for the RNG divergence from CPython.
 
 use crate::rng::Rng;
 use flate2::read::GzDecoder;
@@ -42,6 +45,25 @@ pub(crate) const NPIX: usize = GRID * GRID; // 49
 pub(crate) const SCALE_GRID: &[i64] = &[1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 75, 100, 150, 200];
 const THRESHOLD_GRID: &[f64] =
     &[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70];
+// M13: the runtime canvas is 14x14, downsampled in CSS gates to the 49 bits
+// the classifier trains on (2x2 popcount-vs-threshold per block).
+const GRID14: usize = 14;
+pub(crate) const NPIX14: usize = GRID14 * GRID14; // 196
+// D-011: T=1 is FIXED ARCHITECTURE, not a hyperparameter -- same status H=16
+// had for the MLP budget in D-009. The block downsample is a pure OR over
+// each 2x2 dilated block (any ink lights the bit). Rationale: the glyph
+// floors are pre-registered acceptance criteria, so letting the trainer
+// select T (jointly or via per-T diagnostics) puts glyph-conditioned
+// selection logic in the trainer; the 1.9pp drawn-val gap to T=2 was within
+// proxy noise (the proxy preferred a config that failed the upscale floor);
+// OR is the most forgiving mapping for a human drawing; and the ~4pp
+// MNIST-test cost vs T=2 is the same demo-over-benchmark trade D-010
+// established. Evidence trail (one-time runs, docs/DECISIONS.md D-011):
+// dilation-free search picked T=3 and scored thin-stroke 1/10; post-dilation
+// per-T table: T=1 t=0.65 s16 test .7542 glyphs 8/10 thin 6/10 | T=2 t=0.65
+// s1 test .7964 glyphs 7/10 thin 6/10 | T=3 t=0.4 s10 test .7913 glyphs 7/10
+// thin 6/10. Only T=1 clears both floors.
+pub(crate) const BLOCK_THRESHOLD: usize = 1;
 
 pub(crate) const AUG_VARIANTS_PER_DIGIT: usize = 300;
 const AUG_FLIP_PROB: f64 = 0.05;
@@ -70,6 +92,153 @@ pub(crate) fn glyph_bits() -> BTreeMap<u8, Vec<u8>> {
                 .map(|c| if c == '#' { 1 } else { 0 })
                 .collect();
             (*d, bits)
+        })
+        .collect()
+}
+
+// M13: thin-stroke 14x14 canonical glyphs -- a systematic seven-segment-style
+// construction (each segment a single-pixel-wide line, standard digit->segment
+// map from gen/src/circuit.rs SEVENSEG), NOT hand-tuned per digit for
+// accuracy. Stands in for what a real 1-cell-wide drag stroke looks like on
+// the finer 14x14 canvas, as opposed to the 7x7 GLYPHS above (which are
+// already 2px-thick relative to a 14x14 grid). Generated once by a scratch
+// script; see docs/DECISIONS.md D-011.
+const GLYPHS14_THIN: [(u8, [&str; 14]); 10] = [
+    (0, [
+        "..............", "...########...", "...#......#...", "...#......#...",
+        "...#......#...", "...#......#...", "...#......#...", "..............",
+        "...#......#...", "...#......#...", "...#......#...", "...#......#...",
+        "...#......#...", "...########...",
+    ]),
+    (1, [
+        "..............", "..............", "..........#...", "..........#...",
+        "..........#...", "..........#...", "..........#...", "..............",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "..............",
+    ]),
+    (2, [
+        "..............", "...########...", "..........#...", "..........#...",
+        "..........#...", "..........#...", "..........#...", "...########...",
+        "...#..........", "...#..........", "...#..........", "...#..........",
+        "...#..........", "...########...",
+    ]),
+    (3, [
+        "..............", "...########...", "..........#...", "..........#...",
+        "..........#...", "..........#...", "..........#...", "...########...",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "...########...",
+    ]),
+    (4, [
+        "..............", "..............", "...#......#...", "...#......#...",
+        "...#......#...", "...#......#...", "...#......#...", "...########...",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "..............",
+    ]),
+    (5, [
+        "..............", "...########...", "...#..........", "...#..........",
+        "...#..........", "...#..........", "...#..........", "...########...",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "...########...",
+    ]),
+    (6, [
+        "..............", "...########...", "...#..........", "...#..........",
+        "...#..........", "...#..........", "...#..........", "...########...",
+        "...#......#...", "...#......#...", "...#......#...", "...#......#...",
+        "...#......#...", "...########...",
+    ]),
+    (7, [
+        "..............", "...########...", "..........#...", "..........#...",
+        "..........#...", "..........#...", "..........#...", "..............",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "..............",
+    ]),
+    (8, [
+        "..............", "...########...", "...#......#...", "...#......#...",
+        "...#......#...", "...#......#...", "...#......#...", "...########...",
+        "...#......#...", "...#......#...", "...#......#...", "...#......#...",
+        "...#......#...", "...########...",
+    ]),
+    (9, [
+        "..............", "...########...", "...#......#...", "...#......#...",
+        "...#......#...", "...#......#...", "...#......#...", "...########...",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "...########...",
+    ]),
+];
+
+pub(crate) fn glyph14_thin_bits() -> BTreeMap<u8, Vec<u8>> {
+    GLYPHS14_THIN
+        .iter()
+        .map(|(d, rows)| {
+            let bits = rows.iter().flat_map(|row| row.chars()).map(|c| if c == '#' { 1 } else { 0 }).collect();
+            (*d, bits)
+        })
+        .collect()
+}
+
+/// Nearest-neighbor 2x upscale, 7x7 bits -> 14x14 bits (each cell duplicated
+/// into its 2x2 block). Invariant through `block_downsample` for any
+/// threshold <= 4: all four subcells equal, so popcount is 0 or 4.
+pub(crate) fn nn_upscale_2x(bits7: &[u8]) -> Vec<u8> {
+    let mut out = vec![0u8; NPIX14];
+    for r in 0..GRID {
+        for c in 0..GRID {
+            let v = bits7[r * GRID + c];
+            for dr in 0..2 {
+                for dc in 0..2 {
+                    out[(2 * r + dr) * GRID14 + (2 * c + dc)] = v;
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Runtime downsample, simulated: per 2x2 block of the 14x14 grid, popcount
+/// of the 4 bits >= threshold -> 1 output bit. Row-major 7x7 output (block i
+/// = row i/7, col i%7), matching gen/'s mn{i} indexing exactly.
+pub(crate) fn block_downsample(bits14: &[u8], threshold: usize) -> Vec<u8> {
+    assert_eq!(bits14.len(), NPIX14);
+    let mut out = vec![0u8; NPIX];
+    for br in 0..GRID {
+        for bc in 0..GRID {
+            let r0 = 2 * br;
+            let c0 = 2 * bc;
+            let cnt = bits14[r0 * GRID14 + c0] as usize
+                + bits14[r0 * GRID14 + c0 + 1] as usize
+                + bits14[(r0 + 1) * GRID14 + c0] as usize
+                + bits14[(r0 + 1) * GRID14 + c0 + 1] as usize;
+            out[br * GRID + bc] = if cnt >= threshold { 1 } else { 0 };
+        }
+    }
+    out
+}
+
+fn to_2d(bits: &[u8], grid: usize) -> Vec<Vec<u8>> {
+    bits.chunks(grid).map(|r| r.to_vec()).collect()
+}
+fn to_flat(bits2d: &[Vec<u8>]) -> Vec<u8> {
+    bits2d.iter().flatten().copied().collect()
+}
+/// One round of 4-neighbor dilation on a flat grid (reuses the tested 2D
+/// `dilate`).
+fn dilate_flat(bits: &[u8], grid: usize) -> Vec<u8> {
+    to_flat(&dilate(&to_2d(bits, grid)))
+}
+
+/// Pipeline stage: one round of 4-neighbor dilation at 14x14, applied to
+/// every split alike (core/val/test MNIST sim, drawn-style proxy, glyph
+/// evaluation) -- and mirrored in gen/'s dl{i} runtime gates. Matching the
+/// runtime and the training simulation exactly is the whole point (D-011).
+fn dilate14_all(bits14_list: &[Vec<u8>]) -> Vec<Vec<u8>> {
+    bits14_list
+        .iter()
+        .map(|row| {
+            let mut row = row.clone();
+            for _ in 0..DILATE_ITERS {
+                row = dilate_flat(&row, GRID14);
+            }
+            row
         })
         .collect()
 }
@@ -217,11 +386,15 @@ fn selftest_area_resample() {
     assert_eq!(area_resample(&single, 0, 1, 0, 1, 2), vec![1.0, 0.0, 0.0, 0.0]);
 }
 
+/// M13: the "canvas simulation" resamples to 14x14 (the runtime canvas
+/// resolution), not directly to 7x7 -- the 49-bit classifier input is a
+/// second, separate downsample step (`block_downsample`) applied after
+/// binarization, exactly mirroring the runtime CSS circuit.
 fn preprocess_image(img: &[u8]) -> Vec<f64> {
     let bin_img = binarize_28(img);
     let (t, b, l, r) = bbox_of(&bin_img);
     let (t, b, l, r) = square_bbox(t, b, l, r);
-    area_resample(&bin_img, t, b, l, r, GRID)
+    area_resample(&bin_img, t, b, l, r, GRID14)
 }
 
 fn load_raw_split(data_dir: &Path, images_name: &str, labels_name: &str) -> (Vec<Vec<u8>>, Vec<u8>) {
@@ -262,7 +435,14 @@ pub(crate) fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) 
 //      (how dark a pixel must be to count as ink, before dilation) is
 //      varied over a small fixed set instead of one constant, standing in
 //      for how firmly different people fill a cell.
-const DRAWN_DILATE_ITERS: usize = 1;
+// M13 (dilation-fix): one round of 4-neighbor dilation at 14x14 is now a
+// pipeline stage present everywhere -- train simulation (core/val/test),
+// the drawn-style proxy, thin-stroke glyph evaluation, AND the runtime CSS
+// circuit (gen/'s dl{i} signals). It used to be proxy-only, which is why
+// the first M13 grid search picked a T that only worked on artificially
+// thick proxy strokes and collapsed on genuinely thin ones (docs/DECISIONS.md
+// D-011).
+const DILATE_ITERS: usize = 1;
 const DRAWN_ZOOM: f64 = 0.82;
 const DRAWN_PIXEL_THRESHOLDS: [u8; 3] = [90, 128, 166];
 
@@ -304,16 +484,16 @@ fn zoom_crop(lo: i64, hi: i64, factor: f64, limit: i64) -> (i64, i64) {
     (new_lo, new_hi)
 }
 
+// Dilation happens in cell space (14x14), not pixel space (28x28) -- see
+// dilate14_all below, applied uniformly to every split's binarized bits,
+// this function stops at the continuous 14x14 coverage fracs.
 fn preprocess_image_drawn(img: &[u8], pixel_threshold: u8) -> Vec<f64> {
-    let mut bin_img = binarize_28_at(img, pixel_threshold);
-    for _ in 0..DRAWN_DILATE_ITERS {
-        bin_img = dilate(&bin_img);
-    }
+    let bin_img = binarize_28_at(img, pixel_threshold);
     let (t, b, l, r) = bbox_of(&bin_img);
     let (t, b, l, r) = square_bbox(t, b, l, r);
     let (t, b) = zoom_crop(t, b, DRAWN_ZOOM, 28);
     let (l, r) = zoom_crop(l, r, DRAWN_ZOOM, 28);
-    area_resample(&bin_img, t, b, l, r, GRID)
+    area_resample(&bin_img, t, b, l, r, GRID14)
 }
 
 /// Builds the drawn-style proxy set from raw 28x28 validation images.
@@ -491,9 +671,37 @@ fn find_exemplars(weights: &[Vec<i64>], bias: &[i64], xs: &[Vec<u8>], ys: &[u8])
     exemplars
 }
 
+/// Legacy 7x7 canonical glyphs, routed through the SAME pipeline as a real
+/// drawing: 2x nearest-neighbor upscale to 14x14, one round of dilation,
+/// then block_downsample. Dilation breaks the old exact-invariance argument
+/// (a block that was uniformly 0/4 can pick up 1-3 lit cells from a dilated
+/// neighbor), so this number can now differ from the pre-M13 7x7-direct
+/// metric -- reported as-is, not tuned toward (docs/DECISIONS.md D-011).
 fn glyph_accuracy(weights: &[Vec<i64>], bias: &[i64]) -> f64 {
     let gb = glyph_bits();
-    let correct = gb.iter().filter(|(&d, bits)| predict(weights, bias, bits) == d as usize).count();
+    let correct = gb
+        .iter()
+        .filter(|(&d, bits7)| {
+            let bits14 = dilate_flat(&nn_upscale_2x(bits7), GRID14);
+            let bits49 = block_downsample(&bits14, BLOCK_THRESHOLD);
+            predict(weights, bias, &bits49) == d as usize
+        })
+        .count();
+    correct as f64 / gb.len() as f64
+}
+
+/// Honest measure of the new 14x14 experience: genuinely thin (1-cell-wide)
+/// strokes, dilated and downsampled exactly like the runtime circuit does.
+fn thin_glyph_accuracy(weights: &[Vec<i64>], bias: &[i64]) -> f64 {
+    let gb = glyph14_thin_bits();
+    let correct = gb
+        .iter()
+        .filter(|(&d, bits14)| {
+            let dilated = dilate_flat(bits14, GRID14);
+            let bits49 = block_downsample(&dilated, BLOCK_THRESHOLD);
+            predict(weights, bias, &bits49) == d as usize
+        })
+        .count();
     correct as f64 / gb.len() as f64
 }
 
@@ -533,7 +741,7 @@ pub fn run(repo_root: &Path) {
     let drawn_val_ys = val_ys.clone();
     println!("drawn-style validation proxy: {} images (held-out slice, transformed)", drawn_val_fracs.len());
 
-    println!("joint grid search over cell threshold t, shuffle seed, and quantization scale (drawn-style validation only)...");
+    println!("grid search over cell threshold t, shuffle seed, and quantization scale (drawn-style validation only; T={} is fixed architecture, D-011)...", BLOCK_THRESHOLD);
     struct Best {
         drawn_val_acc: f64,
         mnist_val_acc: f64,
@@ -544,9 +752,12 @@ pub fn run(repo_root: &Path) {
     }
     let mut best: Option<Best> = None;
     for &t in THRESHOLD_GRID {
-        let core_bits = binarize_fracs(core_fracs, t);
-        let val_bits = binarize_fracs(val_fracs, t);
-        let drawn_val_bits = binarize_fracs(&drawn_val_fracs, t);
+        let core_bits14 = dilate14_all(&binarize_fracs(core_fracs, t));
+        let val_bits14 = dilate14_all(&binarize_fracs(val_fracs, t));
+        let drawn_val_bits14 = dilate14_all(&binarize_fracs(&drawn_val_fracs, t));
+        let core_bits: Vec<Vec<u8>> = core_bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect();
+        let val_bits: Vec<Vec<u8>> = val_bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect();
+        let drawn_val_bits: Vec<Vec<u8>> = drawn_val_bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect();
         let mut best_seed_acc = -1.0;
         for &seed in SEED_GRID {
             let (weights, bias) = train_perceptron(&core_bits, &core_ys, seed);
@@ -570,10 +781,14 @@ pub fn run(repo_root: &Path) {
         "chosen: t={t}, seed={seed} (drawn-style val acc {drawn_val_acc_selected:.4}, MNIST val acc {mnist_val_acc_selected:.4})"
     );
 
-    let test_bits = binarize_fracs(&test_fracs, t);
-    let core_bits = binarize_fracs(core_fracs, t);
-    let val_bits = binarize_fracs(val_fracs, t);
-    let drawn_val_bits = binarize_fracs(&drawn_val_fracs, t);
+    let test_bits14 = dilate14_all(&binarize_fracs(&test_fracs, t));
+    let core_bits14 = dilate14_all(&binarize_fracs(core_fracs, t));
+    let val_bits14 = dilate14_all(&binarize_fracs(val_fracs, t));
+    let drawn_val_bits14 = dilate14_all(&binarize_fracs(&drawn_val_fracs, t));
+    let test_bits: Vec<Vec<u8>> = test_bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect();
+    let core_bits: Vec<Vec<u8>> = core_bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect();
+    let val_bits: Vec<Vec<u8>> = val_bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect();
+    let drawn_val_bits: Vec<Vec<u8>> = drawn_val_bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect();
 
     let w_min = weights.iter().flatten().min().copied().unwrap();
     let w_max = weights.iter().flatten().max().copied().unwrap();
@@ -693,6 +908,27 @@ pub fn run(repo_root: &Path) {
         qbias.iter().max().unwrap()
     );
 
+    // M13, touched exactly once, after every hyperparameter (t, seed,
+    // scale, augmentation gate) is already locked in -- not part of
+    // selection, so this isn't tuning against the glyph sets.
+    let thin_acc = thin_glyph_accuracy(&qweights, &qbias);
+    println!(
+        "thin-stroke 14x14 glyph accuracy: {:.1}% ({}/10)",
+        thin_acc * 100.0,
+        (thin_acc * 10.0).round()
+    );
+
+    // Stop condition (M13 spec): don't ship a config that regresses fidelity
+    // below the floors below. Halts before writing weights_mnist.json --
+    // gen/ must not be touched if this fires.
+    if glyph_acc < 0.8 || thin_acc < 0.6 {
+        panic!(
+            "M13 stop condition: 2x-upscale glyph fidelity {:.1}/10 (floor 8/10) or thin-stroke fidelity {:.1}/10 (floor 6/10) — halting before writing weights_mnist.json. t={t} seed={seed}, drawn-style val {drawn_val_acc_final:.4}, MNIST val {mnist_val_acc_final:.4}, MNIST test {test_acc:.4}",
+            glyph_acc * 10.0,
+            thin_acc * 10.0
+        );
+    }
+
     let exemplars = find_exemplars(&qweights, &qbias, &test_bits, &test_ys);
     println!("exemplar lit-cell counts: {:?}", exemplars.iter().map(|(k, v)| (k, v.iter().sum::<u8>())).collect::<BTreeMap<_, _>>());
 
@@ -704,7 +940,11 @@ pub fn run(repo_root: &Path) {
         "val_accuracy": mnist_val_acc_final,
         "drawn_val_accuracy": drawn_val_acc_final,
         "glyph_accuracy": glyph_acc,
+        "thin_glyph_accuracy": thin_acc,
         "threshold": t,
+        "block_threshold": BLOCK_THRESHOLD,
+        "canvas": GRID14,
+        "dilate_iters": DILATE_ITERS,
         "seed": seed,
         "exemplars": exemplars_json,
     });
@@ -715,6 +955,44 @@ pub fn run(repo_root: &Path) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn block_downsample_matches_popcount_threshold() {
+        // one 2x2 block (top-left), rest zero -- vary lit-count 0..4 against T.
+        let cells = [0, 1, GRID14, GRID14 + 1];
+        for lit in 0..=4 {
+            let mut bits14 = vec![0u8; NPIX14];
+            for (i, &idx) in cells.iter().enumerate() {
+                bits14[idx] = if i < lit { 1 } else { 0 };
+            }
+            for tb in 1..=3usize {
+                let out = block_downsample(&bits14, tb);
+                assert_eq!(out[0], if lit >= tb { 1 } else { 0 }, "lit={lit} T={tb}");
+            }
+        }
+    }
+
+    #[test]
+    fn nn_upscale_then_block_downsample_is_identity_for_any_threshold() {
+        for (&_d, bits7) in glyph_bits().iter() {
+            let bits14 = nn_upscale_2x(bits7);
+            for tb in 1..=3usize {
+                let back = block_downsample(&bits14, tb);
+                assert_eq!(&back, bits7, "T={tb}");
+            }
+        }
+    }
+
+    #[test]
+    fn dilate_flat_matches_2d_dilate() {
+        let mut bits = vec![0u8; 25]; // 5x5
+        bits[12] = 1; // center
+        let flat = dilate_flat(&bits, 5);
+        let mut img = vec![vec![0u8; 5]; 5];
+        img[2][2] = 1;
+        let expect: Vec<u8> = dilate(&img).into_iter().flatten().collect();
+        assert_eq!(flat, expect);
+    }
 
     #[test]
     fn dilate_grows_single_pixel_to_a_plus() {

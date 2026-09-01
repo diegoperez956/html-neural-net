@@ -28,6 +28,77 @@ def dec(bits):
     return sum(b << i for i, b in enumerate(bits))
 
 
+# ---- M13 canvas pipeline reference (mirrors train/src/mnist.rs + the gates) ----
+
+def dilate14(bits):
+    """one round of 4-neighbor OR dilation on a flat 14x14 bit list"""
+    def g(r, c):
+        return bits[r * 14 + c] if 0 <= r < 14 and 0 <= c < 14 else 0
+    return [1 if any(g(r + dr, c + dc)
+                     for dr, dc in ((0, 0), (-1, 0), (1, 0), (0, -1), (0, 1))) else 0
+            for r in range(14) for c in range(14)]
+
+
+def block_downsample(dilated, threshold):
+    """per 2x2 block, popcount >= threshold -> 1 (row-major 7x7, mn{i} order)"""
+    out = []
+    for br in range(7):
+        for bc in range(7):
+            cnt = sum(dilated[(2 * br + dr) * 14 + (2 * bc + dc)]
+                      for dr in (0, 1) for dc in (0, 1))
+            out.append(1 if cnt >= threshold else 0)
+    return out
+
+
+def nn_upscale_2x(bits7):
+    """7x7 -> 14x14 nearest-neighbor upscale (each cell fills its 2x2 block)"""
+    out = [0] * 196
+    for r in range(7):
+        for c in range(7):
+            v = bits7[r * 7 + c]
+            for dr in (0, 1):
+                for dc in (0, 1):
+                    out[(2 * r + dr) * 14 + (2 * c + dc)] = v
+    return out
+
+
+# hand-picked thin-stroke 14x14 canvases (seven-segment construction, 1 cell
+# wide) -- test inputs only; expected outputs always come from the reference
+THIN_CANVASES = {
+    "one": [
+        "..............", "..............", "..........#...", "..........#...",
+        "..........#...", "..........#...", "..........#...", "..............",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "..............",
+    ],
+    "three": [
+        "..............", "...########...", "..........#...", "..........#...",
+        "..........#...", "..........#...", "..........#...", "...########...",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "...########...",
+    ],
+    "seven": [
+        "..............", "...########...", "..........#...", "..........#...",
+        "..........#...", "..........#...", "..........#...", "..............",
+        "..........#...", "..........#...", "..........#...", "..........#...",
+        "..........#...", "..............",
+    ],
+}
+
+
+def rows_to_bits(rows):
+    return [1 if ch == "#" else 0 for row in rows for ch in row]
+
+
+def norm_rgb(serialized):
+    """engines serialize color-mix results differently (firefox: rgb(...),
+    chromium: color(srgb ...)); normalize to an 8-bit rgb tuple"""
+    import re as _re
+    nums = [float(v) for v in _re.findall(r"[\d.]+", serialized)[:3]]
+    scale = 255 if serialized.startswith("color(") else 1
+    return tuple(round(v * scale) for v in nums)
+
+
 class Base(unittest.TestCase):
     engine = None  # abstract; only per-engine subclasses run
 
@@ -308,7 +379,9 @@ class ClassifierTests(Base):
 
 
 class MnistClassifierTests(Base):
-    """M11: 7x7 drawn-digit linear classifier, argmax'd and 7-seg decoded."""
+    """M13: 14x14 paint canvas -> 4-neighbor OR dilation (dl gates) -> 2x2
+    block downsample (mn bits) -> 7x7 linear classifier, argmax'd and
+    7-seg decoded. Everything derived from scripts/weights_mnist.json."""
 
     SEG_MAP = {
         "a": {0, 2, 3, 5, 6, 7, 8, 9}, "b": {0, 1, 2, 3, 4, 7, 8, 9},
@@ -325,6 +398,14 @@ class MnistClassifierTests(Base):
         cls.weights = w["weights"]
         cls.bias = w["bias"]
         cls.exemplars = w["exemplars"]
+        cls.block_threshold = w["block_threshold"]
+        cls.canvas = w["canvas"]
+
+    def ref49(self, bits14):
+        """canvas -> 49 classifier bits through the gate pipeline reference
+        (dilation + block downsample, threshold derived from the JSON)."""
+        assert self.canvas == 14
+        return block_downsample(dilate14(bits14), self.block_threshold)
 
     def ref(self, bits49):
         """Independent reference model: score = bias + w.x per class,
@@ -337,9 +418,12 @@ class MnistClassifierTests(Base):
                 best = k
         return scores, best
 
-    def check(self, bits49, label=""):
-        scores, best = self.ref(bits49)
-        self.set_bits(**{f"mn{i}": bits49[i] for i in range(49)})
+    def set_canvas(self, bits14):
+        self.set_bits(**{f"mc{i}": bits14[i] for i in range(196)})
+
+    def check(self, bits14, label=""):
+        scores, best = self.ref(self.ref49(bits14))
+        self.set_canvas(bits14)
         idx = self.read_dec([f"mnist_idx_b{i}" for i in range(4)])
         self.assertEqual(idx, best, f"{label} predicted index")
         got_scores = [s2c(self.read_dec([f"mnist_score{k}_b{i}" for i in range(7)]), 7)
@@ -355,15 +439,45 @@ class MnistClassifierTests(Base):
             expect = 1 if best in digits else 0
             self.assertEqual(self.read(f"mnist_seg_{seg}")[0], expect, f"{label} segment {seg}")
 
-    def test_training_exemplars(self):
-        for k in range(10):
-            self.check(self.exemplars[str(k)], f"exemplar {k}")
+    def test_dilation_and_downsample_gates(self):
+        """For hand-picked 14x14 patterns, the 196 dl{} dilation signals and
+        the 49 mn{} downsample signals must match the Python-side reference
+        (OR-dilation + block popcount >= T, T read from the weights JSON)."""
+        patterns = {
+            "empty": [0] * 196,
+            "single-center": [1 if i == 105 else 0 for i in range(196)],
+            "corner": [1 if i == 0 else 0 for i in range(196)],
+            "full-row-5": [1 if 5 * 14 <= i < 6 * 14 else 0 for i in range(196)],
+            "diagonal": [1 if i % 15 == 0 else 0 for i in range(196)],
+            "border-ring": [1 if i // 14 in (0, 13) or i % 14 in (0, 13) else 0
+                            for i in range(196)],
+        }
+        for name, bits14 in patterns.items():
+            dilated = dilate14(bits14)
+            down = block_downsample(dilated, self.block_threshold)
+            self.set_canvas(bits14)
+            got_dl = self.read(*[f"dl{i}" for i in range(196)])
+            self.assertEqual(got_dl, dilated, f"{name} dilation")
+            got_mn = self.read(*[f"mn{i}" for i in range(49)])
+            self.assertEqual(got_mn, down, f"{name} downsample")
 
-    def test_random_grids(self):
+    def test_thin_stroke_canvases(self):
+        for name, rows in THIN_CANVASES.items():
+            self.check(rows_to_bits(rows), f"thin {name}")
+
+    def test_upscaled_exemplar_canvases(self):
+        # each stored 49-bit exemplar, routed through a 2x nn upscale onto the
+        # canvas -- the reference recomputes what dilation + downsample make
+        # of it (dilation can leak ink across block boundaries), so this
+        # checks the whole chain rather than the stored bits verbatim.
+        for k in range(10):
+            self.check(nn_upscale_2x(self.exemplars[str(k)]), f"exemplar {k} upscaled")
+
+    def test_random_canvases(self):
         import random
         rng = random.Random(0)
-        for t in range(20):
-            bits = [1 if rng.random() < 0.35 else 0 for _ in range(49)]
+        for t in range(10):
+            bits = [1 if rng.random() < 0.3 else 0 for _ in range(196)]
             self.check(bits, f"random {t}")
 
 
@@ -426,42 +540,102 @@ class DisplayTests(Base):
         import json
         with open(os.path.join(ROOT, "scripts", "weights_mnist.json")) as f:
             w = json.load(f)
-        bits49 = w["exemplars"]["7"]
-        self.set_bits(**{f"mn{i}": bits49[i] for i in range(49)})
-        self.assert_view("d_mnist_digit", 7)
-        # Per-class scores derived from the JSON (not hardcoded) -- this test
-        # is meant to stay valid across retrains, same as MnistClassifierTests.
+        bits14 = rows_to_bits(THIN_CANVASES["seven"])
+        bits49 = block_downsample(dilate14(bits14), w["block_threshold"])
+        self.set_bits(**{f"mc{i}": bits14[i] for i in range(196)})
+        # Per-class scores derived from the JSON + the pipeline reference
+        # (not hardcoded) -- this test is meant to stay valid across
+        # retrains, same as MnistClassifierTests.
         sc = [w["bias"][k] + sum(w["weights"][k][i] * bits49[i] for i in range(49))
               for k in range(10)]
+        best = max(range(10), key=lambda k: (sc[k], -k))
+        self.assert_view("d_mnist_digit", best)
         for k in range(10):
             self.assert_view(f"d_mnist_score{k}", sc[k])
         srt = sorted(sc)
         self.assert_view("d_mnist_margin", srt[-1] - srt[-2])
 
     def test_digit_strip_highlight(self):
-        rows = ["..###..", ".#...#.", ".....#.", "...##..",
-                ".....#.", ".#...#.", "..###.."]           # canonical "3"
-        bits49 = [1 if ch == "#" else 0 for row in rows for ch in row]
-        self.set_bits(**{f"mn{i}": bits49[i] for i in range(49)})
-        # engines serialize color-mix results differently (firefox: rgb(...),
-        # chromium: color(srgb ...)); normalize to an 8-bit rgb tuple here
-        import re as _re
+        import json
+        with open(os.path.join(ROOT, "scripts", "weights_mnist.json")) as f:
+            w = json.load(f)
+        bits14 = rows_to_bits(THIN_CANVASES["three"])
+        bits49 = block_downsample(dilate14(bits14), w["block_threshold"])
+        self.set_bits(**{f"mc{i}": bits14[i] for i in range(196)})
+        sc = [w["bias"][k] + sum(w["weights"][k][i] * bits49[i] for i in range(49))
+              for k in range(10)]
+        best = 0
+        for k in range(1, 10):
+            if sc[k] > sc[best]:
+                best = k
+        other = (best + 1) % 10
 
-        def rgb(cls):
-            s = self.page.evaluate(
-                "(cls) => getComputedStyle(document.querySelector(cls)).color", cls)
-            nums = [float(v) for v in _re.findall(r"[\d.]+", s)[:3]]
-            scale = 255 if s.startswith("color(") else 1
-            return tuple(round(v * scale) for v in nums)
+        def color(cls):
+            return norm_rgb(self.page.evaluate(
+                "(cls) => getComputedStyle(document.querySelector(cls)).color", cls))
 
-        self.assertEqual(rgb(".l_mn_digit_3"), (250, 189, 47), ".l_mn_digit_3 lit")
-        self.assertEqual(rgb(".l_mn_digit_5"), (124, 111, 100), ".l_mn_digit_5 unlit")
+        self.assertEqual(color(f".l_mn_digit_{best}"), (250, 189, 47),
+                         f".l_mn_digit_{best} lit")
+        self.assertEqual(color(f".l_mn_digit_{other}"), (124, 111, 100),
+                         f".l_mn_digit_{other} unlit")
+
+    def test_network_sees_preview(self):
+        """rendered-output check of the 'network sees' 7x7 preview: each px
+        cell reads the POST-downsample mn{i} gate signal (pure CSS color-mix
+        readout), lit orange when the bit is 1, canvas-dark when 0."""
+        import json
+        with open(os.path.join(ROOT, "scripts", "weights_mnist.json")) as f:
+            w = json.load(f)
+        bits14 = rows_to_bits(THIN_CANVASES["three"])
+        bits49 = block_downsample(dilate14(bits14), w["block_threshold"])
+        self.set_bits(**{f"mc{i}": bits14[i] for i in range(196)})
+        for i in range(49):
+            got = norm_rgb(self.page.evaluate(
+                "(cls) => getComputedStyle(document.querySelector(cls)).backgroundColor",
+                f".px_{i}"))
+            expect = (254, 128, 25) if bits49[i] else (29, 32, 33)
+            self.assertEqual(got, expect, f"preview cell {i}")
+
+    def test_canvas_idle_and_blob(self):
+        """paint-feel canvas (computed style, not screenshots): idle cells
+        draw no visible border/grid, and a checked cell renders its oversized
+        rounded ink blob, kept out of pointer hit-testing."""
+        def cell_style(sel, pseudo=None):
+            return self.page.evaluate(
+                "(a) => { const el = document.querySelector(a.sel);"
+                "const s = getComputedStyle(el, a.pseudo || null);"
+                "return {border: s.borderTopStyle, bw: s.borderTopWidth,"
+                "shadow: s.boxShadow, bg: s.backgroundColor,"
+                "content: s.content, r: s.borderRadius, w: s.width,"
+                "pe: s.pointerEvents}; }",
+                {"sel": sel, "pseudo": pseudo})
+
+        for i in (0, 97, 195):
+            s = cell_style(f".grid14 label:nth-child({i + 1})")
+            self.assertIn(s["border"], ("none", ""), f"cell {i} border")
+            self.assertEqual(s["bw"], "0px", f"cell {i} border width")
+            self.assertEqual(s["shadow"], "none", f"cell {i} box-shadow")
+            self.assertEqual(s["bg"], "rgba(0, 0, 0, 0)", f"cell {i} background")
+
+        # unchecked cell: no blob pseudo-element at all
+        idle_after = cell_style(".grid14 label:nth-child(1)", "::after")
+        self.assertEqual(idle_after["content"], "none", "unchecked cell must have no blob")
+
+        # checked cell: oversized rounded orange blob, pointer-transparent
+        self.set_bits(mc97=1)
+        blob = cell_style(".grid14 label:nth-child(98)", "::after")
+        self.assertEqual(blob["content"], '""', "checked cell renders a blob")
+        self.assertEqual(norm_rgb(blob["bg"]), (254, 128, 25), "blob ink color")
+        self.assertEqual(blob["r"], "50%", "blob is round")
+        self.assertGreaterEqual(float(blob["w"].rstrip("px")), 38.0,
+                                "blob must be oversized vs the 24px cell pitch")
+        self.assertEqual(blob["pe"], "none", "blob must not intercept pointer events")
 
 
 class DragShimTests(Base):
     """Rendered behavior of the input shim's <script> tag: pointer drags
-    must paint checkboxes the same way clicks do. The network + display
-    stay pure CSS -- this only exercises the shim's event wiring."""
+    must paint canvas checkboxes the same way clicks do. The network +
+    display stay pure CSS -- this only exercises the shim's event wiring."""
 
     def fire(self, elem_id, event_type, pointer_id=1):
         self.page.evaluate(
@@ -495,24 +669,24 @@ class DragShimTests(Base):
         self.click_event(down_id)
 
     def test_drag_paints_three_cells(self):
-        self.drag("mn0", "mn1", "mn2")
-        self.assertEqual(self.checked("mn0", "mn1", "mn2"), [True, True, True])
-        self.assertEqual(self.read("mn0", "mn1", "mn2"), [1, 1, 1])
+        self.drag("mc0", "mc1", "mc2")
+        self.assertEqual(self.checked("mc0", "mc1", "mc2"), [True, True, True])
+        self.assertEqual(self.read("mc0", "mc1", "mc2"), [1, 1, 1])
 
     def test_second_pointerdown_erases(self):
-        self.drag("mn0", "mn1", "mn2")
+        self.drag("mc0", "mc1", "mc2")
         # cell is now checked; a fresh pointerdown on it must erase, not paint
-        self.fire("mn0", "pointerdown")
-        self.assertEqual(self.checked("mn0"), [False])
-        self.assertEqual(self.checked("mn1", "mn2"), [True, True])
+        self.fire("mc0", "pointerdown")
+        self.assertEqual(self.checked("mc0"), [False])
+        self.assertEqual(self.checked("mc1", "mc2"), [True, True])
 
     def test_plain_click_still_toggles_untouched_cell(self):
         # no-shim / keyboard path parity: a bare .click() (no pointer events
         # at all) still toggles a cell the drag never touched.
-        self.assertEqual(self.checked("mn20"), [False])
-        self.page.evaluate("() => document.getElementById('mn20').click()")
-        self.assertEqual(self.checked("mn20"), [True])
-        self.assertEqual(self.read("mn20"), [1])
+        self.assertEqual(self.checked("mc195"), [False])
+        self.page.evaluate("() => document.getElementById('mc195').click()")
+        self.assertEqual(self.checked("mc195"), [True])
+        self.assertEqual(self.read("mc195"), [1])
 
 
 class XorTests(Base):
