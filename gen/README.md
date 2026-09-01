@@ -1,23 +1,25 @@
-# gen — Rust port of scripts/circuit.py + scripts/generate.py
+# gen — the htmlnet build-time generator (Rust)
 
 Build-time only. This crate never touches the shipped artifact at runtime —
-it just writes `dist/index.html`, the same pure HTML+CSS file
-`python3 scripts/generate.py` writes, byte-for-byte.
+it just writes `dist/index.html`, the sole build path for the demo (the
+original Python generator, `scripts/generate.py`, was deleted after this
+port was validated byte-identical to it — see D-008 in `docs/DECISIONS.md`).
 
 ```
 cargo run --release --manifest-path gen/Cargo.toml -- dist/index.html
-# or: make build-rust
+# or: make build
 ```
 
 Weights are read from `../scripts/weights.json` and
 `../scripts/weights_mnist.json`, resolved relative to the crate
-(`CARGO_MANIFEST_DIR`), not the process's cwd — mirroring Python's
-`__file__`-relative loading in `generate.py`. `python3 scripts/train.py` /
-`train_mnist.py` still produce those files; this crate only *reads* them
-(trainers were explicitly out of scope — see AGENT_TASK.md).
+(`CARGO_MANIFEST_DIR`), not the process's cwd. Those files are produced by
+`train/` (`make train`); this crate only *reads* them (trainers were
+explicitly out of scope for this port — see AGENT_TASK.md).
 
-Parity: `make parity` (or `scripts/parity.sh`) builds both generators and
-diffs sha256 of their output on the real weights files.
+Parity: byte-parity with the now-deleted Python generator was this port's
+acceptance contract, verified via `make parity` before Python was removed
+(D-007/D-008 in `docs/DECISIONS.md`). There is nothing left to compare
+against — this crate's output is authoritative.
 
 ## Layout
 
@@ -62,8 +64,8 @@ closed:
   `html.chars().count()` instead, to match Python's number exactly. This is
   only a diagnostic line, never part of the artifact.
 - Everything else — every signal name, gate expression, CSS declaration, and
-  the full HTML body — matches sha256-identical (`make parity`) on the real
-  weights JSON.
+  the full HTML body — matched sha256-identical to the Python generator's
+  output (verified via `make parity`, now retired) on the real weights JSON.
 
 ## Determinism
 

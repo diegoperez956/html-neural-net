@@ -1,9 +1,11 @@
 # train
 
-Rust port of `scripts/train.py` and `scripts/train_mnist.py`. Build-time
+Originally a Rust port of `scripts/train.py` and `scripts/train_mnist.py`;
+those Python trainers were deleted once this port was validated (D-008 in
+`docs/DECISIONS.md`), and `train/` is now the only trainer. Build-time
 only — writes `scripts/weights.json` and `scripts/weights_mnist.json`, same
-schema as the Python originals. `scripts/generate.py` and `tests/` don't
-know or care which trainer produced the JSON.
+schema as the Python originals. `gen/` and `tests/` don't know or care
+which trainer produced the JSON.
 
 ## Usage
 

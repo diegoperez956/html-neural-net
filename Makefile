@@ -1,25 +1,16 @@
-.PHONY: build train test clean build-rust parity
-
-build: train
-	python3 scripts/generate.py dist/index.html
+.PHONY: build train test clean
 
 train:
-	python3 scripts/train.py
-	python3 scripts/train_mnist.py
+	cargo build --release --manifest-path train/Cargo.toml
+	./train/target/release/train glyph
+	./train/target/release/train mnist
 
-test: build
-	python3 -m unittest discover -s tests -v
-
-# Build dist/index.html with the Rust port (gen/) instead of Python.
-# Byte-identical to `make build` — see scripts/parity.sh / `make parity`.
-build-rust: train
+build: train
 	cargo build --release --manifest-path gen/Cargo.toml
 	./gen/target/release/htmlnet-gen dist/index.html
 
-# Cross-language parity check: python3 scripts/generate.py vs gen/ must
-# produce byte-identical output.
-parity:
-	./scripts/parity.sh
+test: build
+	python3 -m unittest discover -s tests -v
 
 clean:
 	rm -f dist/index.html

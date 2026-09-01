@@ -65,7 +65,9 @@ says this explicitly.
 
 ## Structure of the generated artifact
 
-`scripts/circuit.py` is the circuit compiler (build time, plain Python):
+`gen/src/circuit.rs` is the circuit compiler (build time, Rust; originally
+`scripts/circuit.py`, deleted after the port — see D-008 in
+`docs/DECISIONS.md`):
 
 * `Circuit` — ordered named-signal declarations; gates, half/full adders,
   ripple adders, structural unsigned multiplication (AND partial products
@@ -75,9 +77,10 @@ says this explicitly.
   negated (NOT gates + increment) — real gate machinery, no multiplier
   shortcut. Products and bias are summed by ripple adders at 4-bit signed
   width. Threshold = sign bit.
-* `scripts/generate.py` — wires the demo: gates, half/full adder, 2-bit
-  adder, 2×2 multiplier, 4-bit adder, dot product, matrix-vector, neuron,
-  2-2-1 XOR MLP, and Mode B (native CSS arithmetic comparison).
+* `gen/src/main.rs` (originally `scripts/generate.py`) — wires the demo:
+  gates, half/full adder, 2-bit adder, 2×2 multiplier, 4-bit adder, dot
+  product, matrix-vector, neuron, 2-2-1 XOR MLP, and Mode B (native CSS
+  arithmetic comparison).
 
 The generated `dist/index.html` contains, in order: base CSS, `@property`
 registrations, primary-input `:has()` mappings, then the netlist as flat
@@ -103,10 +106,10 @@ threshold neurons can. That is the demo's mathematical point.
 
 ## Trained classifier (M10)
 
-The only learned part of the demo. `scripts/train.py` runs a plain
-perceptron (deterministic, stdlib-only) on 9 exemplars of two 3×3 glyph
+The only learned part of the demo. `train/src/glyph.rs` runs a plain
+perceptron (deterministic) on 9 exemplars of two 3×3 glyph
 classes — top bar vs left bar — and writes `scripts/weights.json`.
-`scripts/generate.py` compiles those weights into the gate netlist:
+`gen/src/main.rs` compiles those weights into the gate netlist:
 products of weight × pixel are gate-masked magnitudes (wiring for ±1/±2),
 summed with the trained bias at 5-bit signed width; threshold = sign bit.
 Training happens at build time; inference happens in CSS.
@@ -115,9 +118,9 @@ Training happens at build time; inference happens in CSS.
 
 A 10-class linear classifier over a 7×7 checkbox grid (49 inputs `mn0..mn48`,
 zero-JS `<input type="reset">` to clear). Trained at build time by
-`scripts/train_mnist.py` on real MNIST (see below); compiled by
-`scripts/circuit.py` (`weighted_score`, `popcount`, `argmax`,
-`digit_minterms`, `sevenseg`) and wired in `scripts/generate.py` §13. Four
+`train/src/mnist.rs` on real MNIST (see below); compiled by
+`gen/src/circuit.rs` (`weighted_score`, `popcount`, `argmax`,
+`digit_minterms`, `sevenseg`) and wired in `gen/src/main.rs` §13. Four
 gate-composed stages, none of them a per-term neuron sum:
 
 * **Per-class weighted score** (`Net.weighted_score`, one per digit, 10
@@ -155,17 +158,17 @@ gate outputs, they do not feed back into them.
 
 ### Training (build time, outside the runtime artifact)
 
-`scripts/train_mnist.py`: pure stdlib, deterministic, downloads and caches
-real MNIST in `data/mnist/` (gitignored). Preprocessing: binarize each
-28×28 image at >128, crop to the tight bounding box of lit pixels, pad to
-a centered square (aspect preserved), area-resample to 7×7 coverage
-fractions, threshold at `t=0.3` (grid-searched) into bits. An 8-epoch
-multiclass perceptron trains on the full 60k training set, then weights
-are quantized to `[-3,3]` (scale factor grid-searched) with bias in
-`[-6,8]`. Result: 82.46% accuracy on the full 10k MNIST test set, 8/10 on
-the canonical drawn-glyph fidelity set (misses: 6→5, 9→3). Fast path:
-`scripts/train_mnist.py` skips retraining and reuses
-`scripts/weights_mnist.json` if it already exists (`--force` to retrain).
+`train/src/mnist.rs`: deterministic, downloads and caches real MNIST in
+`data/mnist/` (gitignored). Preprocessing: binarize each 28×28 image at
+>128, crop to the tight bounding box of lit pixels, pad to a centered
+square (aspect preserved), area-resample to 7×7 coverage fractions,
+threshold at `t=0.3` (grid-searched) into bits. An 8-epoch multiclass
+perceptron trains on the full 60k training set, then weights are quantized
+to `[-3,3]` (scale factor grid-searched) with bias in `[-6,8]`. Result:
+82.46% accuracy on the full 10k MNIST test set, 8/10 on the canonical
+drawn-glyph fidelity set (misses: 6→5, 9→3). Unlike the retired Python
+trainer, `train/src/mnist.rs` has no fast path — `make train` always
+retrains and overwrites `scripts/weights_mnist.json`.
 The runtime page does no input normalization, so the accuracy figure
 assumes drawings are large and roughly centered on the grid — the glyph
 set is a demo-fidelity proxy, not a claim about arbitrary user drawings.

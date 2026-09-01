@@ -71,7 +71,9 @@ lands 88-93%; if pruning hurts, H=32 headroom exists (3.2 MB page).
 
 ## Generator changes
 
-- `generate.py` (or its Rust successor): build H `weighted_score` neurons,
+- `gen/src/main.rs` (the Rust generator — the Python `generate.py` this
+  once hedged on was retired, see D-008 in `docs/DECISIONS.md`): build H
+  `weighted_score` neurons,
   threshold each, feed `NOT`-ed bits into 10 output `weighted_score`
   neurons, then the EXISTING argmax/minterm/seven-seg/margin path unchanged.
 - Tests: extend `MnistClassifierTests.ref` to the MLP forward pass (float

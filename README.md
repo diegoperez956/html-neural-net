@@ -84,7 +84,7 @@ dependency graph that the HTML/CSS artifact describes.**
   `<script>` is an input shim that turns pointer drags into checkbox
   toggles and computes nothing.
 
-Build-time Python (allowed, never shipped) elaborates the circuit,
+Build-time Rust (`gen/`, `train/`; never shipped) elaborates the circuit,
 generates repetitive CSS, and computes references. The runtime artifact is
 flat and deterministic.
 
@@ -109,8 +109,8 @@ make test    # builds, then 32 Playwright tests × Chromium + Firefox
   an independent reference computed from `scripts/weights_mnist.json`, plus
   registered-view spot checks.
 
-M11's classifier is trained on real MNIST (`scripts/train_mnist.py`, pure
-stdlib, deterministic): pixels binarize, crop to the digit's bounding box,
+M11's classifier is trained on real MNIST (`train/src/mnist.rs`,
+deterministic): pixels binarize, crop to the digit's bounding box,
 pad to a centered square, and area-resample to the same 7×7 grid the demo
 draws on. An 8-epoch perceptron quantized to weights in [-3,3] scores
 82.46% on the full 10k MNIST test set and gets 8/10 canonical drawn glyphs
@@ -144,8 +144,8 @@ consumed downstream inside CSS. We don't claim more than that.
 ## Repository
 
 ```text
-scripts/circuit.py      circuit compiler (build time)
-scripts/generate.py     demo generator -> dist/index.html
+gen/                    Rust circuit compiler + demo generator -> dist/index.html
+train/                  Rust trainer -> scripts/weights*.json
 scripts/benchmark.py    scaling benchmarks
 tests/test_runtime.py   exhaustive two-engine Playwright suite
 experiments/            prototypes, per-worktree findings

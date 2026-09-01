@@ -8,7 +8,6 @@ Run: make build && python3 -m unittest discover -s tests -v
 """
 import os
 import subprocess
-import sys
 import unittest
 
 from playwright.sync_api import sync_playwright
@@ -121,11 +120,17 @@ class StaticChecks(Base):
 
     def test_deterministic_rebuild(self):
         import hashlib
-        out = subprocess.run([sys.executable, "scripts/generate.py", "/tmp/htmlnet-rebuild.html"],
-                             cwd=ROOT, capture_output=True, text=True)
-        self.assertEqual(out.returncode, 0, out.stderr)
-        h1 = hashlib.sha256(open(DIST, "rb").read()).hexdigest()
-        h2 = hashlib.sha256(open("/tmp/htmlnet-rebuild.html", "rb").read()).hexdigest()
+        import tempfile
+        gen_bin = os.path.join(ROOT, "gen", "target", "release", "htmlnet-gen")
+        if not os.path.isfile(gen_bin):
+            self.fail(f"{gen_bin} not found — run `make build` first")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            rebuild_path = os.path.join(tmpdir, "htmlnet-rebuild.html")
+            out = subprocess.run([gen_bin, rebuild_path],
+                                 cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(out.returncode, 0, out.stderr)
+            h1 = hashlib.sha256(open(DIST, "rb").read()).hexdigest()
+            h2 = hashlib.sha256(open(rebuild_path, "rb").read()).hexdigest()
         self.assertEqual(h1, h2, "rebuild is not byte-identical")
 
 
@@ -280,7 +285,7 @@ class ClassifierTests(Base):
 
     def test_training_exemplars(self):
         import json
-        # same exemplars as scripts/train.py (kept in sync by test, not runtime)
+        # same exemplars as train/src/glyph.rs (kept in sync by test, not runtime)
         exemplars = [
             ([1, 1, 1, 0, 0, 0, 0, 0, 0], 1),
             ([1, 1, 1, 0, 1, 0, 0, 0, 0], 1),
