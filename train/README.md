@@ -19,9 +19,7 @@ cargo run --release --manifest-path train/Cargo.toml -- mnist
 `glyph` writes `scripts/weights.json`. `mnist` writes
 `scripts/weights_mnist.json`. The experimental `mlp` verb and module were
 removed on 2026-10-03: after the 14×14 pipeline change they silently used only
-49 of 196 coverage cells. The negative result remains in
-[the historical design](../docs/DESIGN_MLP.md); it cannot be regenerated with
-the current trainer. Paths resolve relative to the crate location, not the
+49 of 196 coverage cells. Paths resolve relative to the crate location, not the
 shell's working directory.
 
 ## The shipped models
@@ -31,7 +29,6 @@ Its schema is `{"bias": int, "weights": [int; 9]}`.
 It has no held-out accuracy estimate.
 
 The digit model is a ten-class linear perceptron with 49 binary features.
-It is not the hidden-layer model described in `docs/DESIGN_MLP.md`.
 Its JSON contains:
 
 - `weights`, ten rows of 49 integers in [-3, 3].
@@ -109,13 +106,13 @@ This publication correction did not retrain.
 
 ## Selection caveats
 
-D-007 selected a seed after scanning about twenty candidates against test
+An early version selected a seed after scanning about twenty candidates against test
 accuracy. Its 82.46% result is a retired, test-selected figure.
-D-009 moved selection to validation and recorded 81.89% test accuracy.
-D-010 selected against drawn-style validation and recorded 78.54% on the old
+A later version moved selection to validation and recorded 81.89% test accuracy.
+The next selected against drawn-style validation and recorded 78.54% on the old
 7×7 drawing pipeline. That is not the current model.
 
-D-011 added the 14×14 canvas and runtime dilation. Development compared
+The current model added the 14×14 canvas and runtime dilation. Development compared
 multiple block thresholds and inspected their glyph results. Only OR's
 single proxy-winning configuration met both glyph acceptance floors.
 Checkpoint 3 examined all 260 configurations per T: both-floor pass counts
@@ -136,7 +133,6 @@ weights. A test-triggered [-7, 7] diagnostic is reported but never written.
 These checks are another reason not to describe the entire training procedure
 as completely independent of acceptance data.
 
-See [D-007 through D-011](../docs/DECISIONS.md) for the historical experiments.
 A new evaluation claim needs fresh held-out drawings and a selection procedure
 fixed before their results are inspected.
 
@@ -145,7 +141,7 @@ fixed before their results are inspected.
 The trainer uses seeded SplitMix64 and Fisher-Yates shuffling.
 It does not reproduce CPython's Mersenne Twister stream.
 `python_round` implements round-half-to-even for quantization.
-D-011 records byte-identical JSON across repeated training runs.
+Repeated training runs produce byte-identical JSON.
 
 ```bash
 make test-unit
@@ -155,7 +151,7 @@ make test-runtime
 The trainer has 13 Rust tests covering glyph separation, rounding, image
 transforms, and deterministic shuffling. The ignored comparison test that
 required a dump from the deleted Python trainer was removed on 2026-10-03;
-D-007 retains the historical parity result, not a runnable parity check.
+there is no runnable parity check.
 
 The runtime suite has 87 tests: 41 per browser engine and 5 static checks.
 It checks inference against the current JSON, including script-disabled and

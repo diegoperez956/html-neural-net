@@ -1,5 +1,5 @@
 //! Build-time circuit compiler. Named CSS signals compose arithmetic and
-//! fixed-weight inference. The original Python compiler was retired in D-008.
+//! fixed-weight inference. The original Python compiler was retired in the Rust migration.
 
 /// `ref(name)` in python: var(--name)
 pub fn r#ref(name: &str) -> String {

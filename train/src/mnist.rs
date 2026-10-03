@@ -2,7 +2,7 @@
 //! canvas (M13): images are resampled to 14×14 (the canvas resolution),
 //! dilated, and OR-downsampled to the 49 bits the classifier trains on --
 //! gate-for-gate the pipeline the browser runs at runtime. Originally a
-//! port of scripts/train_mnist.py (deleted in the D-008 Rust migration).
+//! port of scripts/train_mnist.py (deleted in the Rust migration).
 //! See train/README.md for the RNG divergence from CPython.
 
 use crate::rng::Rng;
@@ -26,7 +26,7 @@ pub(crate) const FILES: [&str; 4] = [
 
 const PIXEL_THRESHOLD: u8 = 128;
 const EPOCHS: usize = 8;
-// D-007/D-009: the old fixed SHUFFLE_SEED=8 was chosen by scanning ~20 seeds
+// The old fixed SHUFFLE_SEED=8 was chosen by scanning ~20 seeds
 // against *test-set* accuracy -- a max-of-20 draw against the set that's
 // supposed to be the honest final number. Fixed by selecting seed (and
 // threshold/scale) against a held-out validation slice carved out of the
@@ -49,7 +49,7 @@ const THRESHOLD_GRID: &[f64] =
 // the classifier trains on (2x2 popcount-vs-threshold per block).
 const GRID14: usize = 14;
 pub(crate) const NPIX14: usize = GRID14 * GRID14; // 196
-// D-011: T=1 is fixed in the shipped generator, but its original selection
+// T=1 is fixed in the shipped generator, but its original selection
 // inspected the glyph scores of one proxy-winning configuration per T.
 // Only that T=1 configuration passed both floors; this did not establish
 // that OR is better for drawings. Checkpoint 3's 780-configuration sweep
@@ -58,8 +58,8 @@ pub(crate) const NPIX14: usize = GRID14 * GRID14; // 196
 // shipped seed 16 is the proxy winner, not a typical training outcome.
 // No earlier record establishes advance registration of the glyph floors.
 // T=1 remains an arbitrary architecture pick, not an evidence-backed
-// drawing improvement. No retraining in this correction. See D-011's
-// 2026-10-03 addendum and train/README.md.
+// drawing improvement. No retraining in this correction. See
+// train/README.md.
 pub(crate) const BLOCK_THRESHOLD: usize = 1;
 
 pub(crate) const AUG_VARIANTS_PER_DIGIT: usize = 300;
@@ -99,7 +99,7 @@ pub(crate) fn glyph_bits() -> BTreeMap<u8, Vec<u8>> {
 // accuracy. A synthetic stand-in for a thin drag, not handwriting; the
 // '1' occupies the right-hand segments at column 10. The 7x7 GLYPHS above
 // upscale to 2px-thick strokes on this grid. Generated once by a scratch
-// script; see docs/DECISIONS.md D-011.
+// script.
 const GLYPHS14_THIN: [(u8, [&str; 14]); 10] = [
     (0, [
         "..............", "...########...", "...#......#...", "...#......#...",
@@ -226,7 +226,7 @@ fn dilate_flat(bits: &[u8], grid: usize) -> Vec<u8> {
 /// Pipeline stage: one round of 4-neighbor dilation at 14x14, applied to
 /// every split alike (core/val/test MNIST sim, drawn-style proxy, glyph
 /// evaluation) -- and mirrored in gen/'s dl{i} runtime gates. Matching the
-/// runtime and the training simulation exactly is the whole point (D-011).
+/// runtime and the training simulation exactly is the whole point.
 fn dilate14_all(bits14_list: &[Vec<u8>]) -> Vec<Vec<u8>> {
     bits14_list
         .iter()
@@ -410,7 +410,7 @@ pub(crate) fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) 
     (fracs, labels)
 }
 
-// ---------- drawn-style validation proxy (D-010, Job 2) ----------
+// ---------- drawn-style validation proxy ----------
 //
 // The proxy uses held-out MNIST validation images, not human canvas
 // drawings. It cycles source binarization thresholds over 90/128/166 and
@@ -419,7 +419,7 @@ pub(crate) fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) 
 // source pixels. Its correlation with synthetic glyph fidelity is not
 // consistently stronger than plain MNIST validation (checkpoint 3).
 // One round of 4-neighbor dilation at 14x14 is shared by every split,
-// both glyph sets, and the runtime CSS circuit. See D-011's addendum.
+// both glyph sets, and the runtime CSS circuit.
 const DILATE_ITERS: usize = 1;
 const DRAWN_ZOOM: f64 = 0.82;
 const DRAWN_PIXEL_THRESHOLDS: [u8; 3] = [90, 128, 166];
@@ -654,7 +654,7 @@ fn find_exemplars(weights: &[Vec<i64>], bias: &[i64], xs: &[Vec<u8>], ys: &[u8])
 /// then block_downsample. Dilation breaks the old exact-invariance argument
 /// (a block that was uniformly 0/4 can pick up 1-3 lit cells from a dilated
 /// neighbor), so this number can now differ from the pre-M13 7x7-direct
-/// metric -- reported as-is, not tuned toward (docs/DECISIONS.md D-011).
+/// metric -- reported as-is, not tuned toward.
 fn glyph_accuracy(weights: &[Vec<i64>], bias: &[i64]) -> f64 {
     let gb = glyph_bits();
     let correct = gb
@@ -697,7 +697,7 @@ pub fn run(repo_root: &Path) {
     let (test_fracs, test_ys) = load_split(&data_dir, FILES[2], FILES[3]);
     println!("train: {} images, test: {} images", train_fracs.len(), test_fracs.len());
 
-    // D-007/D-009 fix: carve the validation set out of the 60k TRAINING
+    // Carve the validation set out of the 60k TRAINING
     // images (last 10k) -- never trained on, never touched by the test set.
     // Threshold, shuffle seed, and quantization scale are all selected
     // against this split. The 10k official test set is read after
@@ -710,7 +710,7 @@ pub fn run(repo_root: &Path) {
     let val_ys = train_ys[core_end..].to_vec();
     println!("core (train) images: {}, held-out validation images: {}", core_fracs.len(), val_fracs.len());
 
-    // D-010, Job 2: drawn-style validation proxy, built only from the same
+    // Drawn-style validation proxy, built only from the same
     // held-out validation slice's raw pixels (never test, never the 10
     // canonical glyphs). This is now the PRIMARY selection criterion; plain
     // MNIST validation accuracy is kept as a reported secondary. See
@@ -719,7 +719,7 @@ pub fn run(repo_root: &Path) {
     let drawn_val_ys = val_ys.clone();
     println!("drawn-style validation proxy: {} images (held-out slice, transformed)", drawn_val_fracs.len());
 
-    println!("grid search over cell threshold t, shuffle seed, and quantization scale (drawn-style validation only; T={} is fixed architecture, D-011)...", BLOCK_THRESHOLD);
+    println!("grid search over cell threshold t, shuffle seed, and quantization scale (drawn-style validation only; T={} is fixed architecture)...", BLOCK_THRESHOLD);
     struct Best {
         drawn_val_acc: f64,
         mnist_val_acc: f64,
@@ -832,7 +832,7 @@ pub fn run(repo_root: &Path) {
             100.0 * aug_xs.len() as f64 / mixed_xs.len() as f64
         );
         let (w2, b2) = train_perceptron(&mixed_xs, &mixed_ys, seed);
-        // Primary gate is the transformed-MNIST proxy (D-010, Job 2).
+        // Primary gate is the transformed-MNIST proxy.
         // A synthetic-glyph gain alone does not accept augmented weights;
         // no human canvas drawings were evaluated.
         let (scale, drawn_acc2, qw2, qb2) =

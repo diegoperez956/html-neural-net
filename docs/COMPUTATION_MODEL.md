@@ -105,8 +105,7 @@ Gate mode builds larger operations through named dependencies:
 - Digit scores use popcount bit planes, then subtraction and bias addition.
 
 The compiler emits repetitive structure. It does not enumerate the complete
-input space into result selectors. The unmerged historical UI experiment
-that did use enumeration is covered in [the audit](IMPLEMENTATION_AUDIT.md).
+input space into result selectors.
 
 ## Separate examples, shared builders
 

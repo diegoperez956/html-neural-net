@@ -2,7 +2,6 @@
 
 This guide explains the shipped code. Read sections 1–5 for the story.
 The later sections connect that story to the circuit builders and the math.
-For the audit of earlier claims, read [the implementation audit](IMPLEMENTATION_AUDIT.md).
 
 ## 1. The browser already knows how to calculate
 

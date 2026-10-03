@@ -29,7 +29,7 @@ grep -c '^@property --' dist/index.html
 The CSV files in `benchmarks/` record experiments from 2026-08-30 with Chromium
 149 and Firefox 151. They are not a fresh performance run of the revised UI.
 The three `scripts/benchmark*.py` entry points depended on the Python circuit
-compiler deleted in D-008 and were removed on 2026-10-03. These measurements
+compiler deleted in the Rust migration and were removed on 2026-10-03. These measurements
 can no longer be regenerated with the current toolchain. The CSVs are kept
 unchanged as dated historical evidence; see [their record](../benchmarks/README.md).
 
@@ -112,8 +112,7 @@ The validation proxy crops held-out MNIST images 18% tighter, clipping their
 edges, with varied binarization thresholds. It does not thicken source pixels;
 dilation at 14×14 is shared by all splits. It has no demonstrated advantage
 over plain MNIST validation for predicting drawing fidelity. T=1 remains
-an arbitrary pick; the [D-011 addendum](DECISIONS.md#checkpoint-3-addendum-2026-10-03)
-records the later sweep that invalidated its original rationale.
+an arbitrary pick; a later sweep invalidated its original rationale.
 
 The output is always the class with the largest score. There is no "unknown"
 class. A blank drawing chooses the largest bias. A score margin is not a

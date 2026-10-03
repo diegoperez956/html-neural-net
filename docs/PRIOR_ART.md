@@ -1,13 +1,12 @@
 # PRIOR_ART.md — Close prior art for htmlnet
 
-Research date: **2026-08-30**. Researcher: prior-art worktree agent.
+Research date: **2026-08-30**.
 Scope: CSS Turing completeness; HTML/CSS logic gates/adders/calculators; CSS neural-network
 inference demos; checkbox hacks and custom-property computation.
 
 Method: direct fetch of primary sources (curl), Wayback Machine, GitHub API, CodePen content
 via the r.jina.ai reader (CodePen blocks direct fetch). Search engines: Mojeek + Brave
-(Mojeek rate-limits; Bing served cached junk; DDG blocks curl). Raw captures and search
-notes: `experiments/prior-art/raw/`, `experiments/prior-art/notes.md`.
+(Mojeek rate-limits; Bing served cached junk; DDG blocks curl).
 
 Honesty constraints applied throughout: verified facts are stated as verified (with the
 exact source I inspected); anything I could not retrieve or confirm is marked

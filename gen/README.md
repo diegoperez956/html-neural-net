@@ -48,8 +48,7 @@ make test
 ## Historical port
 
 The crate began as a byte-identical port of Python's `scripts/circuit.py` and
-`scripts/generate.py`. D-007 records that comparison. D-008 removed the Python
-compiler after validation. Rust is now authoritative; there is no remaining
+`scripts/generate.py`. The Python compiler was removed after that comparison passed. Rust is now authoritative; there is no remaining
 requirement to update a second generator.
 
 The old `scripts/benchmark*.py` programs depended on the retired compiler and

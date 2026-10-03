@@ -22,8 +22,8 @@ The [computation model](COMPUTATION_MODEL.md) defines the claim boundaries.
 `make build` compiles the generator and writes both variants from saved weights.
 The `--no-js` option excludes the input script without changing the circuit.
 `make train` explicitly overwrites the saved models. The experimental digit
-MLP trainer was removed on 2026-10-03; its unshipped design and negative result
-remain in [the historical MLP notes](DESIGN_MLP.md).
+MLP trainer was removed on 2026-10-03; its design was never shipped and gave a
+negative result.
 
 ## Compiler structures
 
