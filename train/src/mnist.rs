@@ -99,7 +99,7 @@ pub(crate) fn glyph_bits() -> BTreeMap<u8, Vec<u8>> {
 // accuracy. A synthetic stand-in for a thin drag, not handwriting; the
 // '1' occupies the right-hand segments at column 10. The 7x7 GLYPHS above
 // upscale to 2px-thick strokes on this grid. Generated once by a scratch
-// script; see docs/DECISIONS.md D-011.
+// script (D-011).
 const GLYPHS14_THIN: [(u8, [&str; 14]); 10] = [
     (0, [
         "..............", "...########...", "...#......#...", "...#......#...",
@@ -654,7 +654,7 @@ fn find_exemplars(weights: &[Vec<i64>], bias: &[i64], xs: &[Vec<u8>], ys: &[u8])
 /// then block_downsample. Dilation breaks the old exact-invariance argument
 /// (a block that was uniformly 0/4 can pick up 1-3 lit cells from a dilated
 /// neighbor), so this number can now differ from the pre-M13 7x7-direct
-/// metric -- reported as-is, not tuned toward (docs/DECISIONS.md D-011).
+/// metric -- reported as-is, not tuned toward (D-011).
 fn glyph_accuracy(weights: &[Vec<i64>], bias: &[i64]) -> f64 {
     let gb = glyph_bits();
     let correct = gb

@@ -20,7 +20,3 @@ The timings include browser automation and forced style reads. They are not
 isolated CSS evaluation times or guarantees about live drawing latency.
 The classifier probes used synthetic sparse weights except `linear49-real`,
 which used that date's M11 weights, not today's D-011 model.
-
-See [current limits](../docs/LIMITS.md),
-[historical scale research](../docs/RESEARCH_SCALE.md), and
-[the rejected MLP design](../docs/DESIGN_MLP.md) for interpretation.

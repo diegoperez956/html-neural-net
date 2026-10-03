@@ -88,8 +88,6 @@
   .v { color: #b8bb26; }
   .tag { color: #928374; font-size: 12px; }
   .kbd { color: #fabd2f; }
-  .ladder { color: #928374; font-size: 13px; letter-spacing: 1px; margin: 18px 0; }
-  .ladder .dim { color: #fe8019; }
   input[type="checkbox"]:focus-visible { outline: 2px solid #fe8019; outline-offset: 2px; }
   section:focus-within h2 { color: #fe8019; }
   .caption { color: #7c6f64; font-size: 11px; }

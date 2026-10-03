@@ -19,9 +19,7 @@ cargo run --release --manifest-path train/Cargo.toml -- mnist
 `glyph` writes `scripts/weights.json`. `mnist` writes
 `scripts/weights_mnist.json`. The experimental `mlp` verb and module were
 removed on 2026-10-03: after the 14×14 pipeline change they silently used only
-49 of 196 coverage cells. The negative result remains in
-[the historical design](../docs/DESIGN_MLP.md); it cannot be regenerated with
-the current trainer. Paths resolve relative to the crate location, not the
+49 of 196 coverage cells. Paths resolve relative to the crate location, not the
 shell's working directory.
 
 ## The shipped models
@@ -31,7 +29,6 @@ Its schema is `{"bias": int, "weights": [int; 9]}`.
 It has no held-out accuracy estimate.
 
 The digit model is a ten-class linear perceptron with 49 binary features.
-It is not the hidden-layer model described in `docs/DESIGN_MLP.md`.
 Its JSON contains:
 
 - `weights`, ten rows of 49 integers in [-3, 3].
@@ -136,7 +133,6 @@ weights. A test-triggered [-7, 7] diagnostic is reported but never written.
 These checks are another reason not to describe the entire training procedure
 as completely independent of acceptance data.
 
-See [D-007 through D-011](../docs/DECISIONS.md) for the historical experiments.
 A new evaluation claim needs fresh held-out drawings and a selection procedure
 fixed before their results are inspected.
 
