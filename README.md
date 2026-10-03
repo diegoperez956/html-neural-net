@@ -1,6 +1,15 @@
 # htmlnet
 
-**A neural network built from logic gates and arithmetic circuits using HTML + CSS. The network computes in pure CSS; the only JavaScript on the page is one small deletable input shim for drag-to-draw.**
+a neural network built from logic gates and arithmetic circuits in html + css.
+inference runs in css. one optional javascript shim handles drag input.
+
+[try the demo](https://diegoperez956.github.io/html-neural-net/) ·
+[no javascript](https://diegoperez956.github.io/html-neural-net/no-js.html) ·
+[how it works](https://diegoperez956.github.io/html-neural-net/how-it-works.html)
+
+<img src="docs/media/draw-7.gif" width="320" alt="drawing a 7 on the canvas; the CSS seven-segment display predicts 7"> <img src="docs/media/draw-3.gif" width="320" alt="drawing a 3 on the canvas; the CSS seven-segment display predicts 3">
+
+these are two hand-picked drawings, not an accuracy benchmark.
 
 Open `dist/index.html` offline and draw a digit on the 14×14 canvas.
 CSS gates thicken and downsample the stroke, calculate ten class scores,
@@ -43,6 +52,24 @@ instead of drag painting and contains the same calculation signals.
 ```bash
 ./gen/target/release/htmlnet-gen /tmp/htmlnet-no-js.html --no-js
 ```
+
+### github pages
+
+in the repo settings, set pages → source to **github actions**.
+the pages workflow builds and deploys `dist/` on pushes to `main`.
+it also accepts manual runs. it does not retrain the network.
+
+### record the gifs
+
+with the dev dependencies, playwright chromium, and ffmpeg installed:
+
+```bash
+make build
+python3 scripts/record_demos.py
+```
+
+the recorder uses real pointer drags in headless chromium against `dist/index.html`.
+it checks the final digit and segment signals, then writes optimized gifs to `docs/media/`.
 
 ## Why this is interesting
 
@@ -179,8 +206,8 @@ MNIST training accuracy.
 Chromium 111+ / Firefox 128+ (needs `:has()`, `@property`, and
 `color-mix()` for LED styling). Safari 16.4+ should work but is **not
 tested in this repo**. The local suite was run with Chromium 149 and Firefox
-151. There is no CI workflow in this repository. The
-full demo is ~1.62 MB, 6,834 registered signals. See `docs/LIMITS.md` for
+151. The github pages workflow builds and deploys the demo; it does not
+run the test suite. The full demo is ~1.62 MB, 6,834 registered signals. See `docs/LIMITS.md` for
 the measured scaling story.
 
 ## Prior art (and what this adds)
