@@ -71,7 +71,7 @@ The last command returns 1 because the branch was not merged.
 
 ## The zero-JavaScript promise changed
 
-The original `.agents/PROJECT_BRIEF.md` prohibited JavaScript at runtime.
+The original project brief prohibited JavaScript at runtime.
 Commit `4ecfbda`, with a Claude Fable co-author trailer, added a drag-to-draw
 script and explicitly described the change as relaxing the zero-JS claim.
 Later commit `96ef08d` updated some documentation to reflect the exception.
@@ -166,20 +166,13 @@ through skips.
 checked-in weights. `make train` remains the explicit, potentially expensive
 operation that changes model files.
 
-## Script-free export and study-video follow-up
+## Script-free export follow-up
 
 `make build` now also writes `dist/no-js.html`. Its generator option `--no-js`
 omits the script and updates the input instructions. Static tests compare its
 calculation declarations with the default page, and both browsers test native
 click input against the saved script-free artifact. The drag-enabled default
 is retained rather than silently discarding the existing input changes.
-
-The silent Manim study video is separate teaching material, rendered in Python.
-It is not presented as the browser implementation. Its independent math model
-has tests for carry chains, signed words, XOR, image preprocessing, the saved
-seven, the thin-one failure, and weighted-score bit planes. Video verification
-checks the MP4, chapter markers, absence of audio, layout bounds, and caption OCR.
-See `video/README.md` for the files and commands.
 
 ## New verification
 
@@ -229,5 +222,5 @@ browser automation overhead and do not establish current drawing latency; see
 removed because its reference producer no longer exists.
 
 Neither the audit nor cleanup retrains or changes either shipped weight file.
-The drawing-input changes, script-free export, explanation, and video work
+The drawing-input changes, script-free export, and explanation work
 were preserved in snapshot commit `c12a1ad` before cleanup.

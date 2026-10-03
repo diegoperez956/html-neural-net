@@ -42,8 +42,8 @@ Publication correction on 2026-10-03: checkpoint 3's copy changes rebuild to
 1,622,386 UTF-8 bytes for `dist/index.html` and 1,620,009 for `dist/no-js.html`.
 Both still have 6,834 registered signals and the same weights and input shim.
 Measure with `wc -c dist/index.html dist/no-js.html` after `make build`.
-The revised suite has 15 Rust tests and 97 Python tests: 82 browser tests,
-5 runtime static checks, 3 history tests, 6 video-math tests, and 1 published-
+The revised suite has 15 Rust tests and 91 Python tests: 82 browser tests,
+5 runtime static checks, 3 history tests, and 1 published-
 metrics check, with the same 16 abstract-base skips. A GitHub Pages workflow
 now builds and deploys `dist/`; it does not run the test suite.
 

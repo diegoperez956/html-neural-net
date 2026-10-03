@@ -131,9 +131,9 @@ The Pages workflow builds and deploys the demo. It does not run the test suite.
 
 ## Test limits
 
-The current suite runs 15 Rust tests and 97 Python tests. Of the latter,
+The current suite runs 15 Rust tests and 91 Python tests. Of the latter,
 87 are runtime checks (41 per browser and 5 static), with 16 abstract-base
-class skips; 9 cover history inventory and video math, and 1 checks the
+class skips; 3 cover history inventory, and 1 checks the
 README's published metrics against the saved JSON. The old 67- and 75-test
 figures in the decision log describe earlier milestones, not this suite.
 

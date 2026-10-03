@@ -1,8 +1,7 @@
 # How a neural network runs in CSS
 
-This guide explains the shipped code. Read sections 1–5 for the video story.
+This guide explains the shipped code. Read sections 1–5 for the story.
 The later sections connect that story to the circuit builders and the math.
-For recording steps, use [the filming walkthrough](VIDEO_WALKTHROUGH.md).
 For the audit of earlier claims, read [the implementation audit](IMPLEMENTATION_AUDIT.md).
 
 ## 1. The browser already knows how to calculate
@@ -300,7 +299,7 @@ Scores use seven-bit signed words. The generator checks each class's possible
 score bounds. Comparisons use an extra bit, so subtracting two valid scores
 does not overflow. A sequence of comparisons keeps the winner and runner-up.
 
-This section is useful for answering questions after the video. You do not
+This section is useful for answering questions after reading. You do not
 need to explain every carry wire on screen.
 
 ## 9. Training happens before the browser opens

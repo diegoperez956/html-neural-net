@@ -98,5 +98,5 @@ establish accuracy on human canvas drawings. No human drawings were evaluated.
 This publication correction changes copy and tests, not weights or network
 logic. The Pages workflow builds saved weights without retraining. The updated
 suite has 15 Rust tests and 97 Python tests, with 16 abstract-base skips.
-Prior-art claims, browser feature floors, Safari, and the video pipeline were
+Prior-art claims, browser feature floors, and Safari were
 not independently rechecked at this checkpoint.
