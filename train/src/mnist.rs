@@ -700,8 +700,8 @@ pub fn run(repo_root: &Path) {
     // D-007/D-009 fix: carve the validation set out of the 60k TRAINING
     // images (last 10k) -- never trained on, never touched by the test set.
     // Threshold, shuffle seed, and quantization scale are all selected
-    // against this split. The 10k official test set is touched exactly
-    // once, below, after every hyperparameter is already locked in.
+    // against this split. The 10k official test set is read after
+    // selection; see below for its diagnostic and rejection-floor uses.
     let n_train = train_fracs.len();
     let core_end = n_train - VAL_SIZE;
     let core_fracs = &train_fracs[..core_end];
