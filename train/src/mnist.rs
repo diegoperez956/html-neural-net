@@ -1115,27 +1115,4 @@ mod tests {
         assert_eq!(python_round(-0.5), 0);
         assert_eq!(python_round(-1.5), -2);
     }
-
-    /// Diffs the bbox-normalize pipeline (binarize -> crop -> resample) for
-    /// the first 20 MNIST train images against Python's `preprocess_image`
-    /// output, dumped to /tmp/py_intermediates.json by
-    /// `python3 -c "..."` (see WORKTREE_SUMMARY.md for the exact command).
-    /// Needs data/mnist/ + that dump file, so it's `#[ignore]`d by default;
-    /// run explicitly with `cargo test --release -- --ignored --nocapture`.
-    #[test]
-    #[ignore]
-    fn preprocess_matches_python_intermediates() {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap().to_path_buf();
-        let (imgs, rows, cols) = read_idx_images(&root.join("data/mnist/train-images-idx3-ubyte.gz"));
-        assert_eq!((rows, cols), (28, 28));
-        let py: serde_json::Value = serde_json::from_reader(fs::File::open("/tmp/py_intermediates.json").unwrap()).unwrap();
-        let py = py.as_array().unwrap();
-        for (i, entry) in py.iter().enumerate() {
-            let expected: Vec<f64> = entry["fracs"].as_array().unwrap().iter().map(|v| v.as_f64().unwrap()).collect();
-            let got = preprocess_image(&imgs[i]);
-            for (j, (&e, &g)) in expected.iter().zip(got.iter()).enumerate() {
-                assert!((e - g).abs() < 1e-9, "image {i} cell {j}: python {e} vs rust {g}");
-            }
-        }
-    }
 }

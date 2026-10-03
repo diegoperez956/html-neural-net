@@ -2,9 +2,12 @@
 
 ## Current artifact
 
-The generated page has 6,834 registered signals and is about 1.62 MB.
-Registrations include inputs, aliases, native comparison calculations, and
-decimal views. They are not all gates.
+As rebuilt on 2026-10-03, `dist/index.html` has 6,834 registered signals and
+is exactly 1,622,282 UTF-8 bytes (about 1.62 MB). `dist/no-js.html` has the same
+signals and is 1,619,905 bytes. The default page contains one optional input
+shim (35 source lines after trimming, 2,228 body bytes),
+not JavaScript inference. Registrations include inputs, aliases, native
+comparison calculations, and decimal views. They are not all gates.
 
 The production XOR network uses 177 gates. Its twelve preactivation aliases
 and one decimal view bring its named-signal total to 190.
@@ -23,11 +26,12 @@ grep -c '^@property --' dist/index.html
 
 ## Historical timing data
 
-The CSV files in `benchmarks/` record earlier experiments with Chromium 149
-and Firefox 151. They are not a fresh performance run of the revised UI.
-The `scripts/benchmark*.py` entry points currently depend on the Python
-circuit compiler deleted in D-008 and fail with `ModuleNotFoundError`.
-They need a Rust-backed generator before they can benchmark the current code.
+The CSV files in `benchmarks/` record experiments from 2026-08-30 with Chromium
+149 and Firefox 151. They are not a fresh performance run of the revised UI.
+The three `scripts/benchmark*.py` entry points depended on the Python circuit
+compiler deleted in D-008 and were removed on 2026-10-03. These measurements
+can no longer be regenerated with the current toolchain. The CSVs are kept
+unchanged as dated historical evidence; see [their record](../benchmarks/README.md).
 
 The old probes measured automation-assisted checkbox changes followed by a
 forced style read. Their times include browser automation overhead. They are
@@ -104,6 +108,11 @@ Safari 16.4+ is expected to support the required features but is not tested.
 There is no checked-in CI workflow.
 
 ## Test limits
+
+The current suite runs 15 Rust tests and 94 Python tests. Of the latter,
+85 are runtime checks (40 per browser and 5 static), with 16 abstract-base
+class skips; 9 cover history inventory and video math. The old 67- and 75-test
+figures in the decision log describe earlier milestones, not this suite.
 
 Small circuits have exhaustive tests: four gate input states, eight full-adder
 states, sixteen two-bit operand pairs, and 256 four-bit adder pairs.

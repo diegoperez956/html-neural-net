@@ -14,13 +14,15 @@ make train
 # Or run one trainer:
 cargo run --release --manifest-path train/Cargo.toml -- glyph
 cargo run --release --manifest-path train/Cargo.toml -- mnist
-cargo run --release --manifest-path train/Cargo.toml -- mlp
 ```
 
 `glyph` writes `scripts/weights.json`. `mnist` writes
-`scripts/weights_mnist.json`. The experimental `mlp` command writes
-`scripts/weights_mlp.json`, which the generator never reads.
-Paths resolve relative to the crate location, not the shell's working directory.
+`scripts/weights_mnist.json`. The experimental `mlp` verb and module were
+removed on 2026-10-03: after the 14×14 pipeline change they silently used only
+49 of 196 coverage cells. The negative result remains in
+[the historical design](../docs/DESIGN_MLP.md); it cannot be regenerated with
+the current trainer. Paths resolve relative to the crate location, not the
+shell's working directory.
 
 ## The shipped models
 
@@ -139,10 +141,13 @@ make test-unit
 make test-runtime
 ```
 
-Rust tests cover glyph separation, rounding, image transforms, and experimental
-MLP properties. One ignored comparison test expects a dump from the retired
-Python trainer and is historical evidence, not part of the current test run.
+The trainer has 13 Rust tests covering glyph separation, rounding, image
+transforms, and deterministic shuffling. The ignored comparison test that
+required a dump from the deleted Python trainer was removed on 2026-10-03;
+D-007 retains the historical parity result, not a runnable parity check.
 
-The browser suite checks inference in both engines against the current JSON.
-It includes script-disabled and script-deleted operation, preprocessing,
-score arithmetic, argmax, margin, and rendered displays.
+The runtime suite has 85 tests: 40 per browser engine and 5 static checks.
+It checks inference against the current JSON, including script-disabled and
+script-deleted operation, preprocessing, score arithmetic, argmax, margin,
+and rendered displays. The 16 abstract base-class skips are expected.
+`make test` also runs 2 generator Rust tests and 9 history/video Python tests.

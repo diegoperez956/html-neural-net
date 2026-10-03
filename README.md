@@ -1,6 +1,6 @@
 # htmlnet
 
-**A neural network built from logic gates and arithmetic circuits using HTML + CSS. The network computes in pure CSS; the only JavaScript on the page is a small deletable input shim for drag-to-draw.**
+**A neural network built from logic gates and arithmetic circuits using HTML + CSS. The network computes in pure CSS; the only JavaScript on the page is one small deletable input shim for drag-to-draw.**
 
 Open `dist/index.html` offline and draw a digit on the 14×14 canvas.
 CSS gates thicken and downsample the stroke, calculate ten class scores,
@@ -121,9 +121,11 @@ python3 -m venv .venv
 make test PYTHON=.venv/bin/python
 ```
 
-`make test` builds from the checked-in weights, runs Rust tests, and checks
-the page in Chromium and Firefox. Missing browsers are failures, not silent
-skips. `make train` is separate: it retrains and overwrites both model files
+`make test` builds from the checked-in weights, runs 15 Rust tests and 94
+Python tests: 40 browser tests per engine, 5 runtime static checks, 3 history
+inventory tests, and 6 video-math tests. The 16 abstract browser base classes
+are skipped, not missing browser coverage. Missing browsers are failures,
+not silent skips. `make train` is separate: it retrains and overwrites both model files
 and can download MNIST. No retraining is needed to open or test the demo.
 
 * static: exactly one `<script>` (the input shim, checked for size and for
@@ -202,7 +204,7 @@ consumed downstream inside CSS. We don't claim more than that.
 gen/                    Rust circuit compiler + demo generator -> dist/index.html
 train/                  Rust trainer -> scripts/weights*.json
 scripts/audit_history.py historical runtime-script and selector inventory
-scripts/benchmark*.py   historical probes; retired Python compiler required
+benchmarks/*.csv        dated historical measurements; probe scripts removed
 tests/test_runtime.py   two-engine arithmetic and rendering checks
 experiments/            prototypes, per-worktree findings
 docs/                   COMPUTATION_MODEL, ARCHITECTURE, PRIOR_ART,

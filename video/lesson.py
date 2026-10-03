@@ -2020,7 +2020,7 @@ class CSSStudy(Scene):
             FadeIn(runtime),
         )
         self.step(
-            "The larger digit MLP in train/src/mlp.rs is experimental, not shipped. The XOR network above is a separate hidden-layer example.",
+            "The larger digit MLP was an unshipped experiment; its trainer has been removed, but the negative result remains in docs/DESIGN_MLP.md. The XOR network above is a separate hidden-layer example.",
             Indicate(runtime[-1], color=ORANGE),
         )
 

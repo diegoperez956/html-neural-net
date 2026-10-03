@@ -1,6 +1,42 @@
 # Decisions
 
 Decision log. Each entry records hypothesis, experiment, evidence, hostile review, and disposition.
+Entries describe their milestone, not necessarily today's commands or artifact.
+D-001–D-006 date from 2026-08-30, D-007–D-010 from 2026-08-31,
+D-011 from 2026-09-01, and D-012/D-013 from 2026-10-03. Old Python paths,
+MLP commands, accuracy figures, byte counts, and suite sizes below are historical.
+D-003 is intentionally absent from the retained log; no decision is invented
+or renumbered to fill the gap.
+
+## D-013 — truth pass and removal of rotted research code (2026-10-03)
+
+The local snapshot `c12a1ad` was integrated first, and `make build` and
+`make test` passed before cleanup. It already corrected the public runtime
+claim, Rust build instructions, D-011 model results, and absent-CI claim.
+The default page contains one optional drag-input shim (35 source lines,
+2,228 body bytes in this snapshot), not inference JavaScript. The script-free
+export retains the same calculation signals.
+
+The shipped model remains D-011's t=0.65, seed=16, test_accuracy=0.7542.
+No accuracy work or retraining was done. Rebuilt UTF-8 sizes are 1,622,282 bytes
+for `dist/index.html` and 1,619,905 for `dist/no-js.html`, with 6,834 signals each.
+The original D-011 page is 1,620,878 bytes at `2ae837c`; its logged count was
+six bytes too high and is corrected below, not replaced with today's size.
+
+Removed `scripts/benchmark.py`, `scripts/benchmark_scale.py`, and
+`scripts/benchmark_clf_scale.py`: all imported the compiler deleted in D-008.
+The unchanged CSVs and their citing docs remain as dated 2026-08-30 historical
+results that cannot be regenerated with the current toolchain. Removed the
+`train mlp` verb and `train/src/mlp.rs`: after the 14×14 preprocessing change
+that experiment silently trained on only 49 of 196 cells. The unshipped MLP's
+negative result remains in the historical design and D-009/D-010. Removed the
+ignored `preprocess_matches_python_intermediates` test, whose reference
+producer was deleted.
+
+The current suite runs 15 Rust tests and 94 Python tests: 80 browser tests
+(40 per engine), 5 runtime static checks, 3 history tests, and 6 video-math
+tests. The 16 abstract browser base-class skips are expected; missing browsers
+fail. No CI workflow was added.
 
 ## D-012 — implementation audit and explicit training command
 
@@ -80,5 +116,5 @@ Experiment (evidence trail, one-time runs; logs in the session scratchpad):
 - Fix: `dilate14_all` became a universal pipeline stage in `train/src/mnist.rs` — core/val/test simulation, the drawn-style proxy, both glyph evaluations, AND the runtime CSS circuit all dilate identically before the 2×2 downsample. Post-dilation per-T table (each row = full search restricted to that T): T=1: t=0.65 seed=16, drawn-val 0.6880 / MNIST val 0.7716 / test 0.7542 / upscale 8/10 / thin 6/10; T=2: t=0.65 seed=1, 0.7067 / 0.7980 / 0.7964 / 7/10 / 6/10; T=3: t=0.4 seed=10, 0.6942 / 0.7964 / 0.7913 / 7/10 / 6/10. The joint search picked T=2, whose 7/10 upscale fidelity failed the pre-registered 8/10 floor (stop condition fired again).
 Decision: T=1 is fixed in the current generator and no longer searched by the trainer. It was chosen after inspecting the per-T glyph results. The acceptance floors filtered all three configurations, and only T=1 passed both. The final glyph figures are therefore acceptance-conditioned, not untouched evaluation results. Calling the final architecture fixed does not remove that earlier selection. The trainer also uses glyph accuracy to trigger an augmentation attempt, though drawn-style validation gates acceptance of the resulting model.
 Rationale: OR accepts any ink in a dilated block, which is a forgiving mapping for drawing. T=2 scored 1.9 percentage points higher on the proxy but failed the canonical glyph floor. No statistical analysis established that gap as noise. The choice prioritizes the demonstrated drawing behavior over proxy and MNIST scores, at about a four-point MNIST-test cost relative to T=2.
-Evidence (final T=1-only run; the test and glyph sets had already been evaluated in earlier milestone runs): chosen t=0.65, seed=16, drawn-style val 0.6880, MNIST val 0.7716, **MNIST test 0.7542**, 2×-upscale glyph fidelity **8/10** (misses: 6→5, 9→3), thin-stroke 14×14 fidelity **6/10** (misses: 1→4, 2→7, 6→5, 9→8). Augmentation fallback not triggered (8/10 ≥ floor). Quantized bias range widened to [−13, 19] (still inside the build-time-asserted 7-bit score width). Two consecutive `train mnist` runs byte-identical; `make build` re-run produced the same JSON a third time. Page: 6 834 signals (+1 302: 196 canvas inputs, 728 dilation ORs, 147 downsample ORs, minus the 49 retired `mn` primary placeholders, plus ~280 from the retrained classifier's popcount-plane sizes), 1 620 884 bytes (+217 KB, 1.62 MB — under the 1.8 MB stop condition). Full suite green in both engines (75 tests, 17 abstract-base skips), including new gate-level dilation/downsample checks against a Python reference and rendered-output checks for the paint canvas (no idle borders/grid, blob rendering) and the network-sees preview.
+Evidence (final T=1-only run; the test and glyph sets had already been evaluated in earlier milestone runs): chosen t=0.65, seed=16, drawn-style val 0.6880, MNIST val 0.7716, **MNIST test 0.7542**, 2×-upscale glyph fidelity **8/10** (misses: 6→5, 9→3), thin-stroke 14×14 fidelity **6/10** (misses: 1→4, 2→7, 6→5, 9→8). Augmentation fallback not triggered (8/10 ≥ floor). Quantized bias range widened to [−13, 19] (still inside the build-time-asserted 7-bit score width). Two consecutive `train mnist` runs byte-identical; `make build` re-run produced the same JSON a third time. Page: 6 834 signals (+1 302: 196 canvas inputs, 728 dilation ORs, 147 downsample ORs, minus the 49 retired `mn` primary placeholders, plus ~280 from the retrained classifier's popcount-plane sizes), 1 620 878 UTF-8 bytes at `2ae837c` (+217 KB, 1.62 MB — under the 1.8 MB stop condition). Full suite green in both engines (75 tests, 17 abstract-base skips), including new gate-level dilation/downsample checks against a Python reference and rendered-output checks for the paint canvas (no idle borders/grid, blob rendering) and the network-sees preview.
 Disposition: T=1 ships as the only block downsample the generator will emit — `gen/` reads `block_threshold` from `scripts/weights_mnist.json` and refuses (build error) to emit an OR tree for a popcount spec. The paint-feel UI is the shipped drawing surface; the pixelated preview labels the abstraction honestly.

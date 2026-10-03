@@ -52,9 +52,10 @@ The crate began as a byte-identical port of Python's `scripts/circuit.py` and
 compiler after validation. Rust is now authoritative; there is no remaining
 requirement to update a second generator.
 
-The old `scripts/benchmark*.py` programs were not migrated and still depend on
-the retired compiler. Their saved measurements are historical evidence, not
-a working current benchmark path.
+The old `scripts/benchmark*.py` programs depended on the retired compiler and
+were removed on 2026-10-03. Their saved measurements from 2026-08-30 remain in
+`benchmarks/*.csv` as dated historical evidence. They cannot be regenerated
+with the current toolchain; see [the measurement record](../benchmarks/README.md).
 
 The generator's stdout reports UTF-8 bytes with `html.len()`, not Unicode
 character count. `wc -c dist/index.html` measures the same quantity.

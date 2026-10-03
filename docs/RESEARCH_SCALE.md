@@ -1,5 +1,14 @@
 # Scale research: bigger circuits in pure CSS
 
+Historical measurements and recommendations from 2026-08-30, not a current
+benchmark or implementation plan. The probe scripts were removed on
+2026-10-03 because they depended on the deleted Python circuit compiler.
+`benchmarks/clf_scaling.csv` is preserved unchanged; these results can no
+longer be regenerated with the current toolchain. "Shipped M11" below refers
+to that date's weights and page, not the current D-011 artifact. D-010 rejected
+the production digit MLP; its trainer has since been removed. See
+[the CSV record](../benchmarks/README.md) and [current limits](LIMITS.md).
+
 Measured, not asserted. Method: standalone probe pages with the real circuit
 shapes (bit-plane popcount scores, threshold hidden neurons, gate argmax,
 minterm + seven-seg decode), synthetic sparse quantized weights ([-3,3],
@@ -8,8 +17,9 @@ weights. Toggle an input checkbox → force computed style → time it.
 20 iters, Chromium + Firefox headless via Playwright (same pattern as
 `benchmark_scale.py`; ~30 ms Chromium figures are the automation floor).
 
-Tool: `scripts/benchmark_clf_scale.py` (+ `--selftest`), raw pages in
-`benchmarks/raw/clf-*.html`, data in `benchmarks/clf_scaling.csv`.
+Historical tool: `scripts/benchmark_clf_scale.py` (+ `--selftest`, now removed).
+It generated ignored raw pages in `benchmarks/raw/clf-*.html` (not preserved
+in the repository); the retained data is `benchmarks/clf_scaling.csv`.
 
 ## Results
 

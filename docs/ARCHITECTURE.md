@@ -9,7 +9,6 @@ The [computation model](COMPUTATION_MODEL.md) defines the claim boundaries.
 |---|---|
 | `train/src/glyph.rs` | Train the 3×3 bar perceptron |
 | `train/src/mnist.rs` | Preprocess MNIST, train and quantize the linear digit model |
-| `train/src/mlp.rs` | Experimental digit MLP, not consumed by the page generator |
 | `scripts/weights.json` | Saved glyph weights and bias |
 | `scripts/weights_mnist.json` | Saved linear digit weights, biases, pipeline fields, and metrics |
 | `gen/src/circuit.rs` | Compose named gates, arithmetic circuits, neurons, and decoders |
@@ -22,8 +21,9 @@ The [computation model](COMPUTATION_MODEL.md) defines the claim boundaries.
 
 `make build` compiles the generator and writes both variants from saved weights.
 The `--no-js` option excludes the input script without changing the circuit.
-`make train` explicitly overwrites the saved models. The generator does not
-read `scripts/weights_mlp.json`.
+`make train` explicitly overwrites the saved models. The experimental digit
+MLP trainer was removed on 2026-10-03; its unshipped design and negative result
+remain in [the historical MLP notes](DESIGN_MLP.md).
 
 ## Compiler structures
 

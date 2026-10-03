@@ -4,6 +4,8 @@ Scope: the working tree based on `2ae837c`, plus the local Git history available
 at review time. The repository had 60 reachable commits across all refs.
 This audit distinguishes current behavior, historical shortcuts, and claims
 that the evidence does not support. It cannot establish an author's intent.
+The audit is a dated record (2026-10-03); cleanup notes below distinguish
+subsequent removals from what was present at review time.
 
 ## Does the current network secretly run in JavaScript?
 
@@ -126,8 +128,11 @@ still expected linear weights. Its own commit message reports stale output,
 a broken rebuild, and eight failing browser tests. Commit `22797bc` restored
 the linear digit model.
 
-`train/src/mlp.rs` remains an experiment. The browser's digit recognizer has
-no learned hidden layer. The separate 2→2→1 XOR network does have hidden neurons.
+At audit time, `train/src/mlp.rs` remained an experiment. Cleanup on 2026-10-03
+removed it and the `mlp` verb: after the 14×14 pipeline change it silently
+trained on only 49 of 196 cells. Its negative result remains in the dated
+[MLP design](DESIGN_MLP.md), not as runnable code. The browser's digit recognizer
+has no learned hidden layer. The separate 2→2→1 XOR network does have hidden neurons.
 
 ### Other explanations did not match the source
 
@@ -214,12 +219,15 @@ prior-art pages and unrelated experiment artifacts are not audited as shipped
 runtime code. No deleted branches, private conversations, or external deployments
 were available for review.
 
-The old `scripts/benchmark*.py` files still import the deleted Python circuit
-compiler. Running `scripts/benchmark.py` reproduces `ModuleNotFoundError`.
-They are historical research tools, not a working current benchmark command.
-Their CSV timings include browser automation overhead and do not establish
-current drawing latency. Porting those generators is deferred; see
-[limits](LIMITS.md).
+At audit time, the old `scripts/benchmark*.py` files still imported the deleted
+Python circuit compiler; `scripts/benchmark.py` failed with `ModuleNotFoundError`.
+Cleanup on 2026-10-03 removed all three probes rather than porting them.
+The unchanged [CSV records](../benchmarks/README.md) date from 2026-08-30 and
+can no longer be regenerated with the current toolchain. Their timings include
+browser automation overhead and do not establish current drawing latency; see
+[limits](LIMITS.md). The ignored Python-intermediates comparison test was also
+removed because its reference producer no longer exists.
 
-The revised work does not retrain or change either shipped weight file. It
-preserves the existing drawing-input changes and does not commit or push them.
+Neither the audit nor cleanup retrains or changes either shipped weight file.
+The drawing-input changes, script-free export, explanation, and video work
+were preserved in snapshot commit `c12a1ad` before cleanup.

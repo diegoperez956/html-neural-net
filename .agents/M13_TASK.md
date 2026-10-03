@@ -1,4 +1,8 @@
-# M13 fix batch — adversarial review findings (task spec)
+# M13 fix batch — adversarial review findings (historical task spec)
+
+This task was implemented in snapshot `c12a1ad` (2026-10-03). The counts and
+constraints below refer to that assignment, not today's suite. Current counts
+and artifact sizes are in `docs/LIMITS.md`.
 
 You are the builder for this repo (`/home/diego/html-neural-net`, branch `main`, clean at
 `2ae837c`). An external adversarial review of commit `2ae837c` produced the findings below.
