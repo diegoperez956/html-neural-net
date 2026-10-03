@@ -19,4 +19,4 @@ not part of this record.
 The timings include browser automation and forced style reads. They are not
 isolated CSS evaluation times or guarantees about live drawing latency.
 The classifier probes used synthetic sparse weights except `linear49-real`,
-which used that date's M11 weights, not today's model.
+which used that date's weights, not today's model.
