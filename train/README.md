@@ -77,8 +77,12 @@ by +1 and -1 respectively. This is a plain perceptron, not an averaged one.
 The quantizer divides by a candidate scale, rounds ties to even, and clips
 weights to [-3, 3]. The grid search chooses the coverage threshold, shuffle
 seed, and quantization scale against a drawn-style validation proxy.
-The proxy thickens the source strokes, uses a tighter crop, and varies source
-pixel thresholds. Ordinary MNIST validation accuracy is also reported.
+The proxy crops held-out MNIST images 18% tighter, clipping the digit's
+edges, and cycles source binarization thresholds over 90, 128, and 166.
+It does not thicken source strokes. Dilation at 14×14 is shared by every
+split. Ordinary MNIST validation accuracy is also reported.
+No human drawings were evaluated; this proxy has no demonstrated advantage
+over plain validation for predicting drawing accuracy.
 
 ## Current recorded results
 
@@ -96,9 +100,12 @@ The checked-in `scripts/weights_mnist.json` is the source for these values:
 | Block threshold | 1 |
 
 The canonical glyph misses are 6→5 and 9→3. The thin-stroke misses are
-1→4, 2→7, 6→5, and 9→8. These figures are not accuracy estimates for arbitrary
-user drawings. The current revision verifies browser inference from the saved
-weights; it does not rerun the MNIST experiment.
+1→4, 2→7, 6→5, and 9→8. The thin set is seven-segment-shaped, not handwriting;
+its '1' sits right of centre. Across the 20 seeds at the shipped threshold,
+these scores range from 4–8 and 3–7 of 10. The shipped seed is the proxy winner.
+These figures are not accuracy estimates for arbitrary user drawings.
+Checkpoint 3 reran the trainer and reproduced the saved JSON byte for byte.
+This publication correction did not retrain.
 
 ## Selection caveats
 
@@ -109,12 +116,16 @@ D-010 selected against drawn-style validation and recorded 78.54% on the old
 7×7 drawing pipeline. That is not the current model.
 
 D-011 added the 14×14 canvas and runtime dilation. Development compared
-multiple block thresholds and inspected their glyph results. Only OR
-downsampling met both glyph acceptance floors. Fixing OR as architecture
-for the final search does not erase that earlier selection.
+multiple block thresholds and inspected their glyph results. Only OR's
+single proxy-winning configuration met both glyph acceptance floors.
+Checkpoint 3 examined all 260 configurations per T: both-floor pass counts
+were 16 for T=1, 33 for T=2, and 25 for T=3. This does not support OR's
+claimed drawing advantage. T=1 remains an arbitrary pick, kept without
+retraining. Fixing it for the final search does not erase earlier selection.
 
 The final 8/10 and 6/10 glyph scores are therefore acceptance-conditioned.
-The milestone did not touch the test set and glyph sets only once across all
+Their 20-seed ranges at the shipped threshold are 4–8 and 3–7 of 10;
+seed 16 is the proxy winner, not a typical outcome. The milestone did not touch the test set and glyph sets only once across all
 runs. The current trainer also checks glyph accuracy before deciding whether
 to attempt synthetic-glyph augmentation. It accepts augmented weights only
 if drawn-style validation improves. No augmentation was needed for the saved
@@ -146,8 +157,9 @@ transforms, and deterministic shuffling. The ignored comparison test that
 required a dump from the deleted Python trainer was removed on 2026-10-03;
 D-007 retains the historical parity result, not a runnable parity check.
 
-The runtime suite has 85 tests: 40 per browser engine and 5 static checks.
+The runtime suite has 87 tests: 41 per browser engine and 5 static checks.
 It checks inference against the current JSON, including script-disabled and
 script-deleted operation, preprocessing, score arithmetic, argmax, margin,
 and rendered displays. The 16 abstract base-class skips are expected.
-`make test` also runs 2 generator Rust tests and 9 history/video Python tests.
+`make test` also runs 2 generator Rust tests, 9 history/video Python tests,
+and a check of the README's published accuracy numbers against the saved JSON.

@@ -30,13 +30,13 @@ const EPOCHS: usize = 8;
 // against *test-set* accuracy -- a max-of-20 draw against the set that's
 // supposed to be the honest final number. Fixed by selecting seed (and
 // threshold/scale) against a held-out validation slice carved out of the
-// training data instead; the 10k test set is now touched exactly once, at
-// the very end, for the reported number. See train/README.md.
+// training data instead. The test set supplies reported metrics, a
+// diagnostic trigger, and rejection floors; it is not untouched across
+// development runs. See train/README.md.
 const SEED_GRID: &[u64] = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
-// Held out from the 60k training images (never trained on, never used until
-// hyperparameter selection is done); the 60k are already shuffled ahead of
-// time by the dataset authors, so a simple tail slice is a fair, defensible
-// split.
+// Held out from the 60k training images, never trained on, and used for
+// hyperparameter selection. The dataset authors shuffled the images
+// before this fixed tail slice.
 pub(crate) const VAL_SIZE: usize = 10_000;
 const NUM_CLASSES: usize = 10;
 const GRID: usize = 7;
@@ -49,20 +49,17 @@ const THRESHOLD_GRID: &[f64] =
 // the classifier trains on (2x2 popcount-vs-threshold per block).
 const GRID14: usize = 14;
 pub(crate) const NPIX14: usize = GRID14 * GRID14; // 196
-// D-011: T=1 is FIXED ARCHITECTURE, not a hyperparameter -- same status H=16
-// had for the MLP budget in D-009. The block downsample is a pure OR over
-// each 2x2 dilated block (any ink lights the bit). Rationale: the glyph
-// floors are pre-registered acceptance criteria, so letting the trainer
-// select T (jointly or via per-T diagnostics) puts glyph-conditioned
-// selection logic in the trainer; the 1.9pp drawn-val gap to T=2 was within
-// proxy noise (the proxy preferred a config that failed the upscale floor);
-// OR is the most forgiving mapping for a human drawing; and the ~4pp
-// MNIST-test cost vs T=2 is the same demo-over-benchmark trade D-010
-// established. Evidence trail (one-time runs, docs/DECISIONS.md D-011):
-// dilation-free search picked T=3 and scored thin-stroke 1/10; post-dilation
-// per-T table: T=1 t=0.65 s16 test .7542 glyphs 8/10 thin 6/10 | T=2 t=0.65
-// s1 test .7964 glyphs 7/10 thin 6/10 | T=3 t=0.4 s10 test .7913 glyphs 7/10
-// thin 6/10. Only T=1 clears both floors.
+// D-011: T=1 is fixed in the shipped generator, but its original selection
+// inspected the glyph scores of one proxy-winning configuration per T.
+// Only that T=1 configuration passed both floors; this did not establish
+// that OR is better for drawings. Checkpoint 3's 780-configuration sweep
+// found both-floor pass counts of 16/260 (T=1), 33/260 (T=2), 25/260 (T=3).
+// At T=1, t=0.65, the 20 seeds score 4-8/10 upscaled and 3-7/10 thin glyphs;
+// shipped seed 16 is the proxy winner, not a typical training outcome.
+// No earlier record establishes advance registration of the glyph floors.
+// T=1 remains an arbitrary architecture pick, not an evidence-backed
+// drawing improvement. No retraining in this correction. See D-011's
+// 2026-10-03 addendum and train/README.md.
 pub(crate) const BLOCK_THRESHOLD: usize = 1;
 
 pub(crate) const AUG_VARIANTS_PER_DIGIT: usize = 300;
@@ -99,9 +96,9 @@ pub(crate) fn glyph_bits() -> BTreeMap<u8, Vec<u8>> {
 // M13: thin-stroke 14x14 canonical glyphs -- a systematic seven-segment-style
 // construction (each segment a single-pixel-wide line, standard digit->segment
 // map from gen/src/circuit.rs SEVENSEG), NOT hand-tuned per digit for
-// accuracy. Stands in for what a real 1-cell-wide drag stroke looks like on
-// the finer 14x14 canvas, as opposed to the 7x7 GLYPHS above (which are
-// already 2px-thick relative to a 14x14 grid). Generated once by a scratch
+// accuracy. A synthetic stand-in for a thin drag, not handwriting; the
+// '1' occupies the right-hand segments at column 10. The 7x7 GLYPHS above
+// upscale to 2px-thick strokes on this grid. Generated once by a scratch
 // script; see docs/DECISIONS.md D-011.
 const GLYPHS14_THIN: [(u8, [&str; 14]); 10] = [
     (0, [
@@ -415,33 +412,14 @@ pub(crate) fn load_split(data_dir: &Path, images_name: &str, labels_name: &str) 
 
 // ---------- drawn-style validation proxy (D-010, Job 2) ----------
 //
-// Downsampled MNIST doesn't look like what a person draws on the 7x7 grid:
-// MNIST strokes are thin, anti-aliased, and get a bbox+pad crop that leaves
-// real margin, while a person filling checkboxes draws thick, blocky
-// strokes that cover most of the canvas. Selecting hyperparameters (and the
-// glyph-augmentation fallback) against plain MNIST validation accuracy
-// rewards fidelity to that mismatch instead of to what a visitor draws.
-//
-// Transforms applied to held-out validation images only (never test, never
-// the 10 canonical glyphs):
-//   1. Stroke dilation -- thickens the binarized digit before cropping,
-//      approximating a thicker pen/mouse stroke than MNIST's.
-//   2. The existing bbox + centered-square-pad crop (D-006) -- reused as-is,
-//      since it already matches how a user fills the grid.
-//   3. Full-canvas zoom -- shrinks that square crop toward its center, since
-//      a grid-filled digit occupies more of its bounding square than a
-//      MNIST digit does (MNIST's bbox already has some slack baked in).
-//   4. Coverage-threshold variation -- the 28x28 binarization threshold
-//      (how dark a pixel must be to count as ink, before dilation) is
-//      varied over a small fixed set instead of one constant, standing in
-//      for how firmly different people fill a cell.
-// M13 (dilation-fix): one round of 4-neighbor dilation at 14x14 is now a
-// pipeline stage present everywhere -- train simulation (core/val/test),
-// the drawn-style proxy, thin-stroke glyph evaluation, AND the runtime CSS
-// circuit (gen/'s dl{i} signals). It used to be proxy-only, which is why
-// the first M13 grid search picked a T that only worked on artificially
-// thick proxy strokes and collapsed on genuinely thin ones (docs/DECISIONS.md
-// D-011).
+// The proxy uses held-out MNIST validation images, not human canvas
+// drawings. It cycles source binarization thresholds over 90/128/166 and
+// shrinks the centered square crop to 82% of its width, clipping roughly
+// 9% from each side of the digit before resampling. It does not thicken
+// source pixels. Its correlation with synthetic glyph fidelity is not
+// consistently stronger than plain MNIST validation (checkpoint 3).
+// One round of 4-neighbor dilation at 14x14 is shared by every split,
+// both glyph sets, and the runtime CSS circuit. See D-011's addendum.
 const DILATE_ITERS: usize = 1;
 const DRAWN_ZOOM: f64 = 0.82;
 const DRAWN_PIXEL_THRESHOLDS: [u8; 3] = [90, 128, 166];
@@ -802,10 +780,10 @@ pub fn run(repo_root: &Path) {
         pick_best_quantization(&weights, &bias, &drawn_val_bits, &drawn_val_ys, 3, 200);
     let train_acc = accuracy(&qweights, &qbias, &core_bits, &core_ys);
     let mnist_val_acc = accuracy(&qweights, &qbias, &val_bits, &val_ys);
-    // The ONLY test-set read before the final reported number: a threshold
-    // sanity check on whether to try the [-7,7] fallback range below. It is
-    // not used to pick among alternatives (there's exactly one quantization
-    // already locked in by validation), so it isn't a second "selection".
+    // The proxy selects this quantization. Test accuracy is then reported
+    // and used to trigger a diagnostic and enforce a rejection floor.
+    // Later augmentation can also read the test set; this is not a
+    // procedure that touches acceptance data only once.
     let mut test_acc = accuracy(&qweights, &qbias, &test_bits, &test_ys);
     let mut drawn_val_acc_final = drawn_val_acc;
     let mut mnist_val_acc_final = mnist_val_acc;
@@ -825,13 +803,8 @@ pub fn run(repo_root: &Path) {
     let mut glyph_acc = glyph_accuracy(&qweights, &qbias);
     println!("glyph accuracy (pre-augmentation): {:.1}% ({}/10)", glyph_acc * 100.0, (glyph_acc * 10.0).round());
     println!(
-        "proxy sanity check: drawn-style val acc {drawn_val_acc_final:.4} vs glyph accuracy {glyph_acc:.4} (diff {:.4}){}",
-        (drawn_val_acc_final - glyph_acc).abs(),
-        if (drawn_val_acc_final - glyph_acc).abs() > 0.30 {
-            " -- WARNING: proxy and glyph set disagree wildly, treat the proxy with suspicion"
-        } else {
-            ""
-        }
+        "informational only: proxy acc {drawn_val_acc_final:.4}, synthetic glyph accuracy {glyph_acc:.4}, absolute gap {:.4}; this does not validate the proxy",
+        (drawn_val_acc_final - glyph_acc).abs()
     );
 
     if glyph_acc < 0.8 {
@@ -859,9 +832,9 @@ pub fn run(repo_root: &Path) {
             100.0 * aug_xs.len() as f64 / mixed_xs.len() as f64
         );
         let (w2, b2) = train_perceptron(&mixed_xs, &mixed_ys, seed);
-        // Primary gate is drawn-style validation accuracy (D-010, Job 2) --
-        // this is exactly the fallback the old MNIST-only gate discarded
-        // even though it helps drawn digits, because it also hurts MNIST.
+        // Primary gate is the transformed-MNIST proxy (D-010, Job 2).
+        // A synthetic-glyph gain alone does not accept augmented weights;
+        // no human canvas drawings were evaluated.
         let (scale, drawn_acc2, qw2, qb2) =
             pick_best_quantization(&w2, &b2, &drawn_val_bits, &drawn_val_ys, 3, 200);
         let train_acc2 = accuracy(&qw2, &qb2, &core_bits, &core_ys);
@@ -908,9 +881,9 @@ pub fn run(repo_root: &Path) {
         qbias.iter().max().unwrap()
     );
 
-    // M13, touched exactly once, after every hyperparameter (t, seed,
-    // scale, augmentation gate) is already locked in -- not part of
-    // selection, so this isn't tuning against the glyph sets.
+    // The thin-glyph score is a stop condition before writing weights.
+    // Development also inspected it when choosing T, so these are
+    // acceptance-conditioned synthetic scores, not untouched evaluation.
     let thin_acc = thin_glyph_accuracy(&qweights, &qbias);
     println!(
         "thin-stroke 14x14 glyph accuracy: {:.1}% ({}/10)",
