@@ -1,5 +1,5 @@
 //! Build-time page generator (originally a 1:1 port of scripts/generate.py,
-//! deleted after the D-008 Rust migration; Rust is now the sole build path).
+//! deleted after the Rust migration; Rust is now the sole build path).
 //! Inference runs in CSS. This program emits the circuits, markup, and a
 //! separate pointer-input script. Rust does not run in the browser.
 
@@ -229,7 +229,7 @@ fn main() {
     assert_eq!(
         mnist.block_threshold, 1,
         "weights_mnist.json block_threshold is {} -- refusing to emit an OR tree for a popcount spec. \
-         D-011 fixes T=1 as architecture: the 2x2 block downsample is a pure OR (any ink lights the bit); \
+         T=1 is fixed architecture: the 2x2 block downsample is a pure OR (any ink lights the bit); \
          T>1 would need popcount comparators that are not built here",
         mnist.block_threshold
     );

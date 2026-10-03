@@ -23,5 +23,9 @@ CLAUDE.md
 video/
 docs/agents/
 scripts/install-pstack.sh
-docs/*.md
+docs/ADVERSARIAL_REVIEWS.md
+docs/IMPLEMENTATION_AUDIT.md
+docs/DECISIONS.md
+docs/RESEARCH_SCALE.md
+docs/DESIGN_MLP.md
 experiments/prior-art/
