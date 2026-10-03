@@ -1,6 +1,50 @@
 # Decisions
 
 Decision log. Each entry records hypothesis, experiment, evidence, hostile review, and disposition.
+Entries describe their milestone, not necessarily today's commands or artifact.
+D-001–D-006 date from 2026-08-30, D-007–D-010 from 2026-08-31,
+D-011 from 2026-09-01, and D-012/D-013 from 2026-10-03. Old Python paths,
+MLP commands, accuracy figures, byte counts, and suite sizes below are historical.
+D-003 is intentionally absent from the retained log; no decision is invented
+or renumbered to fill the gap.
+
+## D-013 — truth pass and removal of rotted research code (2026-10-03)
+
+The local snapshot `c12a1ad` was integrated first, and `make build` and
+`make test` passed before cleanup. It already corrected the public runtime
+claim, Rust build instructions, D-011 model results, and absent-CI claim.
+The default page contains one optional drag-input shim (35 source lines,
+2,228 body bytes in this snapshot), not inference JavaScript. The script-free
+export retains the same calculation signals.
+
+The shipped model remains D-011's t=0.65, seed=16, test_accuracy=0.7542.
+No accuracy work or retraining was done. Rebuilt UTF-8 sizes are 1,622,282 bytes
+for `dist/index.html` and 1,619,905 for `dist/no-js.html`, with 6,834 signals each.
+The original D-011 page is 1,620,878 bytes at `2ae837c`; its logged count was
+six bytes too high and is corrected below, not replaced with today's size.
+
+Removed `scripts/benchmark.py`, `scripts/benchmark_scale.py`, and
+`scripts/benchmark_clf_scale.py`: all imported the compiler deleted in D-008.
+The unchanged CSVs and their citing docs remain as dated 2026-08-30 historical
+results that cannot be regenerated with the current toolchain. Removed the
+`train mlp` verb and `train/src/mlp.rs`: after the 14×14 preprocessing change
+that experiment silently trained on only 49 of 196 cells. The unshipped MLP's
+negative result remains in the historical design and D-009/D-010. Removed the
+ignored `preprocess_matches_python_intermediates` test, whose reference
+producer was deleted.
+
+The current suite runs 15 Rust tests and 94 Python tests: 80 browser tests
+(40 per engine), 5 runtime static checks, 3 history tests, and 6 video-math
+tests. The 16 abstract browser base-class skips are expected; missing browsers
+fail. No CI workflow was added.
+
+## D-012 — implementation audit and explicit training command
+
+The current audit disproved the claimed ban on numeric `var() * var()`. Both browser engines evaluated native products correctly for all sixteen pairs of two-bit inputs. Gate mode remains an educational construction, not a workaround for that alleged CSS restriction. The production XOR has 177 gates; the earlier 123-gate figure described an experiment.
+
+Inference also passed with page JavaScript disabled and with the input script removed. The script calculates pointer geometry only. This does not satisfy the original requirement of no script in the artifact, which commit `4ecfbda` explicitly relaxed. The unmerged `experiment/ui` branch at `a57ea17` used complete-input lookup selectors rather than downstream gate composition. See `docs/IMPLEMENTATION_AUDIT.md` for the evidence and audit limits.
+
+`make build` and `make test` now consume saved weights. Previously both retrained models, which made a page edit trigger a costly search and potentially replace model files. Training is now an explicit `make train` operation. No shipped weights or inference signals changed in this revision. Display bit order and model-dimension validation gained failing-before, passing-after regression tests.
 
 ## D-001 (lead) — custom-property netlist architecture verified
 
@@ -21,7 +65,7 @@ Optimization swarm: with DeepSeek-only budget and all measurable targets already
 
 ## D-005 (lead) — worker branch integration policy
 
-Worker branches stay on experiment/* unmerged; their validated findings are integrated into main by the lead (css-logic: var-graph over style queries; arithmetic: two's-complement feasibility, var*var illegality; network-demo: XOR proof + alternate ±1 formulation; ui: honest-labeling vocabulary, a11y patterns; prior-art: docs merged). Rationale: main ships one validated architecture; worker artifacts remain inspectable as experiments.
+Worker branches stay on experiment/* unmerged; their validated findings are integrated into main by the lead (css-logic: var-graph over style queries; arithmetic: two's-complement feasibility, the var*var restriction later disproved in D-012; network-demo: XOR proof + alternate ±1 formulation; ui: honest-labeling vocabulary, a11y patterns; prior-art: docs merged). Rationale: main ships one validated architecture; worker artifacts remain inspectable as experiments.
 
 ## D-006 (lead) — M11 architecture: bit-plane popcount over per-term neuron sums
 
@@ -70,6 +114,7 @@ Hypothesis: raise the canvas to 14×14 invisible hit-target cells (each checked 
 Experiment (evidence trail, one-time runs; logs in the session scratchpad):
 - First attempt (dilation-free runtime): 196 cells → 2×2 popcount≥T directly. The joint grid search over (t, T, seed, scale) on the drawn-style proxy picked T=3 (t=0.5, seed=5, drawn-val 0.6761) — and collapsed on genuinely thin strokes: thin-stroke 14×14 glyph fidelity 1/10 (stop condition fired; no weights written). Per-T table from the same run: T=1 t=0.7 s13 drawn-val 0.6362 / test 0.7633 / upscale 9/10 / thin 5/10; T=2 t=0.35 s2 0.6655 / 0.7877 / 8/10 / 5/10; T=3 t=0.5 s5 0.6761 / 0.6460 / 8/10 / 1/10. Diagnosis: the proxy's artificially thickened strokes hid the thin-stroke failure — the trainer's simulation and the runtime had to share the dilation stage or the proxy lies.
 - Fix: `dilate14_all` became a universal pipeline stage in `train/src/mnist.rs` — core/val/test simulation, the drawn-style proxy, both glyph evaluations, AND the runtime CSS circuit all dilate identically before the 2×2 downsample. Post-dilation per-T table (each row = full search restricted to that T): T=1: t=0.65 seed=16, drawn-val 0.6880 / MNIST val 0.7716 / test 0.7542 / upscale 8/10 / thin 6/10; T=2: t=0.65 seed=1, 0.7067 / 0.7980 / 0.7964 / 7/10 / 6/10; T=3: t=0.4 seed=10, 0.6942 / 0.7964 / 0.7913 / 7/10 / 6/10. The joint search picked T=2, whose 7/10 upscale fidelity failed the pre-registered 8/10 floor (stop condition fired again).
-Decision: T=1 is fixed ARCHITECTURE, the same status H=16 had for the MLP budget in D-009 — removed from the search entirely, no glyph-conditioned selection logic in the trainer. Rationale: the glyph floors are pre-registered acceptance criteria, so any T selection against them (or against a proxy that proxies them) is tuning on the acceptance set; the 1.9pp drawn-val gap to T=2 is within proxy noise (the proxy preferred the config that failed the floor); OR is the most forgiving mapping for a human drawing (any ink in a 2×2 dilated block lights the bit); and the ~4pp MNIST-test cost vs T=2 (0.7542 vs 0.7964) is the same demo-over-benchmark trade D-010 already made.
-Evidence (final, T=1-only search, test set and both glyph sets touched once each): chosen t=0.65, seed=16, drawn-style val 0.6880, MNIST val 0.7716, **MNIST test 0.7542**, 2×-upscale glyph fidelity **8/10** (misses: 6→5, 9→3), thin-stroke 14×14 fidelity **6/10** (misses: 1→4, 2→7, 6→5, 9→8). Augmentation fallback not triggered (8/10 ≥ floor). Quantized bias range widened to [−13, 19] (still inside the build-time-asserted 7-bit score width). Two consecutive `train mnist` runs byte-identical; `make build` re-run produced the same JSON a third time. Page: 6 834 signals (+1 302: 196 canvas inputs, 728 dilation ORs, 147 downsample ORs, minus the 49 retired `mn` primary placeholders, plus ~280 from the retrained classifier's popcount-plane sizes), 1 620 884 bytes (+217 KB, 1.62 MB — under the 1.8 MB stop condition). Full suite green in both engines (75 tests, 17 abstract-base skips), including new gate-level dilation/downsample checks against a Python reference and rendered-output checks for the paint canvas (no idle borders/grid, blob rendering) and the network-sees preview.
+Decision: T=1 is fixed in the current generator and no longer searched by the trainer. It was chosen after inspecting the per-T glyph results. The acceptance floors filtered all three configurations, and only T=1 passed both. The final glyph figures are therefore acceptance-conditioned, not untouched evaluation results. Calling the final architecture fixed does not remove that earlier selection. The trainer also uses glyph accuracy to trigger an augmentation attempt, though drawn-style validation gates acceptance of the resulting model.
+Rationale: OR accepts any ink in a dilated block, which is a forgiving mapping for drawing. T=2 scored 1.9 percentage points higher on the proxy but failed the canonical glyph floor. No statistical analysis established that gap as noise. The choice prioritizes the demonstrated drawing behavior over proxy and MNIST scores, at about a four-point MNIST-test cost relative to T=2.
+Evidence (final T=1-only run; the test and glyph sets had already been evaluated in earlier milestone runs): chosen t=0.65, seed=16, drawn-style val 0.6880, MNIST val 0.7716, **MNIST test 0.7542**, 2×-upscale glyph fidelity **8/10** (misses: 6→5, 9→3), thin-stroke 14×14 fidelity **6/10** (misses: 1→4, 2→7, 6→5, 9→8). Augmentation fallback not triggered (8/10 ≥ floor). Quantized bias range widened to [−13, 19] (still inside the build-time-asserted 7-bit score width). Two consecutive `train mnist` runs byte-identical; `make build` re-run produced the same JSON a third time. Page: 6 834 signals (+1 302: 196 canvas inputs, 728 dilation ORs, 147 downsample ORs, minus the 49 retired `mn` primary placeholders, plus ~280 from the retrained classifier's popcount-plane sizes), 1 620 878 UTF-8 bytes at `2ae837c` (+217 KB, 1.62 MB — under the 1.8 MB stop condition). Full suite green in both engines (75 tests, 17 abstract-base skips), including new gate-level dilation/downsample checks against a Python reference and rendered-output checks for the paint canvas (no idle borders/grid, blob rendering) and the network-sees preview.
 Disposition: T=1 ships as the only block downsample the generator will emit — `gen/` reads `block_threshold` from `scripts/weights_mnist.json` and refuses (build error) to emit an OR tree for a popcount spec. The paint-feel UI is the shipped drawing surface; the pixelated preview labels the abstraction honestly.

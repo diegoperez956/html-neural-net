@@ -1,7 +1,5 @@
-//! 1:1 port of scripts/circuit.py (build-time compiler; the artifact stays
-//! pure HTML+CSS). Byte-identical output vs Python is the acceptance bar:
-//! every expression string, every signal name, every ordering must match.
-//! Do not "improve" anything here without updating generate.py to match.
+//! Build-time circuit compiler. Named CSS signals compose arithmetic and
+//! fixed-weight inference. The original Python compiler was retired in D-008.
 
 /// `ref(name)` in python: var(--name)
 pub fn r#ref(name: &str) -> String {

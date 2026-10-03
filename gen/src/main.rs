@@ -1,7 +1,7 @@
 //! Build-time page generator (originally a 1:1 port of scripts/generate.py,
 //! deleted after the D-008 Rust migration; Rust is now the sole build path).
-//! The artifact stays pure HTML+CSS: this program only elaborates circuits,
-//! emits repetitive markup/CSS, and wires the demo sections.
+//! Inference runs in CSS. This program emits the circuits, markup, and a
+//! separate pointer-input script. Rust does not run in the browser.
 
 mod circuit;
 
@@ -30,7 +30,7 @@ fn text_led_css(signal: &str, cls: &str) -> String {
 
 /// @font-face rules embedding JetBrains Mono as base64 data URIs (single-file
 /// constraint: no external font requests). Read at generation time from
-/// assets/fonts/*.b64 -- same files the Python generator reads, verbatim.
+/// assets/fonts/*.b64.
 fn font_css(manifest_dir: &str) -> String {
     let assets = Path::new(manifest_dir).join("..").join("assets").join("fonts");
     let reg = fs::read_to_string(assets.join("JetBrainsMono-Regular.b64")).unwrap();
@@ -49,13 +49,13 @@ fn dec_css(cls: &str, sig: &str) -> String {
 #[derive(Deserialize)]
 struct ClsWeights {
     bias: i64,
-    weights: Vec<i64>,
+    weights: [i64; 9],
 }
 
 #[derive(Deserialize)]
 struct MnistWeights {
-    weights: Vec<Vec<i64>>,
-    bias: Vec<i64>,
+    weights: [Vec<i64>; 10],
+    bias: [i64; 10],
     test_accuracy: f64,
     /// M13 pipeline fields: the runtime canvas is canvas×canvas checkboxes,
     /// dilated dilate_iters times (4-neighbor OR), then 2×2 blocks reduce to
@@ -77,12 +77,23 @@ fn py_int_list(v: &[i64]) -> String {
 }
 
 fn leds(cls: &str, nbits: usize) -> String {
-    (0..nbits).map(|i| format!(r#"<span class="led {cls}_{i}"></span>"#)).collect()
+    (0..nbits).rev().map(|i| format!(r#"<span class="led {cls}_{i}"></span>"#)).collect()
 }
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    let out_path = args.get(1).cloned().unwrap_or_else(|| "dist/index.html".to_string());
+    let mut no_js = false;
+    let mut output = None;
+    for arg in std::env::args().skip(1) {
+        if arg == "--no-js" {
+            no_js = true;
+        } else {
+            assert!(!arg.starts_with('-') && output.is_none(), "usage: htmlnet-gen [output.html] [--no-js]");
+            output = Some(arg);
+        }
+    }
+    let out_path = output.unwrap_or_else(|| {
+        if no_js { "dist/no-js.html" } else { "dist/index.html" }.to_string()
+    });
 
     // scripts/ is a sibling of gen/ regardless of the invoking cwd — mirrors
     // python's __file__-relative weights loading.
@@ -137,7 +148,7 @@ fn main() {
         "0",
     );
 
-    // dot product of two 2-bit vectors u = (u1,u0), v = (v1,v0): u0*v0 + u1*v1
+    // Two-component binary vectors, not two-bit scalar entries. Sum range: 0..2.
     let p_u0v0 = c.unsigned_mult("d_u0v0", &[r#ref("u0")], &[r#ref("v0")]); // 1 bit
     let p_u1v1 = c.unsigned_mult("d_u1v1", &[r#ref("u1")], &[r#ref("v1")]); // 1 bit
     let mut p_u0v0_ext = p_u0v0.clone();
@@ -314,8 +325,8 @@ fn main() {
         .collect();
 
     // ---------------- Mode B: native CSS arithmetic (comparison baseline) ---
-    // var() * var() is illegal in CSS, so native mode only works where weights
-    // are literal constants — which is exactly the neural-inference case here.
+    // Numeric var() operands can multiply directly in calc(). Gate mode is
+    // an educational construction, not a workaround for a CSS restriction.
     let c = n.c;
     for (sig, expr) in [
         ("nb_h1pre", "calc((2 * var(--x1)) - (2 * var(--x0)) - 1)"),
@@ -502,7 +513,7 @@ fn main() {
         r####"
 <main class="wrap">
 <h1>draw a digit</h1>
-<p class="sub">a neural network in html + css. drag to paint — no grid, just ink; it guesses through dilation and downsample gates feeding a classifier compiled from mnist weights. the only javascript is a 20-line input shim; delete it and clicking still works.</p>
+<p class="sub">a neural network in html + css. drag to paint — no grid, just ink; it guesses through dilation and downsample gates feeding a classifier compiled from mnist weights. the only javascript is a small deletable input shim; delete it and clicking still works.</p>
 
 <div class="app">
   <div class="titlebar">
@@ -541,7 +552,7 @@ fn main() {
 
 <details class="hood">
 <summary>under the hood: checkbox state → bits → gates → adders → multipliers → neurons → this classifier</summary>
-<div class="ladder">checkbox state <span class="dim">→</span> bits <span class="dim">→</span> gates <span class="dim">→</span> adders <span class="dim">→</span> multiplication <span class="dim">→</span> dot product <span class="dim">→</span> matrix×vector <span class="dim">→</span> neurons <span class="dim">→</span> XOR MLP <span class="dim">→</span> dilate <span class="dim">→</span> OR-downsample <span class="dim">→</span> drawn-digit classifier</div>
+<div class="ladder">building blocks: bits → gates → arithmetic → neurons.<br>The XOR network and digit classifier are separate demos, not consecutive layers.</div>
 
 <section>
   <h2>1 · input bits</h2>
@@ -605,11 +616,11 @@ fn main() {
   </div>
   <div class="row"><span class="kbd">c + d =</span> <span class="bits">{leds_add4}</span>
   <span class="v d_add4"></span> <span class="caption">16·8·4·2·1</span>
-  <span class="tag">4 full adders, carries chained as named wires</span></div>
+  <span class="tag">5 full-adder stages, including the carry bit</span></div>
 </section>
 
 <section>
-  <h2>7 · dot product u·v (2-bit entries)</h2>
+  <h2>7 · dot product u·v (two binary components each)</h2>
   <div class="row">
     <label><input type="checkbox" id="u1"> u1</label>
     <label><input type="checkbox" id="u0"> u0</label>
@@ -635,7 +646,7 @@ fn main() {
   <div class="row"><span class="kbd">preactivation (4-bit two's complement)</span>
   <span class="bits">{leds_npre}</span> <span class="v d_npre"></span> <span class="caption">−8·4·2·1</span></div>
   <div class="row"><span class="kbd">activation</span> <span class="led l_n_out"></span>
-  <span class="tag">= 1 if preactivation ≥ 0 (sign bit)</span></div>
+  <span class="tag">= 1 if preactivation ≥ 0 (NOT the sign bit)</span></div>
 </section>
 
 <section>
@@ -652,17 +663,18 @@ fn main() {
   <h2>11 · comparison — the same XOR in native CSS arithmetic</h2>
   <div class="row"><span class="kbd">h1 = max(0, min(1, 2x₁−2x₀))</span> <span class="led l_nb_h1"></span></div>
   <div class="row"><span class="kbd">h2 = max(0, min(1, −2x₁+2x₀))</span> <span class="led l_nb_h2"></span></div>
-  <div class="row"><span class="kbd">out = max(0, min(1, 2h1+2h2−1))</span> <span class="led l_nb_out"></span>
+  <div class="row"><span class="kbd">out = max(0, min(1, 2h1+2h2))</span> <span class="led l_nb_out"></span>
   <span class="v d_nb_out"></span></div>
   <div class="row"><span class="kbd">Wx row 0 / row 1</span> <span class="v d_nb_mv0"></span> / <span class="v d_nb_mv1"></span></div>
-  <div class="tag">~14 declarations total vs {n_signals} gate signals above. Same outputs, opposite philosophy.
-  Because var()×var() is illegal in CSS, native mode only exists when one operand is a build-time constant —
-  which is true for inference weights, and exactly why structural composition is unavoidable for interactive multiplication.</div>
+  <div class="tag">8 arithmetic declarations for XOR and the matrix rows, excluding display views.
+  The gate-built XOR uses 177 gates. The whole page has {n_signals} registered signals, including inputs and views.
+  CSS can multiply two numeric runtime values with calc(var(--a) * var(--b)).
+  Gate mode shows how arithmetic is constructed; native mode shows how little CSS the same math needs.</div>
 </section>
 
 <section>
   <h2>12 · trained classifier — 3×3 glyph → “top bar” vs “left bar”</h2>
-  <div class="tag">trained at build time by a plain perceptron (train/src/glyph.rs) on 9 exemplars; weights compiled into the gate netlist. bias = {cls_bias}, w = {cls_weights_str}. This is the only learned part of the demo.</div>
+  <div class="tag">trained at build time by a plain perceptron (train/src/glyph.rs) on 9 exemplars; weights compiled into the gate netlist. bias = {cls_bias}, w = {cls_weights_str}. The digit classifier also has learned weights. The XOR weights are hand-picked.</div>
   <div class="grid" role="group" aria-label="3 by 3 glyph grid">
     {g_cells}
   </div>
@@ -682,7 +694,7 @@ fn main() {
   </div>
   <div class="tag">
   argmax = tournament left-fold over the 10 class scores (ties keep the lowest digit); each score = popcount-decomposed
-  weighted sum (weights ∈ [−3,3] via bit-planes P0/P1) − bias, all gate-composed at build time. Seven-segment display and
+  weighted sum (weights ∈ [−3,3] via bit-planes P0/P1) + bias, all gate-composed at build time. Seven-segment display and
   digit strip read the argmax/minterm gate signals directly (LEDs); the numeric readouts above are native-calc views,
   outside the gate circuit, exactly like every other decimal readout on this page.
   </div>
@@ -691,7 +703,7 @@ fn main() {
 <section>
   <h2>honesty label</h2>
   <div class="tag">
-  Runtime: the network, displays and readouts are HTML + CSS only (no WASM, no network requests, works from file://). The single &lt;script&gt; on the page is an input shim that translates pointer drags into checkbox toggles — zero computation; delete it and everything still works, one click per cell.<br>
+  Runtime: the network, displays and readouts are HTML + CSS only (no WASM, no network requests, works from file://). The single &lt;script&gt; on the page is an input shim that translates pointer drags into checkbox toggles. It calculates pointer positions, never network scores. Delete it and click cells to run the same inference.<br>
   Gates are named bit identities over native CSS min()/max()/calc() — the browser's arithmetic is the substrate; we compose circuits on top.<br>
   Decimal numbers in green are native-calc display views, outside the gate circuit. LEDs read gate signals directly.<br>
   The MNIST classifier (§13) follows the same split: the canvas's dilation and OR-downsample stages, argmax/minterm/segment signals are gates, the score, digit and margin numbers are native-calc views. No exception.<br>
@@ -703,7 +715,7 @@ fn main() {
 
 <footer>
 <div class="sig">htmlnet/1.0 (HTML+CSS) Server at file:// Port 0</div>
-<div class="tag"><span class="kbd">make build</span> / <span class="kbd">make test</span></div>
+<div class="tag"><a class="kbd" href="how-it-works.html">how it works</a> · <span class="kbd">make build</span> / <span class="kbd">make test</span></div>
 </footer>
 </main>
 <script>
@@ -712,28 +724,55 @@ fn main() {
 (() => {{
   const grid = document.querySelector('.grid14');
   if (!grid) return;
-  let mode = null, downBox = null;
+  let mode = null, downBox = null, pid = null, lastX = 0, lastY = 0;
   const boxOf = e => {{ const c = e.target.closest('.cell14'); return c && c.querySelector('input'); }};
+  const boxAt = (x, y) => {{ const c = document.elementFromPoint(x, y)?.closest('.cell14'); return c && c.querySelector('input'); }};
   grid.addEventListener('pointerdown', e => {{
-    const box = boxOf(e); if (!box || e.button !== 0) return;
-    e.target.releasePointerCapture && e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId) && e.target.releasePointerCapture(e.pointerId);
-    mode = !box.checked; box.checked = mode; downBox = box;
+    if (mode !== null || e.button !== 0) return; /* one stroke at a time: a second finger must not re-arm */
+    const box = boxOf(e) || boxAt(e.clientX, e.clientY); if (!box) return;
+    try {{ grid.setPointerCapture(e.pointerId); }} catch {{}} /* synthetic test pointers have no active id */
+    mode = !box.checked; box.checked = mode; downBox = box; pid = e.pointerId; lastX = e.clientX; lastY = e.clientY;
   }});
   grid.addEventListener('pointerover', e => {{
-    if (mode === null) return;
+    if (mode === null || e.pointerId !== pid) return;
     const box = boxOf(e); if (box) box.checked = mode;
+  }});
+  grid.addEventListener('pointermove', e => {{
+    if (mode === null || e.pointerId !== pid) return;
+    if ((e.buttons & 1) === 0) {{ mode = null; pid = null; return; }} /* primary contact gone (missed pointerup) */
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 16)); /* half of the 32px cell pitch */
+    for (let i = 1; i <= steps; i++) {{ const box = boxAt(lastX + dx * i / steps, lastY + dy * i / steps); if (box) box.checked = mode; }}
+    lastX = e.clientX; lastY = e.clientY;
   }});
   grid.addEventListener('click', e => {{
     const box = boxOf(e);
     if (box && box === downBox) e.preventDefault(); /* already painted on pointerdown */
     downBox = null; /* one-shot: keyboard toggles must not be suppressed */
   }});
-  addEventListener('pointerup', () => {{ mode = null; }});
+  addEventListener('pointerup', e => {{ if (e.pointerId === pid) {{ mode = null; pid = null; }} }});
+  addEventListener('pointercancel', e => {{ /* no click follows a cancel: also drop the suppression latch */
+    if (e.pointerId === pid) {{ mode = null; pid = null; downBox = null; }} }});
 }})();
 </script>
 "####
     );
 
+    let body = if no_js {
+        let (markup, _) = body.split_once("<script>").expect("input script boundary");
+        markup
+            .replace("drag to paint — no grid, just ink", "click cells to draw")
+            .replace(
+                "the only javascript is a small deletable input shim; delete it and clicking still works.",
+                "this build contains no javascript. click once per cell; clear resets the drawing.",
+            )
+            .replace(
+                "The single &lt;script&gt; on the page is an input shim that translates pointer drags into checkbox toggles. It calculates pointer positions, never network scores. Delete it and click cells to run the same inference.",
+                "This build contains no JavaScript. Native checkbox clicks change inputs; CSS computes every network output.",
+            )
+    } else {
+        body
+    };
     let html = render(c, &extra, &body, "htmlnet — draw a digit, the network is pure CSS");
     if let Some(parent) = Path::new(&out_path).parent() {
         if !parent.as_os_str().is_empty() {
@@ -741,7 +780,31 @@ fn main() {
         }
     }
     fs::write(&out_path, &html).unwrap();
-    // python's message uses len(html) on the str, i.e. Unicode codepoints, not
-    // UTF-8 bytes -- match that for parity of the stdout message too.
     println!("wrote {out_path}: {n_signals} signals, {} bytes", html.len());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn glyph_schema_rejects_missing_or_extra_pixels() {
+        for count in [8, 10] {
+            let json = serde_json::json!({"bias": 0, "weights": vec![0; count]});
+            assert!(serde_json::from_value::<ClsWeights>(json).is_err(), "accepted {count} glyph weights");
+        }
+    }
+
+    #[test]
+    fn digit_schema_rejects_missing_or_extra_classes() {
+        let shipped: serde_json::Value = serde_json::from_str(include_str!("../../scripts/weights_mnist.json")).unwrap();
+        for count in [9, 11] {
+            for field in ["weights", "bias"] {
+                let mut json = shipped.clone();
+                let entry = json[field][0].clone();
+                json[field] = serde_json::json!(vec![entry; count]);
+                assert!(serde_json::from_value::<MnistWeights>(json).is_err(), "accepted {count} {field} rows");
+            }
+        }
+    }
 }

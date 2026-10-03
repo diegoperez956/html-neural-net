@@ -1,10 +1,15 @@
 # Design: MLP hidden layer in the CSS circuit
 
-Status: built and evaluated (`train/src/mlp.rs`), not shipped. It cleared
-its MNIST accuracy bar but not glyph fidelity, and roughly doubled the
-classifier's page bytes for that; the circuit described below was never
-generated. Kept as a recorded negative result — see D-010 in
-`docs/DECISIONS.md`. Backed by measured numbers in `RESEARCH_SCALE.md`.
+Historical design (2026-08-30), evaluated and rejected on 2026-08-31, not
+shipped. The experimental `train/src/mlp.rs` and `train mlp` verb were removed
+on 2026-10-03 after the 14×14 pipeline change left them silently using only
+49 of 196 coverage cells. The result below cannot be regenerated with the
+current trainer. It cleared its MNIST accuracy bar but not glyph fidelity,
+and roughly doubled the classifier's page bytes for that; the production
+circuit described below was never generated. Kept as a recorded negative
+result — see D-009/D-010 in `docs/DECISIONS.md`. The 2026-08-30 synthetic probe
+measurements in `RESEARCH_SCALE.md` are also historical, not current results.
+References to "today" and recommendations below describe that original proposal.
 
 ## Goal
 

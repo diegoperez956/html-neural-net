@@ -7,3 +7,8 @@ benchmarks/raw/
 data/
 train/target/
 gen/target/
+.venv/
+reference/cursor-plugins/
+video/.cache/
+video/output/
+video/.venv/
