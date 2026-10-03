@@ -23,4 +23,4 @@ test-runtime: build
 	$(PYTHON) -m unittest discover -s tests -v
 
 clean:
-	rm -f dist/index.html
+	rm -f dist/index.html dist/no-js.html
