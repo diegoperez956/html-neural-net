@@ -31,11 +31,8 @@ The circuit builders compose named signals, rather than enumerating complete inp
 ## Read this first
 
 - [How it works, with worked math](docs/HOW_IT_WORKS.md)
-- [Filming walkthrough for YouTube](docs/VIDEO_WALKTHROUGH.md)
 - [Implementation audit, including historical shortcuts](docs/IMPLEMENTATION_AUDIT.md)
 - [Browser-readable explanation](dist/how-it-works.html)
-- [50-minute silent Manim study video](video/README.md)
-- [Next-chat knowledge-test handoff](docs/STUDY_HANDOFF.md)
 
 ## Demo
 
@@ -149,9 +146,9 @@ python3 -m venv .venv
 make test PYTHON=.venv/bin/python
 ```
 
-`make test` builds from the checked-in weights, runs 15 Rust tests and 97
+`make test` builds from the checked-in weights, runs 15 Rust tests and 91
 Python tests: 41 browser tests per engine, 5 runtime static checks, 3 history
-inventory tests, 6 video-math tests, and 1 published-metrics check. The 16 abstract browser base classes
+inventory tests, and 1 published-metrics check. The 16 abstract browser base classes
 are skipped, not missing browser coverage. Missing browsers are failures,
 not silent skips. `make train` is separate: it retrains and overwrites both model files
 and can download MNIST. No retraining is needed to open or test the demo.

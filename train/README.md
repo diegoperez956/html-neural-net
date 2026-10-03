@@ -161,5 +161,5 @@ The runtime suite has 87 tests: 41 per browser engine and 5 static checks.
 It checks inference against the current JSON, including script-disabled and
 script-deleted operation, preprocessing, score arithmetic, argmax, margin,
 and rendered displays. The 16 abstract base-class skips are expected.
-`make test` also runs 2 generator Rust tests, 9 history/video Python tests,
+`make test` also runs 2 generator Rust tests, 3 history Python tests,
 and a check of the README's published accuracy numbers against the saved JSON.
