@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>htmlnet — how it works</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 24px 80px; background: #282828; color: #ebdbb2;
+    font-family: 'JetBrains Mono', Courier, monospace; font-size: 13px; line-height: 1.7;
+  }
+  .wrap { max-width: 700px; margin: 0 auto; }
+  a { color: #fe8019; }
+  a:visited { color: #fe8019; }
+  .back { display: inline-block; margin-bottom: 28px; color: #928374; text-decoration: none; }
+  .back:hover { color: #fe8019; }
+  h1 { font-size: 22px; margin: 0 0 6px; color: #ebdbb2; font-weight: 700; }
+  .sub { color: #928374; font-size: 13px; margin: 0 0 32px; max-width: 62ch; }
+  h2 { font-size: 15px; margin: 40px 0 10px; border-top: 1px solid #504945; padding-top: 20px; color: #fe8019; }
+  h3 { font-size: 13px; margin: 20px 0 6px; color: #ebdbb2; }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  code { background: #1d2021; border: 1px solid #504945; border-radius: 3px; padding: 1px 5px; color: #fabd2f; font-size: 12px; }
+  pre {
+    background: #1d2021; border: 1px solid #504945; border-radius: 4px;
+    padding: 12px 14px; overflow-x: auto; font-size: 12px; line-height: 1.6;
+    color: #ebdbb2;
+  }
+  pre code { background: none; border: none; padding: 0; color: inherit; }
+  .kw { color: #fe8019; }
+  .num { color: #b8bb26; }
+  .cm { color: #7c6f64; font-style: italic; }
+  table { border-collapse: collapse; margin: 14px 0; width: 100%; }
+  th, td { border: 1px solid #504945; padding: 6px 10px; text-align: left; font-size: 12px; }
+  th { color: #928374; background: #1d2021; font-weight: normal; }
+  td code { font-size: 12px; }
+  .tag { color: #928374; font-size: 12px; }
+  .ladder { color: #928374; font-size: 12px; letter-spacing: 0.5px; margin: 14px 0; word-spacing: 2px; }
+  .ladder .dim { color: #fe8019; }
+  .note { border-left: 2px solid #504945; padding: 2px 0 2px 14px; color: #928374; font-size: 12px; margin: 14px 0; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #504945; color: #928374; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="index.html">&larr; back to the demo</a>
+
+<h1>How htmlnet works</h1>
+<p class="sub">A neural network computed in pure HTML + CSS. Checkboxes are input bits, CSS custom properties carry signals through a dependency graph, and the browser's style engine does the arithmetic. The optional JavaScript is a small drag-to-draw input script &mdash; delete the one <code>&lt;script&gt;</code> tag and the network still runs, one click per cell.</p>
+
+<p>For worked numbers and recording notes, read the <a href="../docs/HOW_IT_WORKS.md">math guide</a>, <a href="../docs/VIDEO_WALKTHROUGH.md">filming walkthrough</a>, and <a href="../docs/IMPLEMENTATION_AUDIT.md">implementation audit</a>.</p>
+<div class="ladder">bits &rarr; gates &rarr; arithmetic &rarr; neurons.<br>The XOR network and digit classifier are separate examples, not consecutive layers.</div>
+
+<h2>What this actually is</h2>
+<p>A checkbox's checkedness is the only persistent state on the page &mdash; that's the input. A selector reads it and writes a <code>0</code> or <code>1</code> into a registered integer custom property:</p>
+<pre><code>@property --x { syntax: "&lt;integer&gt;"; inherits: true; initial-value: 0; }
+.rt { --x: 0; }
+body.rt:has(#x:checked) { --x: 1; }</code></pre>
+<p>Each signal has an integer registration and a value declaration. Gate declarations reference other signals with <code>var()</code>. All calculations share the body scope, and displays inherit the results. The browser recomputes dependent values when a checkbox changes. The registration enforces integer values, but the gate equations are what preserve the bit range of 0 or 1.</p>
+<p>Mode B computes XOR and the matrix rows with eight native arithmetic declarations, excluding displays. The production gate-built XOR uses 177 gates. The entire page has 6,834 registered signals, including inputs, aliases, and views. Those are different counts, not interchangeable comparisons.</p>
+<p>Concretely: HTML supplies form state and structure, CSS supplies the computation graph and evaluates it, and Rust (build time only, never shipped) generates the 6,834 named declarations that make up that graph. Nothing here claims the browser "is a CPU" or that HTML performs matrix multiplication from first principles &mdash; see <code>docs/COMPUTATION_MODEL.md</code> for the exact wording this project holds itself to.</p>
+
+<h2>The gate encoding</h2>
+<p>Four bit-domain identities, each a native CSS operation re-read as logic. These are the bottom of the derivation &mdash; not reduced further, not built from transistors:</p>
+<table>
+<tr><th>gate</th><th>identity</th><th>native CSS</th></tr>
+<tr><td>NOT a</td><td><code>1 &minus; a</code></td><td><code>calc()</code> subtraction</td></tr>
+<tr><td>a AND b</td><td><code>min(a, b)</code></td><td><code>min()</code></td></tr>
+<tr><td>a OR b</td><td><code>max(a, b)</code></td><td><code>max()</code></td></tr>
+<tr><td>a XOR b</td><td><code>max(a,b) &minus; min(a,b)</code></td><td><code>min()/max()/calc()</code></td></tr>
+</table>
+<p>In the generator (<code>gen/src/circuit.rs</code>) those four lines are it:</p>
+<pre><code>fn not_e(a) { format!("calc(1 - ({a}))") }
+fn and_e(a, b) { format!("min({a}, {b})") }
+fn or_e(a, b)  { format!("max({a}, {b})") }
+fn xor_e(a, b) { format!("calc(max({a}, {b}) - min({a}, {b}))") }</code></pre>
+<p>Every larger structure is these four, wired together, at build time:</p>
+<ul>
+<li><strong>Half adder</strong> = one XOR (sum) + one AND (carry).</li>
+<li><strong>Full adder</strong> = two half adders' worth of XOR/AND plus one OR to combine carries.</li>
+<li><strong>N-bit ripple-carry adder</strong> = full adders chained through named carry signals, LSB to MSB.</li>
+<li><strong>Unsigned multiplier</strong> = AND gates produce every shifted partial-product bit; ripple adders sum the rows (binary long multiplication, not a lookup).</li>
+<li><strong>Two's-complement negation</strong> = NOT every bit, ripple-add 1 (carry-in trick, same adder used for subtraction everywhere on the page).</li>
+</ul>
+<p>A half adder is genuinely two gates:</p>
+<pre><code>pub fn half_adder(&mut self, name, a, b) -> (sum, carry) {
+    let s = self.gate2(Xor, a, Some(b), Some(&format!("{name}_sum")));
+    let c = self.gate2(And, a, Some(b), Some(&format!("{name}_carry")));
+    (s, c)
+}</code></pre>
+<p>and a full adder is two of those plus an OR to merge the two carry-out cases &mdash; the standard textbook circuit, just emitted as named CSS custom properties instead of drawn as a schematic.</p>
+
+<h2>How we made linear algebra with HTML</h2>
+<p><strong>CSS can multiply two runtime numbers.</strong> <code>calc(var(--a) * var(--b))</code> works when both variables resolve to numbers. Earlier docs said otherwise. Tests now compare native multiplication with the gate multiplier in Chromium and Firefox.</p>
+<p>Gate mode is a teaching choice. It constructs arithmetic from bit operations so you can follow the steps. Native CSS arithmetic is the shorter alternative.</p>
+
+<h3>Dot product</h3>
+<p>A dot product of two vectors is: multiply each pair of components (a gate circuit, since both operands are runtime values), then add all the products with an adder tree.</p>
+<pre><code>let p_u0v0 = c.unsigned_mult("d_u0v0", &[u0], &[v0]);
+let p_u1v1 = c.unsigned_mult("d_u1v1", &[u1], &[v1]);
+let dot_bits = c.ripple_add("dot_sum", &p_u0v0_ext, &p_u1v1_ext, "0");</code></pre>
+
+<h3>Matrix &times; vector</h3>
+<p>One dot product per output row. The demo's fixed 2&times;2 matrix has constant weights, so each "multiply" degenerates into wiring &mdash; AND-gating the input bit through a mask built from the constant's own bit pattern, then summing with a ripple adder:</p>
+<pre><code>fn row_of(c, name, wx1, wx0, x1name, x0name) -> row_sum_bits {
+    let t1 = mask_bits(wx1).and_each(x1name);  // weight bits AND input bit
+    let t0 = mask_bits(wx0).and_each(x0name);
+    c.ripple_add(name, &t1, &t0, "0")
+}</code></pre>
+<p>A constant integer weight multiplied by one bit needs no general multiplier. Masking the weight's bit pattern selects either that weight or zero.</p>
+
+<h3>Neuron</h3>
+<p>A neuron is a dot product (weights &middot; inputs) plus a bias, thresholded. For a signed weight, the magnitude is bit-masked against the input, then conditionally negated (NOT the masked bits, ripple-add 1) before the ripple-add tree sums every term plus the bias constant. The sign bit is 1 for a negative sum. Inverting it gives the chosen activation, 1 for a nonnegative sum:</p>
+<pre><code>let sign_bit = acc[acc.len() - 1].clone();
+let out = self.c.gate(Not, &sign_bit, "n1_out");  // out = 1 iff sum >= 0</code></pre>
+
+<h3>Layers: the 2-2-1 XOR network</h3>
+<p>A single linear neuron can't learn XOR. Two hidden threshold neurons can. The page ships this exact integer-weight network:</p>
+<pre><code>h1  = step(+2x1 - 2x0 - 1)
+h2  = step(-2x1 + 2x0 - 1)
+out = step(+2h1 + 2h2 - 1)</code></pre>
+<p>Weights are &plusmn;2. Their magnitudes need no general multiplier, but the builder still emits masking gates and negation for negative products. Sums use four-bit signed words. <code>h1</code> and <code>h2</code> are neuron output signals; the output neuron reads them with plain <code>var(--xor_h1_out)</code> / <code>var(--xor_h2_out)</code> the same way it would read a primary input. That's the whole trick behind "layers stack": a hidden layer is just more named signals that a later neuron's declarations happen to reference.</p>
+
+<h3>The 10-class linear digit classifier</h3>
+<p>Same recipe scaled up: one matrix&times;vector product (49 pixel-bits &times; 10 rows of weights) plus argmax, done entirely in gates. Weights are constrained to <code>[-3,3]</code> so each one decomposes into two popcount bit-planes (magnitude 1 or 3 in plane 0, magnitude 2 or 3 in plane 1) instead of needing a general multiplier &mdash; <code>Circuit::popcount</code> carry-save-reduces each plane's lit inputs with full/half adders, plane 1's count gets doubled by a zero-bit shift, and <code>pos &minus; neg + bias</code> is two ripple adds. Ten of those per-class scores feed a 9-round tournament argmax (<code>Circuit::argmax</code>): each round subtracts the challenger from the incumbent, the sign bit of that difference selects a mux, ties keep the lower index. The winning 4-bit index is decoded to one-hot minterms (AND-trees over NOT'd index bits), and each of the 7 segments is an OR-tree over the minterms of the digits that light it &mdash; standard seven-segment logic, driving the visible display straight off gate signals, not off a separate decimal readout.</p>
+<div class="note">Decimal numbers you see anywhere on the page (scores, indices, bit counters) are <code>calc()</code> views like <code>calc(b0 + 2*b1 + 4*b2)</code> &mdash; display-only, native multiplication by powers of two, and they never feed back into the gate circuit. The seven-segment digit is different: it's driven by gate signals directly.</div>
+
+<h2>The 14&times;14 paint canvas</h2>
+<p>The canvas is 196 invisible checkbox cells (<code>mc0..mc195</code>) with no visible grid. Each checked cell renders one oversized rounded orange blob, ~1.7&times; the cell pitch, so a dragged path reads as a continuous marker stroke instead of stair-stepped squares:</p>
+<pre><code>.cell14:has(input:checked)::after {
+  content: ""; border-radius: 50%; background: #fe8019;
+  width: 54px; height: 54px; /* cell pitch is 32px */
+  pointer-events: none;
+}</code></pre>
+<p>What the classifier actually sees is much coarser than what you drew, and that gap is bridged by two gate stages, run in CSS every time a cell toggles:</p>
+<ol>
+<li><strong>Dilation</strong> &mdash; each cell's effective bit is the OR of itself and its 4 orthogonal neighbors (edge cells OR fewer): 196 named signals <code>dl0..dl195</code>, nested <code>max()</code> calls. A 1-cell-wide stroke becomes a 3-cell-wide band, because a thin drag needs to survive downsampling.</li>
+<li><strong>2&times;2 block OR-downsample</strong> &mdash; each of the 49 output cells (<code>mn0..mn48</code>) is the OR of its 2&times;2 block of dilated bits: any ink in the block lights it. The current generator requires T=1, "any ink counts". Development chose that architecture after comparing glyph acceptance results, so the reported glyph scores are acceptance-conditioned.</li>
+</ol>
+<p>That reduces the 196 canvas cells to the 49 bits (7&times;7) the linear classifier was trained on. The "network sees" preview on the page reads those same <code>mn</code> gate bits and renders them pixelated on purpose &mdash; it's showing you the actual abstraction the classifier receives, not the marker stroke you drew.</p>
+
+<h2>The build pipeline</h2>
+<p>Nothing above is handwritten or improvised at runtime. Two Rust programs, run at build time, produce the entire artifact:</p>
+<ol>
+<li><strong><code>train/</code></strong> &mdash; a deterministic Rust trainer. <code>train/src/mnist.rs</code> downloads real MNIST, binarizes, crops to bounding box, pads to a centered square, area-resamples to 14&times;14, dilates, and OR-reduces to 7&times;7 &mdash; simulating the exact gate pipeline the browser will run &mdash; then trains an 8-epoch perceptron on 50,000 images, withholds 10,000 training images for validation, and quantizes weights to <code>[-3,3]</code>, writing <code>scripts/weights_mnist.json</code>.</li>
+<li><strong><code>gen/</code></strong> &mdash; the circuit compiler and page generator. <code>gen/src/circuit.rs</code> defines <code>Circuit</code> (an ordered table of named signal declarations) and <code>Net</code> (the neuron/weighted-score builders); <code>gen/src/main.rs</code> calls those builders in order &mdash; gates, half/full adder, 2-bit adder, 2&times;2 multiplier, 4-bit adder, dot product, matrix-vector, neuron, the 2-2-1 XOR MLP, Mode B, the M13 canvas pipeline, the trained classifiers &mdash; reads the trained weights, and calls <code>render()</code> to emit the whole page: sorted <code>@property</code> registrations, then every <code>.rt { --sig: expr; }</code> declaration in dependency order, then the static body markup and the one input-shim <code>&lt;script&gt;</code>.</li>
+</ol>
+<p>The builders compose named signals through <code>var()</code> references. The numbered UI sections instantiate separate examples, not a single chain. Tests compare intermediate values and rendered outputs with independent arithmetic. They also click cells with page JavaScript disabled and with the input script deleted.</p>
+<p>The result is ~6,834 registered custom-property signals, about 1.62&nbsp;MB, no JavaScript doing network inference, and it opens from <code>file://</code> with no build step, no server, and no network request.</p>
+
+<footer>
+See <code>README.md</code>, <code>docs/ARCHITECTURE.md</code>, and <code>docs/COMPUTATION_MODEL.md</code> in the repo for the full write-up, the honesty boundaries this project holds itself to, and the prior-art survey. MIT licensed.
+</footer>
+
+</div>
+</body>
+</html>

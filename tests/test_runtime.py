@@ -1,13 +1,16 @@
 """htmlnet runtime tests — Playwright against the built dist/index.html.
 
-The artifact must be JS-free; the *test harness* may evaluate JS in the page
-to read registered custom properties (computed values are real integers
-thanks to @property).
+Inference must work without page JavaScript. The test driver may read computed
+styles with JavaScript, but it does not supply predictions to the page.
 
-Run: make build && python3 -m unittest discover -s tests -v
+Run: make test
 """
+import hashlib
 import os
+from pathlib import Path
+import re
 import subprocess
+import tempfile
 import unittest
 
 from playwright.sync_api import sync_playwright
@@ -17,6 +20,7 @@ DIST = os.path.join(ROOT, "dist", "index.html")
 URL = "file://" + DIST
 
 ENGINES = ["chromium", "firefox"]
+INPUT_SHIM_SHA256 = "f6b879663aa12c6d209f2a959fab2167d6f5f1ad6f74880c82d683bb714e5e1e"
 
 
 def s2c(v, width):
@@ -109,8 +113,9 @@ class Base(unittest.TestCase):
         cls.pw = sync_playwright().start()
         try:
             cls.browser = getattr(cls.pw, cls.engine).launch(headless=True)
-        except Exception as e:
-            raise unittest.SkipTest(f"{cls.engine} unavailable: {e}")
+        except Exception:
+            cls.pw.stop()
+            raise
 
     @classmethod
     def tearDownClass(cls):
@@ -118,14 +123,14 @@ class Base(unittest.TestCase):
         cls.pw.stop()
 
     def setUp(self):
-        self.page = self.browser.new_page()
+        self.page = self.browser.new_page(reduced_motion="reduce")
         self.page.goto(URL)
 
     def tearDown(self):
         self.page.close()
 
     def set_bits(self, **ids):
-        # test-side JS sets form state directly (the artifact itself stays JS-free)
+        # Test input injection only. The page's CSS computes the outputs.
         self.page.evaluate(
             "(ids) => { for (const [n, v] of Object.entries(ids)) "
             "{ const el = document.getElementById(n); el.checked = v; } }",
@@ -147,9 +152,9 @@ class Base(unittest.TestCase):
         return dec(vals)
 
 
-class StaticChecks(Base):
-    def test_no_javascript(self):
-        html = open(DIST).read()
+class StaticChecks(unittest.TestCase):
+    def test_only_reviewed_input_javascript(self):
+        html = Path(DIST).read_text()
         lower = html.lower()
         # exactly one <script>: the input shim. Everything else on the page
         # (network computation, display, readouts) stays JS-free.
@@ -159,6 +164,19 @@ class StaticChecks(Base):
         self.assertNotIn("onchange", lower)
         self.assertNotIn("oninput", lower)
         self.assertNotIn("onload", lower)
+        from html.parser import HTMLParser
+
+        class AttributeAudit(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.handlers = []
+
+            def handle_starttag(self, tag, attrs):
+                self.handlers.extend(name for name, _ in attrs if name.startswith("on"))
+
+        attributes = AttributeAudit()
+        attributes.feed(html)
+        self.assertEqual(attributes.handlers, [], "inline event-handler attributes")
         self.assertNotIn("webassembly", lower)
         self.assertNotIn(".wasm", lower)
         self.assertNotIn("http://", lower)
@@ -177,12 +195,15 @@ class StaticChecks(Base):
                            "import", "localstorage", "document.cookie", "src="):
             self.assertNotIn(forbidden, low_body, f"shim contains {forbidden!r}")
         self.assertNotIn("Function(", script_body, "shim uses the Function constructor")
+        # Any deliberate input-shim change requires review and a new pin.
+        normalized = " ".join(script_body.split()).encode()
+        self.assertEqual(hashlib.sha256(normalized).hexdigest(), INPUT_SHIM_SHA256)
 
     def test_no_operand_pair_lookup_selectors(self):
         """Composition, not enumeration: :has() rules may only map single
         primary input checkboxes; no selector may encode a truth-table row."""
         import re
-        html = open(DIST).read()
+        html = Path(DIST).read_text()
         has_rules = re.findall(r"body\.rt:has\(([^)]+)\)", html)
         self.assertTrue(has_rules, "expected input mapping rules")
         for rule in has_rules:
@@ -190,8 +211,6 @@ class StaticChecks(Base):
             self.assertEqual(len(ids), 1, f"multi-input :has rule: {rule}")
 
     def test_deterministic_rebuild(self):
-        import hashlib
-        import tempfile
         gen_bin = os.path.join(ROOT, "gen", "target", "release", "htmlnet-gen")
         if not os.path.isfile(gen_bin):
             self.fail(f"{gen_bin} not found — run `make build` first")
@@ -200,9 +219,40 @@ class StaticChecks(Base):
             out = subprocess.run([gen_bin, rebuild_path],
                                  cwd=ROOT, capture_output=True, text=True)
             self.assertEqual(out.returncode, 0, out.stderr)
-            h1 = hashlib.sha256(open(DIST, "rb").read()).hexdigest()
-            h2 = hashlib.sha256(open(rebuild_path, "rb").read()).hexdigest()
+            h1 = hashlib.sha256(Path(DIST).read_bytes()).hexdigest()
+            h2 = hashlib.sha256(Path(rebuild_path).read_bytes()).hexdigest()
         self.assertEqual(h1, h2, "rebuild is not byte-identical")
+
+    def test_no_js_export_has_identical_signals(self):
+        gen_bin = Path(ROOT, "gen/target/release/htmlnet-gen")
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory, "no-js.html")
+            subprocess.run([str(gen_bin), str(output), "--no-js"], check=True, capture_output=True)
+            html = output.read_text()
+        self.assertFalse("<script" in html.lower(), "--no-js output still contains a script")
+        self.assertFalse("drag to paint" in html, "scriptless copy still advertises dragging")
+        signals = lambda text: re.findall(r"^\.rt \{ --[^\n]+", text, re.M)
+        self.assertEqual(signals(html), signals(Path(DIST).read_text()))
+
+    def test_inference_uses_gates_and_hidden_outputs(self):
+        signals = dict(re.findall(r"\.rt \{ --([\w-]+): ([^;]+); \}", Path(DIST).read_text()))
+        self.assertTrue(signals)
+        for name, expr in signals.items():
+            if not name.startswith("nb_") and not name.endswith("_dec"):
+                self.assertNotIn("*", expr, f"native multiplication in gate signal {name}")
+
+        def ancestors(name):
+            found, pending = set(), [name]
+            while pending:
+                for dependency in re.findall(r"var\(--([\w-]+)\)", signals[pending.pop()]):
+                    self.assertIn(dependency, signals, f"undefined signal {dependency}")
+                    if dependency not in found:
+                        found.add(dependency)
+                        pending.append(dependency)
+            return found
+
+        self.assertTrue({"xor_h1_out", "xor_h2_out"} <= ancestors("xor_out_out"))
+        self.assertIn("mc105", ancestors("mnist_idx_b0"))
 
 
 class GateTests(Base):
@@ -318,6 +368,22 @@ class NativeModeTests(Base):
                 self.assertEqual(nb_h2, h2)
                 self.assertEqual(nb_out, x1 ^ x0)
 
+    def test_runtime_numbers_can_multiply_natively(self):
+        self.page.add_style_tag(content='''
+            @property --probe_a { syntax: "<integer>"; inherits: true; initial-value: 0; }
+            @property --probe_b { syntax: "<integer>"; inherits: true; initial-value: 0; }
+            @property --probe_product { syntax: "<integer>"; inherits: true; initial-value: 0; }
+            .rt {
+                --probe_a: calc(2 * var(--a1) + var(--a0));
+                --probe_b: calc(2 * var(--b1) + var(--b0));
+                --probe_product: calc(var(--probe_a) * var(--probe_b));
+            }
+        ''')
+        for a in range(4):
+            for b in range(4):
+                self.set_bits(a1=a >> 1, a0=a & 1, b1=b >> 1, b0=b & 1)
+                self.assertEqual(self.read("probe_product", "mul2_dec"), [a * b, a * b])
+
     def test_matvec_all_4_states(self):
         for v1 in (0, 1):
             for v0 in (0, 1):
@@ -370,6 +436,7 @@ class ClassifierTests(Base):
         ]
         for bits, label in exemplars:
             self.check(bits)
+            self.assertEqual(self.ref(bits)[1], label, f"training label for {bits}")
 
     def test_random_states(self):
         import random
@@ -494,6 +561,29 @@ class DisplayTests(Base):
         got = self.counter_reset(cls)
         self.assertEqual(got, f"v {expect_int}", f".{cls}::after rendered counter")
 
+    def test_visible_bit_order_matches_place_value_captions(self):
+        self.page.locator("details.hood > summary").click()
+        self.set_bits(a0=1, b1=1, x0=1)
+        for selector, expected in ((".l_add2_0", [0, 1, 1]),
+                                   (".l_mul2_0", [0, 0, 1, 0]),
+                                   (".l_npre_0", [1, 1, 0, 1])):
+            colors = self.page.locator(selector).evaluate('''el =>
+                [...el.parentElement.children]
+                    .sort((a, b) => a.getBoundingClientRect().x - b.getBoundingClientRect().x)
+                    .map(e => getComputedStyle(e).backgroundColor)
+            ''')
+            bits = [1 if norm_rgb(color) == (254, 128, 25) else 0 for color in colors]
+            self.assertEqual(bits, expected, f"{selector}: most significant bit must be on the left")
+
+    def test_seven_segment_rendering(self):
+        _, best = canvas_reference(rows_to_bits(THIN_CANVASES["seven"]))
+        self.set_bits(**{f"mc{i}": bit for i, bit in enumerate(rows_to_bits(THIN_CANVASES["seven"]))})
+        for segment, digits in MnistClassifierTests.SEG_MAP.items():
+            color = self.page.locator(f".l_mn_seg_{segment}").evaluate(
+                "e => getComputedStyle(e).backgroundColor")
+            expected = (250, 189, 47) if best in digits else (60, 56, 54)
+            self.assertEqual(norm_rgb(color), expected, f"rendered segment {segment}")
+
     def test_adder_and_multiplier_views(self):
         self.set_bits(a1=1, a0=0, b1=1, b0=1)          # a=2, b=3
         self.assert_view("d_add2", 5)
@@ -506,7 +596,7 @@ class DisplayTests(Base):
         self.assert_view("d_add4", 15)
 
     def test_dot_view(self):
-        self.set_bits(u1=1, u0=0, v1=1, v0=0)          # u=2, v=2 -> 0*0 + 1*1
+        self.set_bits(u1=1, u0=0, v1=1, v0=0)          # u=(1,0), v=(1,0) -> 1*1 + 0*0
         self.assert_view("d_dot", 1)
 
     def test_matvec_views(self):
@@ -627,8 +717,9 @@ class DisplayTests(Base):
         self.assertEqual(blob["content"], '""', "checked cell renders a blob")
         self.assertEqual(norm_rgb(blob["bg"]), (254, 128, 25), "blob ink color")
         self.assertEqual(blob["r"], "50%", "blob is round")
-        self.assertGreaterEqual(float(blob["w"].rstrip("px")), 38.0,
-                                "blob must be oversized vs the 24px cell pitch")
+        cell_width = self.page.locator("#mc97").bounding_box()["width"]
+        self.assertGreaterEqual(float(blob["w"].rstrip("px")), 1.5 * cell_width,
+                                "blob must overlap neighboring cells")
         self.assertEqual(blob["pe"], "none", "blob must not intercept pointer events")
 
 
@@ -668,6 +759,19 @@ class DragShimTests(Base):
         # drag would -- the shim must suppress its default (no double-toggle)
         self.click_event(down_id)
 
+    def test_real_mouse_click_and_drag(self):
+        self.page.locator("#mc70").click()
+        self.assertTrue(self.page.locator("#mc70").is_checked())
+        self.page.locator("#mc70").click()
+        self.assertFalse(self.page.locator("#mc70").is_checked())
+        start = self.page.locator("#mc70").bounding_box()
+        end = self.page.locator("#mc75").bounding_box()
+        self.page.mouse.move(start["x"] + start["width"] / 2, start["y"] + start["height"] / 2)
+        self.page.mouse.down()
+        self.page.mouse.move(end["x"] + end["width"] / 2, end["y"] + end["height"] / 2)
+        self.page.mouse.up()
+        self.assertEqual(self.checked(*[f"mc{i}" for i in range(70, 76)]), [True] * 6)
+
     def test_drag_paints_three_cells(self):
         self.drag("mc0", "mc1", "mc2")
         self.assertEqual(self.checked("mc0", "mc1", "mc2"), [True, True, True])
@@ -689,6 +793,73 @@ class DragShimTests(Base):
         self.assertEqual(self.read("mc195"), [1])
 
 
+def canvas_reference(bits14):
+    import json
+    weights = json.loads(Path(ROOT, "scripts", "weights_mnist.json").read_text())
+    bits49 = block_downsample(dilate14(bits14), weights["block_threshold"])
+    scores = [bias + sum(w * bit for w, bit in zip(row, bits49))
+              for row, bias in zip(weights["weights"], weights["bias"])]
+    return scores, max(range(10), key=lambda digit: scores[digit])
+
+
+class NoScriptTests(Base):
+    def assert_native_drawing_and_reset(self, page, requests):
+        bits = rows_to_bits(THIN_CANVASES["seven"])
+        _, best = canvas_reference(bits)
+        for i, bit in enumerate(bits):
+            if bit:
+                page.locator(f"#mc{i}").click()
+        self.assertEqual(page.locator(".grid14 input:checked").count(), sum(bits))
+        counter = page.locator(".statusbar .d_mnist_digit").evaluate(
+            "el => getComputedStyle(el, '::after').counterReset")
+        self.assertEqual(counter, f"v {best}")
+        for digit in range(10):
+            color = page.locator(f".l_mn_digit_{digit}").evaluate("el => getComputedStyle(el).color")
+            self.assertEqual(norm_rgb(color), (250, 189, 47) if digit == best else (124, 111, 100))
+        page.locator('input[type="reset"]').click()
+        self.assertEqual(page.locator(".grid14 input:checked").count(), 0)
+        _, blank = canvas_reference([0] * 196)
+        self.assertEqual(page.locator(".statusbar .d_mnist_digit").evaluate(
+            "el => getComputedStyle(el, '::after').counterReset"), f"v {blank}")
+        page.locator("details.hood > summary").click()
+        page.locator("#x1").click()
+        self.assertEqual(page.locator(".d_xor").evaluate(
+            "el => getComputedStyle(el, '::after').counterReset"), "v 1")
+        page.locator("#x0").click()
+        self.assertEqual(page.locator(".d_xor").evaluate(
+            "el => getComputedStyle(el, '::after').counterReset"), "v 0")
+        self.assertFalse([url for url in requests if url.startswith(("http:", "https:"))])
+
+    def test_inference_with_javascript_disabled(self):
+        context = self.browser.new_context(java_script_enabled=False, reduced_motion="reduce")
+        try:
+            page = context.new_page()
+            requests = []
+            page.on("request", lambda request: requests.append(request.url))
+            page.goto(URL)
+            self.assert_native_drawing_and_reset(page, requests)
+        finally:
+            context.close()
+
+    def test_no_js_export_with_native_inputs(self):
+        requests = []
+        self.page.on("request", lambda request: requests.append(request.url))
+        self.page.goto(Path(ROOT, "dist/no-js.html").as_uri())
+        self.assertEqual(self.page.locator("script").count(), 0)
+        self.assert_native_drawing_and_reset(self.page, requests)
+
+    def test_inference_with_script_deleted(self):
+        html, count = re.subn(r"<script>.*?</script>", "", Path(DIST).read_text(), flags=re.S)
+        self.assertEqual(count, 1)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory, "scriptless.html")
+            path.write_text(html)
+            requests = []
+            self.page.on("request", lambda request: requests.append(request.url))
+            self.page.goto(path.as_uri())
+            self.assert_native_drawing_and_reset(self.page, requests)
+
+
 class XorTests(Base):
     def test_all_4_states_with_intermediates(self):
         for x1 in (0, 1):
@@ -705,20 +876,17 @@ class XorTests(Base):
                 self.assertEqual(out, x1 ^ x0, f"XOR({x1},{x0})")
 
 
-# per-engine variants
-def engine_case(name, engine):
-    attrs = {"engine": engine}
-    return type(name, (object,), attrs)
-
-
+# Per-engine variants. Static checks run once, without a browser.
 for engine in ENGINES:
-    for base in (StaticChecks, GateTests, HalfAdderTests, FullAdderTests,
+    for base in (GateTests, HalfAdderTests, FullAdderTests,
                  Add2Tests, Mul2Tests, Add4Tests, DotTests, MatVecTests,
                  NeuronTests, XorTests, NativeModeTests, ClassifierTests,
-                 MnistClassifierTests, DisplayTests, DragShimTests):
+                 MnistClassifierTests, DisplayTests, DragShimTests, NoScriptTests):
         cls = type(f"{base.__name__}_{engine}", (base,), {"engine": engine})
         cls.__module__ = __name__
         globals()[cls.__name__] = cls
+
+del cls, base, engine  # unittest must not discover aliases of the last class.
 
 
 if __name__ == "__main__":

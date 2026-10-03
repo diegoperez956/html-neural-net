@@ -1,16 +1,26 @@
-.PHONY: build train test clean
+.PHONY: build train test test-unit test-runtime clean
+
+PYTHON ?= python3
+CARGO ?= cargo
 
 train:
-	cargo build --release --manifest-path train/Cargo.toml
+	$(CARGO) build --locked --release --manifest-path train/Cargo.toml
 	./train/target/release/train glyph
 	./train/target/release/train mnist
 
-build: train
-	cargo build --release --manifest-path gen/Cargo.toml
+build:
+	$(CARGO) build --locked --release --manifest-path gen/Cargo.toml
 	./gen/target/release/htmlnet-gen dist/index.html
+	./gen/target/release/htmlnet-gen dist/no-js.html --no-js
 
-test: build
-	python3 -m unittest discover -s tests -v
+test: test-unit test-runtime
+
+test-unit:
+	$(CARGO) test --locked --manifest-path gen/Cargo.toml
+	$(CARGO) test --locked --manifest-path train/Cargo.toml
+
+test-runtime: build
+	$(PYTHON) -m unittest discover -s tests -v
 
 clean:
 	rm -f dist/index.html

@@ -1,180 +1,148 @@
-# train
+# Training the models
 
-Originally a Rust port of `scripts/train.py` and `scripts/train_mnist.py`;
-those Python trainers were deleted once this port was validated (D-008 in
-`docs/DECISIONS.md`), and `train/` is now the only trainer. Build-time
-only — `glyph` and `mnist` write `scripts/weights.json` and
-`scripts/weights_mnist.json`, the files `gen/` and `tests/` actually
-consume. `mlp` (M12's hidden-layer experiment, not shipped — see D-010 in
-`docs/DECISIONS.md`) writes its own `scripts/weights_mlp.json` and is not
-part of `make build`.
+Training happens in Rust before the page opens. The browser only evaluates
+the saved model. `make build` and `make test` use checked-in weights and do
+not retrain.
 
-## Usage
+## Commands
 
+These commands overwrite model files. MNIST training runs a grid search and
+can download data when the cache is missing.
+
+```bash
+make train
+# Or run one trainer:
+cargo run --release --manifest-path train/Cargo.toml -- glyph
+cargo run --release --manifest-path train/Cargo.toml -- mnist
+cargo run --release --manifest-path train/Cargo.toml -- mlp
 ```
-cd train
-cargo run --release -- glyph   # -> ../scripts/weights.json
-cargo run --release -- mnist   # -> ../scripts/weights_mnist.json (shipped, linear)
-cargo run --release -- mlp     # -> ../scripts/weights_mlp.json (experimental, not shipped)
+
+`glyph` writes `scripts/weights.json`. `mnist` writes
+`scripts/weights_mnist.json`. The experimental `mlp` command writes
+`scripts/weights_mlp.json`, which the generator never reads.
+Paths resolve relative to the crate location, not the shell's working directory.
+
+## The shipped models
+
+The 3×3 glyph classifier trains a perceptron on nine hand-built examples.
+Its schema is `{"bias": int, "weights": [int; 9]}`.
+It has no held-out accuracy estimate.
+
+The digit model is a ten-class linear perceptron with 49 binary features.
+It is not the hidden-layer model described in `docs/DESIGN_MLP.md`.
+Its JSON contains:
+
+- `weights`, ten rows of 49 integers in [-3, 3].
+- `bias`, ten integers.
+- `test_accuracy`, `val_accuracy`, and `drawn_val_accuracy`.
+- `glyph_accuracy` and `thin_glyph_accuracy`.
+- `threshold` and `seed` from model selection.
+- `canvas: 14`, `dilate_iters: 1`, and `block_threshold: 1`.
+- `exemplars`, ten saved 49-bit examples indexed by string digits.
+
+The generator validates the class counts and each row's input count.
+It rejects a different canvas size, dilation count, or block threshold.
+It also checks that weights and all possible score bounds fit its circuit.
+
+Stored exemplars are already post-processed 49-bit features. Upscaling one
+onto the drawing canvas and processing it again can change it. Browser tests
+recompute the full path rather than assume that operation is an identity.
+
+## Preprocessing and training
+
+`src/mnist.rs` caches the four compressed MNIST IDX files in `data/mnist/`.
+Missing files are downloaded with a `curl` subprocess. The normal image path is:
+
+1. Binarize the 28×28 pixels above 128.
+2. Crop to the digit's bounding box and make a centered square crop.
+3. Area-resample to 14×14 coverage fractions.
+4. Threshold coverage into binary cells.
+5. Dilate once with the four orthogonal neighbors.
+6. OR each 2×2 block into one of 49 features.
+
+Only steps 5 and 6 also run on the drawing canvas. The browser does not crop,
+center, or threshold a screenshot. Its checkboxes are already binary inputs.
+
+Training uses the first 50,000 images of MNIST's 60,000-image training set.
+The remaining 10,000 form validation data. The official 10,000 test images
+are separate.
+
+The multiclass perceptron makes eight passes through the training set.
+On a wrong prediction, it adds the active input bits to the correct class's
+weights and subtracts them from the predicted class's weights. Biases change
+by +1 and -1 respectively. This is a plain perceptron, not an averaged one.
+
+The quantizer divides by a candidate scale, rounds ties to even, and clips
+weights to [-3, 3]. The grid search chooses the coverage threshold, shuffle
+seed, and quantization scale against a drawn-style validation proxy.
+The proxy thickens the source strokes, uses a tighter crop, and varies source
+pixel thresholds. Ordinary MNIST validation accuracy is also reported.
+
+## Current recorded results
+
+The checked-in `scripts/weights_mnist.json` is the source for these values:
+
+| Field | Value |
+|---|---|
+| MNIST test accuracy | 0.7542 |
+| MNIST validation accuracy | 0.7716 |
+| Drawn-style validation accuracy | 0.6880 |
+| Canonical upscaled glyph accuracy | 8/10 |
+| Thin-stroke glyph accuracy | 6/10 |
+| Coverage threshold | 0.65 |
+| Shuffle seed | 16 |
+| Block threshold | 1 |
+
+The canonical glyph misses are 6→5 and 9→3. The thin-stroke misses are
+1→4, 2→7, 6→5, and 9→8. These figures are not accuracy estimates for arbitrary
+user drawings. The current revision verifies browser inference from the saved
+weights; it does not rerun the MNIST experiment.
+
+## Selection caveats
+
+D-007 selected a seed after scanning about twenty candidates against test
+accuracy. Its 82.46% result is a retired, test-selected figure.
+D-009 moved selection to validation and recorded 81.89% test accuracy.
+D-010 selected against drawn-style validation and recorded 78.54% on the old
+7×7 drawing pipeline. That is not the current model.
+
+D-011 added the 14×14 canvas and runtime dilation. Development compared
+multiple block thresholds and inspected their glyph results. Only OR
+downsampling met both glyph acceptance floors. Fixing OR as architecture
+for the final search does not erase that earlier selection.
+
+The final 8/10 and 6/10 glyph scores are therefore acceptance-conditioned.
+The milestone did not touch the test set and glyph sets only once across all
+runs. The current trainer also checks glyph accuracy before deciding whether
+to attempt synthetic-glyph augmentation. It accepts augmented weights only
+if drawn-style validation improves. No augmentation was needed for the saved
+configuration.
+
+The 0.60 test-accuracy floor and glyph floors can reject a run before it writes
+weights. A test-triggered [-7, 7] diagnostic is reported but never written.
+These checks are another reason not to describe the entire training procedure
+as completely independent of acceptance data.
+
+See [D-007 through D-011](../docs/DECISIONS.md) for the historical experiments.
+A new evaluation claim needs fresh held-out drawings and a selection procedure
+fixed before their results are inspected.
+
+## Reproducibility and tests
+
+The trainer uses seeded SplitMix64 and Fisher-Yates shuffling.
+It does not reproduce CPython's Mersenne Twister stream.
+`python_round` implements round-half-to-even for quantization.
+D-011 records byte-identical JSON across repeated training runs.
+
+```bash
+make test-unit
+make test-runtime
 ```
 
-Paths are resolved from `CARGO_MANIFEST_DIR` (compile-time), so it doesn't
-matter what directory you run from. MNIST needs `data/mnist/*.gz` (the four
-IDX files); if missing, it tries to download them the same way
-`train_mnist.py` does (same mirrors).
+Rust tests cover glyph separation, rounding, image transforms, and experimental
+MLP properties. One ignored comparison test expects a dump from the retired
+Python trainer and is historical evidence, not part of the current test run.
 
-## Schema contract
-
-`glyph` writes `{"bias": int, "weights": [int; 9]}` (unchanged from
-Python). `mnist` writes `{"weights": [[int;49];10], "bias": [int;10],
-"test_accuracy": float, "val_accuracy": float, "drawn_val_accuracy":
-float, "glyph_accuracy": float, "thin_glyph_accuracy": float,
-"threshold": float, "block_threshold": int, "canvas": int,
-"dilate_iters": int, "seed": int, "exemplars": {"0".."9": [int;49]}}` —
-the same linear schema as the Python original plus a few transparency
-fields D-009/D-010 added and the M13 pipeline fields (`gen/` reads
-`weights`, `bias`, `test_accuracy`, `block_threshold`, `canvas`, and
-`dilate_iters`; it asserts `block_threshold == 1` — the runtime downsample
-is a pure OR, fixed architecture per D-011 — and refuses to build
-otherwise). Weights are clipped to `[-3, 3]` (`gen/src/circuit.rs`'s
-`weighted_score` assumes this).
-`mlp` writes its own separate schema (`hidden_weights`/`hidden_biases`/
-`output_weights`/`output_biases`, see `docs/DESIGN_MLP.md`) to
-`scripts/weights_mlp.json` — `gen/` never reads this file.
-
-## RNG: divergence from CPython
-
-Python's `random` module is Mersenne Twister (MT19937) with its own
-`shuffle`/`random()`/`choice()` semantics on top. This port does **not**
-reproduce that — it uses a small seeded SplitMix64 generator
-(`src/rng.rs`), which the task spec explicitly allows ("if not, use your
-own seeded RNG and document the divergence"). Reproducing MT19937 bit-for-bit
-buys weight-for-weight parity with Python, which is explicitly a
-nice-to-have, not the contract (schema + accuracy are).
-
-Used in two places, both ported structurally from the Python (same
-Fisher-Yates shuffle shape, same call sites) but drawing from the divergent
-stream:
-- `train_perceptron`'s per-epoch `shuffle(order)`.
-- `jitter_variants`'s per-cell shift/flip sampling (only exercised if glyph
-  accuracy < 8/10 after the base quantization pass, same as Python).
-
-`python_round()` in `src/mnist.rs` *does* replicate Python 3's round-half-
-to-even exactly (not naive round-half-away-from-zero) — that one is cheap to
-get exactly right and it affects which quantization scale wins the accuracy
-comparison in `pick_best_quantization`.
-
-## Seed choice (D-007 -> D-009 honest re-selection -> D-010 drawn-style retarget)
-
-The perceptron is shuffle-order-sensitive: final accuracy (after
-quantization, and after glyph-triggered augmentation if it fires) swings by
-several points across seeds even with the *same* algorithm — this is
-inherent to averaged-perceptron training, not a bug.
-
-D-007 originally picked `SHUFFLE_SEED = 8` by scanning ~20 seeds against
-**test-set** accuracy — a max-of-20 draw against the number that's supposed
-to be the honest, unbiased estimate. D-009 fixed that: the last 10k of the
-60k training images are held out as a validation split (never trained on),
-and `t`/seed/scale were grid-searched against it, with the 10k test set
-read exactly once at the end.
-
-D-010 went one step further: downsampled MNIST validation accuracy is
-itself a poor proxy for what a visitor draws on the 7×7 grid (thin
-anti-aliased pen strokes with real bbox margin vs. thick, canvas-filling,
-blockily-filled cells). Selection now runs against a **drawn-style
-validation proxy** instead — the same held-out validation images, with
-their raw pixels transformed to look more like grid-drawn input before the
-usual bbox+crop pipeline:
-
-1. **Stroke dilation** (one round of 4-neighbor binary dilation) — thickens
-   the binarized digit before cropping.
-2. The existing **bbox + centered-square-pad crop** (D-006) — reused as-is.
-3. **Full-canvas zoom** (`DRAWN_ZOOM = 0.82`) — shrinks that square crop
-   toward its center, since a grid-filled digit fills more of its bounding
-   square than a MNIST digit does.
-4. **Coverage-threshold variation** — the 28×28 binarization threshold
-   (`DRAWN_PIXEL_THRESHOLDS = [90, 128, 166]`, cycled by image index) varies
-   how much of MNIST's anti-aliased stroke edge counts as ink before
-   dilation, standing in for different drawing "pressure."
-
-`t`, shuffle seed, quantization scale, and the glyph-augmentation
-accept/reject gate are all now selected against this proxy
-(`build_drawn_style_val` in `src/mnist.rs`); plain MNIST validation
-accuracy is still computed and reported as a secondary number. The 10
-canonical glyphs are never touched during selection — only afterward, as a
-sanity check that the proxy isn't off in the weeds (see the accuracy table
-below: proxy 0.7756 vs. glyph accuracy 0.8000, a 0.024 gap, which is close
-enough to trust the proxy).
-
-`THRESHOLD_GRID` was widened from the original `0.10..0.35` to `0.10..0.70`
-for this search — the old range's max (`0.35`) was where drawn-style
-accuracy peaked, i.e. the old grid's edge, not an interior optimum. The
-wider grid finds a real peak at `t=0.45` instead.
-
-Current result: `t=0.45`, `seed=19`, drawn-style val accuracy 0.7756, MNIST
-val accuracy 0.7876, **test accuracy 0.7854**. This trades ~3.4 points of
-MNIST test accuracy (down from D-009's honest 0.8189) for canonical
-drawn-glyph fidelity: 8/10, up from 7/10. See D-010 in
-`docs/DECISIONS.md` for the full evaluation, including the MLP's negative
-result that motivated this retarget.
-
-No `TRAIN_SEED` env override anymore — seed is chosen by the grid search on
-every run, not read from an env var, so the result is deterministic without
-extra configuration.
-
-## Download: curl subprocess, not an HTTP client crate
-
-`data/mnist/` is cached in every environment this has been asked to run in
-(offline-first, per the task). Download is a fallback that essentially never
-executes. Given that, shelling out to `curl` (already on the box, same
-mirrors and `User-Agent` as the Python version) beats adding `ureq`+`rustls`
-or `reqwest` as a dependency for a code path that doesn't run.
-
-## Verification performed
-
-- **Glyph**: exact weight parity with Python (`{"bias": -2, "weights": [1,
-  0, 2, -1, 0, 0, -1, 0, 0]}`) — expected, since `train.py` has no RNG at
-  all, it's a pure integer perceptron.
-- **Bbox-normalize pipeline**: `src/mnist.rs`'s `preprocess_matches_python_intermediates`
-  test (`#[ignore]`d by default, needs `data/mnist/` + a Python-side dump)
-  diffs the 49 coverage fractions for the first 20 MNIST train images
-  against `preprocess_image()` from `train_mnist.py`, cell by cell, to
-  1e-9. Bit-identical. Dump command used:
-  ```
-  python3 -c "
-  import sys; sys.path.insert(0, 'scripts')
-  from train_mnist import preprocess_image, read_idx_images, read_idx_labels
-  import json
-  imgs, *_ = read_idx_images('data/mnist/train-images-idx3-ubyte.gz')
-  labels = read_idx_labels('data/mnist/train-labels-idx1-ubyte.gz')
-  json.dump([{'label': labels[i], 'fracs': preprocess_image(imgs[i])} for i in range(20)],
-            open('/tmp/py_intermediates.json', 'w'))
-  "
-  ```
-  then `cargo test --release -- --ignored --nocapture`.
-- **Determinism**: two consecutive `mnist` runs produce byte-identical
-  `weights_mnist.json`.
-- **Schema**: keys, nesting, and value types checked against the Python
-  output (same key set, `weights` is `[[int;49];10]`, `bias` is `[int;10]`,
-  `exemplars` has all 10 string keys each mapping to `[int;49]`).
-- **End-to-end**: `make build` then `python3 -m unittest discover -s tests`
-  — 67 tests, all pass (17 skipped, pre-existing abstract-base/webkit
-  skips unrelated to this change).
-
-## Accuracy result
-
-| | Python baseline | Rust, seed-scanned vs test (D-007, retired) | Rust, honest MNIST-val-selected (D-009, retired) | Rust, drawn-style-val-selected (current, D-010) |
-|---|---|---|---|---|
-| test_accuracy | 0.7998 | 0.8246 | 0.8189 | **0.7854** |
-| val_accuracy (MNIST) | n/a | n/a | 0.8301 | 0.7876 |
-| drawn_val_accuracy (proxy) | n/a | n/a | n/a | 0.7756 |
-| glyph_accuracy | 0.8 | 0.8 | 0.7 | **0.8** |
-| threshold | 0.3 | 0.3 | 0.2 | 0.45 |
-| seed | n/a (42, unselected) | 8 (test-scanned) | 10 (val-selected) | 19 (drawn-val-selected) |
-
-D-007's and D-009's columns are kept here for the record, not as targets.
-0.7854 test accuracy / 8/10 glyph fidelity is what this codebase ships
-now: a deliberate trade of MNIST accuracy for the metric that reflects
-what a visitor actually draws (D-010 in `docs/DECISIONS.md`). The MLP
-(`docs/DESIGN_MLP.md`) cleared 0.8189 on MNIST but not glyph fidelity
-(also 7/10, unmoved) and was not shipped for it.
+The browser suite checks inference in both engines against the current JSON.
+It includes script-disabled and script-deleted operation, preprocessing,
+score arithmetic, argmax, margin, and rendered displays.

@@ -952,6 +952,61 @@ pub fn run(repo_root: &Path) {
     println!("wrote {}", out_path.display());
 }
 
+// ---------- bit export for the CSS-in-browser training prototype ----------
+//
+// Additive only: dumps the same 49-bit features `run()` trains on, as JSON,
+// so a non-Rust reference (NumPy) and a generated static page can reproduce
+// the exact classifier inputs without duplicating the pipeline. Threshold is
+// pinned to the shipped value (t=0.65 in scripts/weights_mnist.json) rather
+// than re-running the grid search -- this command doesn't train anything.
+const EXPORT_THRESHOLD: f64 = 0.65;
+
+fn bits_to_strings(bits_list: &[Vec<u8>]) -> Vec<String> {
+    bits_list.iter().map(|bits| bits.iter().map(|&b| if b == 1 { '1' } else { '0' }).collect()).collect()
+}
+
+pub fn export_bits(repo_root: &Path) {
+    let data_dir = repo_root.join("data").join("mnist");
+    let out_path = repo_root.join("data").join("mnist_bits_t065.json");
+
+    println!("loading MNIST (cached in data/mnist/, downloading if missing)...");
+    let (train_imgs_raw, train_ys) = load_raw_split(&data_dir, FILES[0], FILES[1]);
+    let (test_imgs_raw, test_ys) = load_raw_split(&data_dir, FILES[2], FILES[3]);
+
+    // Same split as run(): last VAL_SIZE of the 60k training images held out,
+    // first 50,000 are "core".
+    let n_train = train_imgs_raw.len();
+    let core_end = n_train - VAL_SIZE;
+
+    let to_bits = |imgs: &[Vec<u8>]| -> Vec<Vec<u8>> {
+        let fracs: Vec<Vec<f64>> = imgs.iter().map(|im| preprocess_image(im)).collect();
+        let bits14 = dilate14_all(&binarize_fracs(&fracs, EXPORT_THRESHOLD));
+        bits14.iter().map(|row| block_downsample(row, BLOCK_THRESHOLD)).collect()
+    };
+
+    let train_bits = to_bits(&train_imgs_raw[..core_end]);
+    let val_bits = to_bits(&train_imgs_raw[core_end..]);
+    let test_bits = to_bits(&test_imgs_raw);
+    println!(
+        "train (core): {}, val: {}, test: {}",
+        train_bits.len(),
+        val_bits.len(),
+        test_bits.len()
+    );
+
+    let out = serde_json::json!({
+        "threshold": EXPORT_THRESHOLD,
+        "train": bits_to_strings(&train_bits),
+        "train_labels": train_ys[..core_end].to_vec(),
+        "val": bits_to_strings(&val_bits),
+        "val_labels": train_ys[core_end..].to_vec(),
+        "test": bits_to_strings(&test_bits),
+        "test_labels": test_ys,
+    });
+    fs::write(&out_path, serde_json::to_string(&out).unwrap()).expect("write mnist_bits_t065.json");
+    println!("wrote {}", out_path.display());
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -14190,7 +14190,7 @@ body.rt:has(#mc195:checked) { --mc195: 1; }
 
 <main class="wrap">
 <h1>draw a digit</h1>
-<p class="sub">a neural network in html + css. drag to paint — no grid, just ink; it guesses through dilation and downsample gates feeding a classifier compiled from mnist weights. the only javascript is a small deletable input shim; delete it and clicking still works.</p>
+<p class="sub">a neural network in html + css. click cells to draw; it guesses through dilation and downsample gates feeding a classifier compiled from mnist weights. this build contains no javascript. click once per cell; clear resets the drawing.</p>
 
 <div class="app">
   <div class="titlebar">
@@ -14380,7 +14380,7 @@ body.rt:has(#mc195:checked) { --mc195: 1; }
 <section>
   <h2>honesty label</h2>
   <div class="tag">
-  Runtime: the network, displays and readouts are HTML + CSS only (no WASM, no network requests, works from file://). The single &lt;script&gt; on the page is an input shim that translates pointer drags into checkbox toggles. It calculates pointer positions, never network scores. Delete it and click cells to run the same inference.<br>
+  Runtime: the network, displays and readouts are HTML + CSS only (no WASM, no network requests, works from file://). This build contains no JavaScript. Native checkbox clicks change inputs; CSS computes every network output.<br>
   Gates are named bit identities over native CSS min()/max()/calc() — the browser's arithmetic is the substrate; we compose circuits on top.<br>
   Decimal numbers in green are native-calc display views, outside the gate circuit. LEDs read gate signals directly.<br>
   The MNIST classifier (§13) follows the same split: the canvas's dilation and OR-downsample stages, argmax/minterm/segment signals are gates, the score, digit and margin numbers are native-calc views. No exception.<br>
@@ -14395,43 +14395,6 @@ body.rt:has(#mc195:checked) { --mc195: 1; }
 <div class="tag"><a class="kbd" href="how-it-works.html">how it works</a> · <span class="kbd">make build</span> / <span class="kbd">make test</span></div>
 </footer>
 </main>
-<script>
-/* input shim: drag-to-paint. the network + display are pure CSS — delete
-   this block and the page still works, one click per cell. */
-(() => {
-  const grid = document.querySelector('.grid14');
-  if (!grid) return;
-  let mode = null, downBox = null, pid = null, lastX = 0, lastY = 0;
-  const boxOf = e => { const c = e.target.closest('.cell14'); return c && c.querySelector('input'); };
-  const boxAt = (x, y) => { const c = document.elementFromPoint(x, y)?.closest('.cell14'); return c && c.querySelector('input'); };
-  grid.addEventListener('pointerdown', e => {
-    if (mode !== null || e.button !== 0) return; /* one stroke at a time: a second finger must not re-arm */
-    const box = boxOf(e) || boxAt(e.clientX, e.clientY); if (!box) return;
-    try { grid.setPointerCapture(e.pointerId); } catch {} /* synthetic test pointers have no active id */
-    mode = !box.checked; box.checked = mode; downBox = box; pid = e.pointerId; lastX = e.clientX; lastY = e.clientY;
-  });
-  grid.addEventListener('pointerover', e => {
-    if (mode === null || e.pointerId !== pid) return;
-    const box = boxOf(e); if (box) box.checked = mode;
-  });
-  grid.addEventListener('pointermove', e => {
-    if (mode === null || e.pointerId !== pid) return;
-    if ((e.buttons & 1) === 0) { mode = null; pid = null; return; } /* primary contact gone (missed pointerup) */
-    const dx = e.clientX - lastX, dy = e.clientY - lastY;
-    const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 16)); /* half of the 32px cell pitch */
-    for (let i = 1; i <= steps; i++) { const box = boxAt(lastX + dx * i / steps, lastY + dy * i / steps); if (box) box.checked = mode; }
-    lastX = e.clientX; lastY = e.clientY;
-  });
-  grid.addEventListener('click', e => {
-    const box = boxOf(e);
-    if (box && box === downBox) e.preventDefault(); /* already painted on pointerdown */
-    downBox = null; /* one-shot: keyboard toggles must not be suppressed */
-  });
-  addEventListener('pointerup', e => { if (e.pointerId === pid) { mode = null; pid = null; } });
-  addEventListener('pointercancel', e => { /* no click follows a cancel: also drop the suppression latch */
-    if (e.pointerId === pid) { mode = null; pid = null; downBox = null; } });
-})();
-</script>
 
 </body>
 </html>

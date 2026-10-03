@@ -1,0 +1,3 @@
+manim==0.20.1
+kokoro-onnx
+soundfile

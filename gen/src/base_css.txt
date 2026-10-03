@@ -27,15 +27,15 @@
      reads as a continuous marker stroke, never stair-stepped squares */
   .pad { display: flex; flex-direction: column; gap: 10px; }
   .grid14 {
-    display: grid; grid-template-columns: repeat(14, 24px); grid-auto-rows: 24px;
+    display: grid; grid-template-columns: repeat(14, 32px); grid-auto-rows: 32px;
     border: 1px solid #504945; border-radius: 0; overflow: hidden;
     background: #1d2021; cursor: crosshair; touch-action: none;
   }
   .cell14 { position: relative; width: 100%; height: 100%; }
-  .cell14 input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: crosshair; }
+  .grid14 .cell14 input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: crosshair; } /* outranks the generic input[type=checkbox] 15px sizing below */
   .cell14:has(input:checked)::after {
     content: ""; position: absolute; left: 50%; top: 50%;
-    width: 40px; height: 40px; transform: translate(-50%, -50%);
+    width: 54px; height: 54px; transform: translate(-50%, -50%);
     border-radius: 50%; background: #fe8019; pointer-events: none;
   }
   .cell14:has(input:focus-visible) { outline: 2px solid #fe8019; outline-offset: -2px; z-index: 1; }
@@ -101,3 +101,15 @@
   .cell input { position: absolute; opacity: 0; width: 0; height: 0; }
   .cell:has(input:focus-visible) { outline: 2px solid #fe8019; outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  @media (max-width: 520px) {
+    body { padding: 24px 8px; }
+    .grid14 {
+      grid-template-columns: repeat(14, calc((100vw - 52px) / 14));
+      grid-auto-rows: calc((100vw - 52px) / 14);
+    }
+    .cell14:has(input:checked)::after {
+      width: calc((100vw - 52px) / 14 * 1.7);
+      height: calc((100vw - 52px) / 14 * 1.7);
+    }
+  }

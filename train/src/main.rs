@@ -23,8 +23,13 @@ fn main() {
         // shipped. Writes its own scripts/weights_mlp.json, not part of
         // `make build`.
         Some("mlp") => mlp::run(&root),
+        // Feasibility-prototype support: dumps the same 49-bit MNIST
+        // features `mnist` trains on (fixed t=0.65) as JSON, for a non-Rust
+        // (NumPy) reference and a generated page. Writes
+        // data/mnist_bits_t065.json; not part of `make build`.
+        Some("export-bits") => mnist::export_bits(&root),
         _ => {
-            eprintln!("usage: train <glyph|mnist|mlp>");
+            eprintln!("usage: train <glyph|mnist|mlp|export-bits>");
             std::process::exit(1);
         }
     }
