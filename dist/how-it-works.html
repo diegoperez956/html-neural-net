@@ -52,7 +52,7 @@
 <h1>How htmlnet works</h1>
 <p class="sub">A neural network computed in pure HTML + CSS. Checkboxes are input bits, CSS custom properties carry signals through a dependency graph, and the browser's style engine does the arithmetic. The optional JavaScript is a small drag-to-draw input script &mdash; delete the one <code>&lt;script&gt;</code> tag and the network still runs, one click per cell.</p>
 
-<p>For worked numbers and recording notes, read the <a href="../docs/HOW_IT_WORKS.md">math guide</a>, <a href="../docs/VIDEO_WALKTHROUGH.md">filming walkthrough</a>, and <a href="../docs/IMPLEMENTATION_AUDIT.md">implementation audit</a>.</p>
+<p>For worked numbers and recording notes, read the <a href="https://github.com/diegoperez956/html-neural-net/blob/main/docs/HOW_IT_WORKS.md">math guide</a>, <a href="https://github.com/diegoperez956/html-neural-net/blob/main/docs/VIDEO_WALKTHROUGH.md">filming walkthrough</a>, and <a href="https://github.com/diegoperez956/html-neural-net/blob/main/docs/IMPLEMENTATION_AUDIT.md">implementation audit</a>.</p>
 <div class="ladder">bits &rarr; gates &rarr; arithmetic &rarr; neurons.<br>The XOR network and digit classifier are separate examples, not consecutive layers.</div>
 
 <h2>What this actually is</h2>
@@ -138,7 +138,7 @@ out = step(+2h1 + 2h2 - 1)</code></pre>
 }</code></pre>
 <p>What the classifier actually sees is much coarser than what you drew, and that gap is bridged by two gate stages, run in CSS every time a cell toggles:</p>
 <ol>
-<li><strong>Dilation</strong> &mdash; each cell's effective bit is the OR of itself and its 4 orthogonal neighbors (edge cells OR fewer): 196 named signals <code>dl0..dl195</code>, nested <code>max()</code> calls. A 1-cell-wide stroke becomes a 3-cell-wide band, because a thin drag needs to survive downsampling.</li>
+<li><strong>Dilation</strong> &mdash; each cell's effective bit is the OR of itself and its 4 orthogonal neighbors (edge cells OR fewer): 196 outputs <code>dl0..dl195</code>, built from 728 two-input <code>max()</code> signals. A 1-cell-wide stroke becomes a 3-cell-wide band, because a thin drag needs to survive downsampling.</li>
 <li><strong>2&times;2 block OR-downsample</strong> &mdash; each of the 49 output cells (<code>mn0..mn48</code>) is the OR of its 2&times;2 block of dilated bits: any ink in the block lights it. The current generator requires T=1, "any ink counts". Development chose that architecture after comparing glyph acceptance results, so the reported glyph scores are acceptance-conditioned.</li>
 </ol>
 <p>That reduces the 196 canvas cells to the 49 bits (7&times;7) the linear classifier was trained on. The "network sees" preview on the page reads those same <code>mn</code> gate bits and renders them pixelated on purpose &mdash; it's showing you the actual abstraction the classifier receives, not the marker stroke you drew.</p>

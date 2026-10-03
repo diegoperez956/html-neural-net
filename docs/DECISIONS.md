@@ -33,10 +33,19 @@ negative result remains in the historical design and D-009/D-010. Removed the
 ignored `preprocess_matches_python_intermediates` test, whose reference
 producer was deleted.
 
-The current suite runs 15 Rust tests and 94 Python tests: 80 browser tests
+That revision's suite ran 15 Rust tests and 94 Python tests: 80 browser tests
 (40 per engine), 5 runtime static checks, 3 history tests, and 6 video-math
 tests. The 16 abstract browser base-class skips are expected; missing browsers
-fail. No CI workflow was added.
+fail. No CI workflow was added in that revision.
+
+Publication correction on 2026-10-03: checkpoint 3's copy changes rebuild to
+1,622,386 UTF-8 bytes for `dist/index.html` and 1,620,009 for `dist/no-js.html`.
+Both still have 6,834 registered signals and the same weights and input shim.
+Measure with `wc -c dist/index.html dist/no-js.html` after `make build`.
+The revised suite has 15 Rust tests and 97 Python tests: 82 browser tests,
+5 runtime static checks, 3 history tests, 6 video-math tests, and 1 published-
+metrics check, with the same 16 abstract-base skips. A GitHub Pages workflow
+now builds and deploys `dist/`; it does not run the test suite.
 
 ## D-012 — implementation audit and explicit training command
 
@@ -113,8 +122,59 @@ Context: the 7×7 checkbox grid read as "fill boxes," not "draw." User requireme
 Hypothesis: raise the canvas to 14×14 invisible hit-target cells (each checked cell renders an oversized rounded orange blob that overlaps its neighbors; the hit-target stays the cell, the blob layer is pointer-transparent) and move the abstraction into the circuit: one round of 4-neighbor OR dilation (`dl0..dl195` gates) feeding a 2×2 block downsample (`mn0..mn48` gates) into the unchanged 49-input classifier. The "network sees" 7×7 preview reads the post-downsample gate bits, deliberately pixelated — the surface shows ink, the preview shows the abstraction.
 Experiment (evidence trail, one-time runs; logs in the session scratchpad):
 - First attempt (dilation-free runtime): 196 cells → 2×2 popcount≥T directly. The joint grid search over (t, T, seed, scale) on the drawn-style proxy picked T=3 (t=0.5, seed=5, drawn-val 0.6761) — and collapsed on genuinely thin strokes: thin-stroke 14×14 glyph fidelity 1/10 (stop condition fired; no weights written). Per-T table from the same run: T=1 t=0.7 s13 drawn-val 0.6362 / test 0.7633 / upscale 9/10 / thin 5/10; T=2 t=0.35 s2 0.6655 / 0.7877 / 8/10 / 5/10; T=3 t=0.5 s5 0.6761 / 0.6460 / 8/10 / 1/10. Diagnosis: the proxy's artificially thickened strokes hid the thin-stroke failure — the trainer's simulation and the runtime had to share the dilation stage or the proxy lies.
-- Fix: `dilate14_all` became a universal pipeline stage in `train/src/mnist.rs` — core/val/test simulation, the drawn-style proxy, both glyph evaluations, AND the runtime CSS circuit all dilate identically before the 2×2 downsample. Post-dilation per-T table (each row = full search restricted to that T): T=1: t=0.65 seed=16, drawn-val 0.6880 / MNIST val 0.7716 / test 0.7542 / upscale 8/10 / thin 6/10; T=2: t=0.65 seed=1, 0.7067 / 0.7980 / 0.7964 / 7/10 / 6/10; T=3: t=0.4 seed=10, 0.6942 / 0.7964 / 0.7913 / 7/10 / 6/10. The joint search picked T=2, whose 7/10 upscale fidelity failed the pre-registered 8/10 floor (stop condition fired again).
+- Fix: `dilate14_all` became a universal pipeline stage in `train/src/mnist.rs` — core/val/test simulation, the drawn-style proxy, both glyph evaluations, AND the runtime CSS circuit all dilate identically before the 2×2 downsample. Post-dilation per-T table (each row = full search restricted to that T): T=1: t=0.65 seed=16, drawn-val 0.6880 / MNIST val 0.7716 / test 0.7542 / upscale 8/10 / thin 6/10; T=2: t=0.65 seed=1, 0.7067 / 0.7980 / 0.7964 / 7/10 / 6/10; T=3: t=0.4 seed=10, 0.6942 / 0.7964 / 0.7913 / 7/10 / 6/10. The joint search picked T=2, whose 7/10 upscale fidelity failed the 8/10 acceptance floor (stop condition fired again).
 Decision: T=1 is fixed in the current generator and no longer searched by the trainer. It was chosen after inspecting the per-T glyph results. The acceptance floors filtered all three configurations, and only T=1 passed both. The final glyph figures are therefore acceptance-conditioned, not untouched evaluation results. Calling the final architecture fixed does not remove that earlier selection. The trainer also uses glyph accuracy to trigger an augmentation attempt, though drawn-style validation gates acceptance of the resulting model.
-Rationale: OR accepts any ink in a dilated block, which is a forgiving mapping for drawing. T=2 scored 1.9 percentage points higher on the proxy but failed the canonical glyph floor. No statistical analysis established that gap as noise. The choice prioritizes the demonstrated drawing behavior over proxy and MNIST scores, at about a four-point MNIST-test cost relative to T=2.
+Original rationale, withdrawn at checkpoint 3: OR accepts any ink in a dilated block. That was assumed to help drawing. T=2's single proxy winner scored 1.9 percentage points higher on the proxy but failed the canonical glyph floor. This comparison did not establish OR's superiority, and no statistical analysis established that gap as noise. T=1 remains an arbitrary pick, not a demonstrated drawing improvement.
 Evidence (final T=1-only run; the test and glyph sets had already been evaluated in earlier milestone runs): chosen t=0.65, seed=16, drawn-style val 0.6880, MNIST val 0.7716, **MNIST test 0.7542**, 2×-upscale glyph fidelity **8/10** (misses: 6→5, 9→3), thin-stroke 14×14 fidelity **6/10** (misses: 1→4, 2→7, 6→5, 9→8). Augmentation fallback not triggered (8/10 ≥ floor). Quantized bias range widened to [−13, 19] (still inside the build-time-asserted 7-bit score width). Two consecutive `train mnist` runs byte-identical; `make build` re-run produced the same JSON a third time. Page: 6 834 signals (+1 302: 196 canvas inputs, 728 dilation ORs, 147 downsample ORs, minus the 49 retired `mn` primary placeholders, plus ~280 from the retrained classifier's popcount-plane sizes), 1 620 878 UTF-8 bytes at `2ae837c` (+217 KB, 1.62 MB — under the 1.8 MB stop condition). Full suite green in both engines (75 tests, 17 abstract-base skips), including new gate-level dilation/downsample checks against a Python reference and rendered-output checks for the paint canvas (no idle borders/grid, blob rendering) and the network-sees preview.
 Disposition: T=1 ships as the only block downsample the generator will emit — `gen/` reads `block_threshold` from `scripts/weights_mnist.json` and refuses (build error) to emit an OR tree for a popcount spec. The paint-feel UI is the shipped drawing surface; the pixelated preview labels the abstraction honestly.
+
+### Checkpoint 3 addendum (2026-10-03)
+
+The original comparison inspected only one proxy-winning configuration per T.
+Only that T=1 winner passed both glyph floors. This did not establish that
+T=1 was better for drawing. The floors first appear with the results in
+`2ae837c`; no earlier record establishes advance registration.
+
+Checkpoint 3 reproduced those winners, then evaluated 13 coverage thresholds
+and 20 seeds for each T, with quantization selected against the proxy.
+That is 260 configurations per T, 780 total:
+
+| Measurement | T=1, shipped | T=2 | T=3 |
+|---|---|---|---|
+| Both glyph floors passed | 16/260 (6.2%) | 33/260 (12.7%) | 25/260 (9.6%) |
+| Upscaled glyph score ≥ 8/10 | 23.5% | 22.7% | 13.8% |
+| Thin glyph score ≥ 6/10 | 21.9% | 40.0% | 66.2% |
+| Median MNIST test accuracy | 67.2% | 72.7% | 74.0% |
+| Median proxy accuracy | 58.6% | 60.1% | 63.0% |
+| Top 20 by proxy passing both floors | 6/20 | 3/20 | 4/20 |
+
+T=1 passed both floors least often. Every original proxy winner scored
+6/10 thin glyphs, so that floor did not distinguish them. The claimed
+advantage rested on one upscaled glyph. The 1.9-point proxy gap is larger
+than the approximately 0.46-point binomial sampling error on 10k images,
+but smaller than the 12–14-point seed spread at fixed threshold. Neither
+observation justifies the old unqualified noise claim.
+
+At T=1 and the shipped threshold 0.65, the 20 seeds score 4–8/10 upscaled
+glyphs and 3–7/10 thin glyphs. Their MNIST test accuracy ranges from 63.1%
+to 75.4%; proxy accuracy ranges from 55.0% to 68.8%. Seed 16 is the proxy
+winner, not a typical outcome. The 8/10 and 6/10 saved scores are
+acceptance-conditioned synthetic checks, not new-drawing accuracy estimates.
+
+The current proxy no longer dilates source pixels. It crops held-out MNIST
+images 18% tighter, clipping about 9% from each side, and cycles source
+binarization thresholds over 90/128/166. Dilation at 14×14 is shared by all
+splits. D-010's 0.024 proxy/glyph gap referred to a different proxy. The
+current gap is 0.112, and neither gap validates a proxy against ten glyphs.
+Across the 260 T=1 configurations, proxy correlations with upscaled/thin
+glyph scores are 0.35/0.27; ordinary MNIST validation gives 0.28/0.38.
+There is no consistent measured proxy advantage. No human drawings were evaluated.
+The trainer's comparison print is now informational, not a sanity check.
+Test and glyph results also enforce rejection floors and can trigger a
+diagnostic or augmentation. They were not touched only once across development.
+
+Disposition: retain T=1 as an arbitrary pick without retraining. Correct
+public accuracy wording, add position-sensitivity measurements, and add
+single-cell preprocessing coverage and a published-metrics check.
+Checkpoint 3 independently reran training and reproduced the saved JSON
+byte for byte; this correction did not change weights or inference signals.

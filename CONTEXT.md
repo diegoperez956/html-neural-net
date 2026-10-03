@@ -49,5 +49,7 @@ The number of correct predictions on one of the small canonical glyph sets.
 Those sets are development acceptance checks, not untouched generalization tests.
 
 **Drawn-style validation proxy**:
-Held-out MNIST training examples transformed to resemble canvas drawings.
-It is not a collection of independent drawings made by demo users.
+Held-out MNIST training examples cropped 18% tighter, clipping digit edges,
+with varied source binarization thresholds. The proxy does not thicken source
+strokes. It has no demonstrated advantage for predicting drawing accuracy.
+No human drawings were evaluated.

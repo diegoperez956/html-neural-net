@@ -181,8 +181,10 @@ The stronger claim depends on several checks, not one slogan:
 4. Gate truth tables and the small arithmetic input spaces match independent
    arithmetic exhaustively.
 5. The output XOR circuit depends on both hidden-neuron signals.
-6. Digit scores, preprocessing, argmax, margin, and decoder bits match an
-   independent reference on the covered drawings.
+6. Every single-cell canvas input matches an independent reference for all
+   dilation and downsample outputs in both engines. These pure OR stages are
+   determined by their input sets. Digit scores, argmax, margin, and decoder
+   bits match the reference on the covered drawings, not every possible input.
 7. Rendered bit order, counters, preview colors, and segment colors match
    their signals.
 8. Rebuilding from the same sources and weights produces identical bytes.

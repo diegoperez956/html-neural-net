@@ -528,6 +528,17 @@ class MnistClassifierTests(Base):
             got_mn = self.read(*[f"mn{i}" for i in range(49)])
             self.assertEqual(got_mn, down, f"{name} downsample")
 
+    def test_every_single_cell_preprocessing(self):
+        """Single-cell inputs identify every input of these pure OR stages."""
+        names = [f"dl{i}" for i in range(196)] + [f"mn{i}" for i in range(49)]
+        for cell in range(196):
+            with self.subTest(cell=cell):
+                bits = [int(i == cell) for i in range(196)]
+                dilated = dilate14(bits)
+                expected = dilated + block_downsample(dilated, self.block_threshold)
+                self.set_canvas(bits)
+                self.assertEqual(self.read(*names), expected)
+
     def test_thin_stroke_canvases(self):
         for name, rows in THIN_CANVASES.items():
             self.check(rows_to_bits(rows), f"thin {name}")

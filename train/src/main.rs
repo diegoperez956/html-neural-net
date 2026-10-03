@@ -13,9 +13,9 @@ fn main() {
     let root = repo_root();
     match cmd.as_deref() {
         Some("glyph") => glyph::run(&root),
-        // Shipped trainer: honest val-selected linear classifier, selected
-        // against a drawn-style validation proxy (see D-011 in
-        // docs/DECISIONS.md and train/README.md). Writes
+        // Shipped linear trainer: threshold/seed/scale selected against
+        // a transformed-MNIST proxy; architecture and release floors also
+        // inspected synthetic glyph results (D-011, train/README.md). Writes
         // scripts/weights_mnist.json, the linear schema gen/ expects.
         Some("mnist") => mnist::run(&root),
         // Feasibility-prototype support: dumps the same 49-bit MNIST

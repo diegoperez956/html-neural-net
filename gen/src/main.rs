@@ -525,6 +525,7 @@ fn main() {
       <div class="grid14" role="group" aria-label="14 by 14 paint canvas">
         {canvas_cells}
       </div>
+      <p class="caption">draw big and centred. fill the box.</p>
     </form>
     <div class="guess">
       <div class="digit7" role="img" aria-label="predicted digit">
@@ -547,11 +548,11 @@ fn main() {
       </div>
     </div>
   </div>
-  <div class="statusbar"><span class="idle">no ink · bias output</span> guess: <span class="d_mnist_digit"></span> · margin: <span class="d_mnist_margin"></span> · {mnist_test_acc_pct} mnist</div>
+  <div class="statusbar"><span class="idle">no ink · bias output</span> guess: <span class="d_mnist_digit"></span> · margin: <span class="d_mnist_margin"></span> · {mnist_test_acc_pct} on cropped, centred mnist</div>
 </div>
 
 <details class="hood">
-<summary>under the hood: checkbox state → bits → gates → adders → multipliers → neurons → this classifier</summary>
+<summary>under the hood: checkbox state → bits → gates → adders → popcount scores → argmax (this classifier)</summary>
 <div class="ladder">building blocks: bits → gates → arithmetic → neurons.<br>The XOR network and digit classifier are separate demos, not consecutive layers.</div>
 
 <section>
@@ -685,7 +686,7 @@ fn main() {
 
 <section>
   <h2>13 · drawn-digit classifier, readouts</h2>
-  <div class="tag">the paint canvas and display live on the main page; these readouts tap the same circuit's signals. 14×14 invisible canvas cells → one round of 4-neighbor dilation (dl gates) → 2×2 block OR-downsample (mn bits) → the 49-input linear classifier, weights trained on MNIST at build time (train/src/mnist.rs), {mnist_test_acc_pct} MNIST test accuracy.</div>
+  <div class="tag">the paint canvas and display live on the main page; these readouts tap the same circuit's signals. 14×14 invisible canvas cells → one round of 4-neighbor dilation (dl gates) → 2×2 block OR-downsample (mn bits) → the 49-input linear classifier, weights trained on MNIST at build time (train/src/mnist.rs), {mnist_test_acc_pct} on cropped, centred MNIST test digits.</div>
   <div class="row"><span class="kbd">margin, top1 - top2 (decimal view)</span> <span class="v d_mnist_margin"></span></div>
   <div class="row"><span class="kbd">predicted digit (index bits, decimal view)</span> <span class="v d_mnist_digit"></span></div>
   <div class="row"><span class="kbd">per-class scores (signed, decimal views)</span></div>

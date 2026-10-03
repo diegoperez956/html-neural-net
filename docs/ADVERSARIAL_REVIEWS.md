@@ -61,4 +61,42 @@ Reviewer reproduced `make build` + `make test` (34 tests green at review time), 
 - `negate()` dead variable. → **FIXED.**
 - "pure wiring" overstatement for ±2 weight application. → **FIXED:** reworded to "reduces to wiring (no multiplier circuit needed)".
 
-Final state: 58 tests green across Chromium + Firefox.
+Final state at that checkpoint: 58 tests green across Chromium + Firefox.
+The zero-script result describes the 2026-08-30 artifact, not today's optional
+input shim.
+
+## Checkpoint 3: accuracy and model selection (2026-10-03)
+
+An independent hostile review examined `main` at `f668921` before publication.
+It ran `make test`, rebuilt both runtime pages byte for byte, and reran
+`train mnist`, reproducing the checked-in JSON exactly. The baseline had
+15 passing Rust tests and 94 passing Python tests, with 16 abstract-base skips.
+Headless Chromium and Firefox confirmed native input, reset, script-disabled
+inference, and no runtime requests beyond the document. The input shim only
+changes checkbox state; CSS computes preprocessing, scores, and display.
+
+The reviewer also shifted and scaled normalized test digits, evaluated all
+780 combinations of T, coverage threshold, and seed, and mutated individual
+preprocessing gates. Those diagnostics used scratch trainer code, not a
+checked-in command. Their findings correct the selection story; they do not
+establish accuracy on human canvas drawings. No human drawings were evaluated.
+
+| Finding | Disposition |
+|---|---|
+| F1: live 75% label hides position and size sensitivity | FIXED. Label now names cropped, centred MNIST. The canvas asks for big, centred input. README and LIMITS record the horizontal-shift results and 30.9% uncropped result. |
+| F2: T=1 rationale rests on one winner per T | ACCEPTED-AS-DOCUMENTED. The D-011 addendum records all 260 configurations per T. T=1 remains an arbitrary pick, without retraining or a claim of drawing superiority. Unsupported advance-registration and noise claims were removed. |
+| F3: glyph results depend heavily on seed | ACCEPTED-AS-DOCUMENTED. README, LIMITS, training notes, and D-011 report 4–8/10 upscaled and 3–7/10 thin across the 20 seeds at the shipped threshold. The shipped seed is the proxy winner. |
+| F4: proxy description and sanity check are unsupported | FIXED. Current descriptions name tighter clipping and varied source thresholds, not source dilation. The comparison print is informational. No claim of proxy validation or evaluated human drawings remains in the current selection account. |
+| F5: thin set is seven-segment-shaped | FIXED. Public descriptions call it synthetic and note the right-of-centre '1'. |
+| F6: two missing-input preprocessing mutants survive | FIXED. Both engines now check every single-cell input against all 196 dilation and 49 downsample outputs. Pure OR stages are determined by those input sets; classifier coverage is still not exhaustive. |
+| F7: source comments contradict acceptance-data use | FIXED. Trainer comments identify test-triggered diagnostics, rejection floors, glyph-conditioned architecture choice, and the current proxy transforms. |
+| F8: README metrics are not tied to saved metadata | FIXED. A published-metrics contract test compares the README's three saved-model figures with JSON values. |
+| F9: circuit summary implies multipliers feed digit inference | FIXED. The summary names popcount scores and argmax. The XOR and arithmetic examples remain separate. |
+| F10: explanation undercounts dilation signals | FIXED. It names 196 outputs built from 728 two-input max signals. |
+| F11: headline and review trail are stale; dist-only doc links break | FIXED. The README distinguishes the linear digit model and hand-wired XOR, names this checkpoint's training reproduction, and links this record. The HTML explanation uses repository links that work when only dist is deployed. |
+
+This publication correction changes copy and tests, not weights or network
+logic. The Pages workflow builds saved weights without retraining. The updated
+suite has 15 Rust tests and 97 Python tests, with 16 abstract-base skips.
+Prior-art claims, browser feature floors, Safari, and the video pipeline were
+not independently rechecked at this checkpoint.
