@@ -220,8 +220,8 @@ Chromium 111+ / Firefox 128+ (needs `:has()`, `@property`, and
 `color-mix()` for LED styling). Safari 16.4+ should work but is **not
 tested in this repo**. The local suite was run with Chromium 149 and Firefox
 151. The github pages workflow builds and deploys the demo; it does not
-run the test suite. The full demo is 1,622,368 bytes, about 1.62 MB, with
-6,834 registered signals. The no-js page is 1,619,991 bytes.
+run the test suite. The full demo is 1,622,386 bytes, about 1.62 MB, with
+6,834 registered signals. The no-js page is 1,620,009 bytes.
 See `docs/LIMITS.md` for the measured scaling story.
 
 ## Prior art (and what this adds)

@@ -39,7 +39,7 @@ tests. The 16 abstract browser base-class skips are expected; missing browsers
 fail. No CI workflow was added in that revision.
 
 Publication correction on 2026-10-03: checkpoint 3's copy changes rebuild to
-1,622,368 UTF-8 bytes for `dist/index.html` and 1,619,991 for `dist/no-js.html`.
+1,622,386 UTF-8 bytes for `dist/index.html` and 1,620,009 for `dist/no-js.html`.
 Both still have 6,834 registered signals and the same weights and input shim.
 Measure with `wc -c dist/index.html dist/no-js.html` after `make build`.
 The revised suite has 15 Rust tests and 97 Python tests: 82 browser tests,

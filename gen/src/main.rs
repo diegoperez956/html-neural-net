@@ -686,7 +686,7 @@ fn main() {
 
 <section>
   <h2>13 · drawn-digit classifier, readouts</h2>
-  <div class="tag">the paint canvas and display live on the main page; these readouts tap the same circuit's signals. 14×14 invisible canvas cells → one round of 4-neighbor dilation (dl gates) → 2×2 block OR-downsample (mn bits) → the 49-input linear classifier, weights trained on MNIST at build time (train/src/mnist.rs), {mnist_test_acc_pct} MNIST test accuracy.</div>
+  <div class="tag">the paint canvas and display live on the main page; these readouts tap the same circuit's signals. 14×14 invisible canvas cells → one round of 4-neighbor dilation (dl gates) → 2×2 block OR-downsample (mn bits) → the 49-input linear classifier, weights trained on MNIST at build time (train/src/mnist.rs), {mnist_test_acc_pct} on cropped, centred MNIST test digits.</div>
   <div class="row"><span class="kbd">margin, top1 - top2 (decimal view)</span> <span class="v d_mnist_margin"></span></div>
   <div class="row"><span class="kbd">predicted digit (index bits, decimal view)</span> <span class="v d_mnist_digit"></span></div>
   <div class="row"><span class="kbd">per-class scores (signed, decimal views)</span></div>

@@ -3,8 +3,8 @@
 ## Current artifact
 
 As rebuilt on 2026-10-03, `dist/index.html` has 6,834 registered signals and
-is exactly 1,622,368 UTF-8 bytes (about 1.62 MB). `dist/no-js.html` has the same
-signals and is 1,619,991 bytes. The default page contains one optional input
+is exactly 1,622,386 UTF-8 bytes (about 1.62 MB). `dist/no-js.html` has the same
+signals and is 1,620,009 bytes. The default page contains one optional input
 shim (35 source lines after trimming, 2,228 body bytes),
 not JavaScript inference. Registrations include inputs, aliases, native
 comparison calculations, and decimal views. They are not all gates.
