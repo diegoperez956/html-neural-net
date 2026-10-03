@@ -22,6 +22,8 @@ AGENTS.md
 CLAUDE.md
 video/
 docs/agents/
+docs/VIDEO_WALKTHROUGH.md
+docs/STUDY_HANDOFF.md
 scripts/install-pstack.sh
 docs/ADVERSARIAL_REVIEWS.md
 docs/IMPLEMENTATION_AUDIT.md
