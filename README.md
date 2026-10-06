@@ -2,9 +2,9 @@
 
 a neural network built out of logic gates in html + css. draw a digit, css guesses it.
 
-[try the demo](https://diegoperez956.github.io/html-neural-net/) ·
-[no javascript](https://diegoperez956.github.io/html-neural-net/no-js.html) ·
-[how it works](https://diegoperez956.github.io/html-neural-net/how-it-works.html)
+[try the demo](https://papayuh.github.io/html-neural-net/) ·
+[no javascript](https://papayuh.github.io/html-neural-net/no-js.html) ·
+[how it works](https://papayuh.github.io/html-neural-net/how-it-works.html)
 
 <img src="docs/media/draw-7.gif" width="320" alt="drawing a 7 on the canvas; the CSS seven-segment display predicts 7">
 
